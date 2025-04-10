@@ -2,7 +2,7 @@
 
 ## Overview of Application
 
-MovieLogger is a simple, user-friendly app to help movie buffs keep track of everything they've watched or want to watch. Users can log films, rate them, write reviews, and manage their personal watchlist.
+MovieLogger is a simple, user-friendly app to help movie buffs keep track of everything they've watched or want to watch. Users can log films, rate them, write reviews, add a movie to their list of favourites, and manage their personal watchlist.
 
 ## Problem Definition
 
@@ -29,8 +29,17 @@ Manually keeping track of movies watched, reviews written, and films to watch ca
 - Social Features (eg. following other users)
 - Mobile version
 
+## Domain Model Diagram
+
 ```mermaid
-%%{init: {'theme':'dark'}}%%
 erDiagram
-   User ||--o{ Movie : manages
-```
+    USER ||--o{ MOVIES_LOGGED : logs
+    USER ||--o{ MOVIE_RATINGS : rates
+    USER ||--o{ MOVIE_REVIEWS : writes
+    USER ||--o{ MOVIE_FAVOURITES : favourites
+
+    MOVIE ||--o{ MOVIES_LOGGED : is_logged
+    MOVIE ||--o{ MOVIE_RATINGS : is_rated
+    MOVIE ||--o{ MOVIE_REVIEWS : is_reviewed
+    MOVIE ||--o{ MOVIE_FAVOURITES : is_favourited
+
