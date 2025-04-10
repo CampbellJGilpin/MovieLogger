@@ -12,34 +12,48 @@ Manually keeping track of movies watched, reviews written, and films to watch ca
 
 ### Must Have
 - Ability to add movies to the database
-- Ability to add a movie as logged against a user
-- Ability to rate movies that have been logged (1-10 scale)
-- Ability to add written reviews to movies that have been logged
-- Ability to add movies to a users favourites
+- Ability log movies (includes rating, review, and favourite toggle)
+- Ability to edit movies (includes rating, review, and favourite toggle)
 - Authentication
 
 ### Should Have
 - Basic search functionality for adding movies
 - Filter logged movies by watch date, rating, or title
+- Ability to add genres and assign them to movies
 
 ### Could Have
-- Genre tagging system (eg. Action, Drama)
+- Tagging system (eg. "Guilty Pleasure", "Oscar Winner", etc)
+- Integration with streaming platforms to check availability
 
 ### Will Not Have
 - Social Features (eg. following other users)
 - Mobile version
+- Offline mode
 
 ## Domain Model Diagram
 
 ```mermaid
 erDiagram
-    USER ||--o{ MOVIES_LOGGED : logs
-    USER ||--o{ MOVIE_RATINGS : rates
-    USER ||--o{ MOVIE_REVIEWS : writes
-    USER ||--o{ MOVIE_FAVOURITES : favourites
+    USERS ||--o{ MOVIES : adds
+    USERS ||--o{ REVIEWS : writes
+    USERS ||--o{ RATINGS : gives
+    USERS ||--o{ FAVOURITES : saves
 
-    MOVIE ||--o{ MOVIES_LOGGED : is_logged
-    MOVIE ||--o{ MOVIE_RATINGS : is_rated
-    MOVIE ||--o{ MOVIE_REVIEWS : is_reviewed
-    MOVIE ||--o{ MOVIE_FAVOURITES : is_favourited
+    MOVIES ||--o{ REVIEWS : receives
+    MOVIES ||--o{ RATINGS : receives
+    MOVIES ||--o{ FAVOURITES : appears_in
+```
 
+### Glossary
+
+- **Admin**: A special type of user with elevated permissions. Admins can manage users and moderate content.
+
+- **User**: An individual who uses the MovieLogger app. Users can log movies, rate them, write reviews, and add favourites. All users must authenticate to use core features.
+
+- **Movie**: A film entry in the database, containing title, description, release date, and genre. Users interact with movies by logging, rating, reviewing, or favouriting them.
+
+- **Review**: A written review that a user attaches to a logged movie. Each review is associated with one movie and one user.
+
+- **Rating**: A numerical score (e.g., 1–10) that a user assigns to a movie they've logged. Each movie can have multiple ratings, but each user can rate a movie only once.
+
+- **Favourite**: A toggle which a user can apply to a movie to mark it as a personal favourite. 
