@@ -12,13 +12,13 @@ Manually keeping track of movies watched, reviews written, and films to watch ca
 
 ### Must Have
 - Ability to add movies to the database
-- Ability log movies (includes rating, review, and favourite toggle)
+- Ability to log movies (includes rating, review, and favourite toggle)
 - Ability to edit movies (includes rating, review, and favourite toggle)
 - Authentication
 
 ### Should Have
 - Basic search functionality for adding movies
-- Filter logged movies by watch date, rating, or title
+- Filter logged movies (by watch date, rating, or title)
 - Ability to add genres and assign them to movies
 
 ### Could Have
