@@ -65,12 +65,12 @@ erDiagram
     Users ||--o{ Reviews : writes
     Users ||--o{ Ratings : gives
     Users ||--o{ Favourites : saves
-    Users ||--o{ User_Movies : logs
+    Users ||--o{ UserMovies : logs
 
     Movies ||--o{ Reviews : receives
     Movies ||--o{ Ratings : receives
     Movies ||--o{ Favourites : appears_in
-    Movies ||--o{ User_Movies : is_logged_in
+    Movies ||--o{ UserMovies : is_logged_in
 
     Genres ||--o{ Movies : has
 
