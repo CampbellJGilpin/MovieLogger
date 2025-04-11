@@ -61,57 +61,57 @@ erDiagram
 
 ```mermaid
 erDiagram
-    USERS ||--o{ REVIEWS : writes
-    USERS ||--o{ RATINGS : gives
-    USERS ||--o{ FAVOURITES : saves
-    USERS ||--o{ MOVIE_LOGS : logs
+    Users ||--o{ Reviews : writes
+    Users ||--o{ Ratings : gives
+    Users ||--o{ Favourites : saves
+    Users ||--o{ MovieLogs : logs
 
-    MOVIES ||--o{ REVIEWS : receives
-    MOVIES ||--o{ RATINGS : receives
-    MOVIES ||--o{ FAVOURITES : appears_in
-    MOVIES ||--o{ MOVIE_LOGS : is_logged_in
+    MOVIES ||--o{ Reviews : receives
+    MOVIES ||--o{ Ratings : receives
+    MOVIES ||--o{ Favourites : appears_in
+    MOVIES ||--o{ MovieLogs : is_logged_in
 
-    USERS {
-        int UserId
+    Users {
+        int Id
         string UserName
         string Email
         string Password
         boolean IsAdmin
     }
 
-    MOVIES {
-        int MovieId
+    Movies {
+        int Id
         string Title
         string Description
-        date ReleaseDate
+        datetime ReleaseDate
         string Genre
     }
 
-    REVIEWS {
-        int ReviewId
-        int FK_Users_Reviews_UserId_ReviewId
-        int FK_Movies_Reviews_MovieId_ReviewId
+    Reviews {
+        int Id
+        int FK_Reviews_Id_Users_Id
+        int FK_Reviews_Id_Movies_Id
         string ReviewText
-        date DateCreated
+        datetime DateCreated
     }
 
-    RATINGS {
-        int RatingId
-        int FK_Users_Ratings_UserId_RatingId
-        int FK_Movies_Ratings_MovieId_RatingId
+    Ratings {
+        int Id
+        int FK_Ratings_Id_Users_Id
+        int FK_Ratings_Id_Movies_Id
         int Score
     }
 
-    FAVOURITES {
-        int FavouriteId
-        int FK_Users_Favourites_UserId_FavouriteId
-        int FK_Movies_Favourites_MovieId_FavouriteId
-        date DateAdded
+    Favourites {
+        int Id
+        int FK_Favourites_Id_Users_Id
+        int FK_Favourites_Id_Movies_Id
+        datetime DateAdded
     }
 
-    MOVIE_LOGS {
-        int FK_Users_UserId
-        int FK_Movies_MovieId
-        date DateWatched
+    MovieLogs { 
+        int FK_MovieLogs_Id_Movies_Id
+        int FK_MovieLogs_Id_Movies_Id
+        datetime DateWatched
     }
 ```
