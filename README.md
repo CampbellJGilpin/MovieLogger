@@ -58,6 +58,7 @@ erDiagram
 
 - **Favourites**: A toggle which a user can apply to a movie to mark it as a personal favourite. 
 
+### Entity Relationship Diagram
 
 ```mermaid
 erDiagram
@@ -70,6 +71,8 @@ erDiagram
     Movies ||--o{ Ratings : receives
     Movies ||--o{ Favourites : appears_in
     Movies ||--o{ MovieLogs : is_logged_in
+
+    Genres ||--o{ Movies : has
 
     Users {
         int Id
@@ -84,7 +87,12 @@ erDiagram
         string Title
         string Description
         datetime ReleaseDate
-        string Genre
+        int FK_Movies_Id_Genres_Id
+    }
+
+   Genres {
+        int Id
+        string Title
     }
 
     Reviews {
