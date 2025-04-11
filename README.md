@@ -66,10 +66,10 @@ erDiagram
     Users ||--o{ Favourites : saves
     Users ||--o{ MovieLogs : logs
 
-    MOVIES ||--o{ Reviews : receives
-    MOVIES ||--o{ Ratings : receives
-    MOVIES ||--o{ Favourites : appears_in
-    MOVIES ||--o{ MovieLogs : is_logged_in
+    Movies ||--o{ Reviews : receives
+    Movies ||--o{ Ratings : receives
+    Movies ||--o{ Favourites : appears_in
+    Movies ||--o{ MovieLogs : is_logged_in
 
     Users {
         int Id
@@ -90,7 +90,7 @@ erDiagram
     Reviews {
         int Id
         int FK_Reviews_Id_Users_Id
-        int FK_Reviews_Id_Movies_Id
+        int FK_Reviews_Id_MovieLogs_Id
         string ReviewText
         datetime DateCreated
     }
@@ -98,7 +98,7 @@ erDiagram
     Ratings {
         int Id
         int FK_Ratings_Id_Users_Id
-        int FK_Ratings_Id_Movies_Id
+        int FK_Ratings_Id_MovieLogs_Id
         int Score
     }
 
@@ -110,7 +110,8 @@ erDiagram
     }
 
     MovieLogs { 
-        int FK_MovieLogs_Id_Movies_Id
+        int Id
+        int FK_MovieLogs_Id_Users_Id
         int FK_MovieLogs_Id_Movies_Id
         datetime DateWatched
     }
