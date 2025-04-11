@@ -97,30 +97,30 @@ erDiagram
 
     Reviews {
         int Id
-        int FK_Reviews_UserId_Users_Id
-        int FK_Reviews_UserMovieId_UserMovies_Id
+        int UserId
+        int UserMovieId
         string ReviewText
         datetime DateCreated
     }
 
     Ratings {
         int Id
-        int FK_Ratings_UserId_Users_Id
-        int FK_Ratings_UserMovieId_UserMovies_Id
+        int UserId
+        int UserMovieId
         int Score
     }
 
     Favourites {
         int Id
-        int FK_Favourites_UserId_Users_Id
-        int FK_Favourites_MovieId_Movies_Id
+        int UserId
+        int MovieId
         datetime DateAdded
     }
 
-    User_Movies { 
+    UserMovies { 
         int Id
-        int FK_MovieLogs_UserId_Users_Id
-        int FK_MovieLogs_MovieId_Movies_Id
+        int UserId
+        int MovieId
         datetime DateWatched
     }
 ```
