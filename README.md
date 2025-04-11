@@ -65,12 +65,12 @@ erDiagram
     Users ||--o{ Reviews : writes
     Users ||--o{ Ratings : gives
     Users ||--o{ Favourites : saves
-    Users ||--o{ MovieLogs : logs
+    Users ||--o{ User_Movies : logs
 
     Movies ||--o{ Reviews : receives
     Movies ||--o{ Ratings : receives
     Movies ||--o{ Favourites : appears_in
-    Movies ||--o{ MovieLogs : is_logged_in
+    Movies ||--o{ User_Movies : is_logged_in
 
     Genres ||--o{ Movies : has
 
@@ -87,7 +87,7 @@ erDiagram
         string Title
         string Description
         datetime ReleaseDate
-        int FK_Movies_Id_Genres_Id
+        int FK_Movies_GenreId_Genres_Id
     }
 
    Genres {
@@ -97,30 +97,30 @@ erDiagram
 
     Reviews {
         int Id
-        int FK_Reviews_Id_Users_Id
-        int FK_Reviews_Id_MovieLogs_Id
+        int FK_Reviews_UserId_Users_Id
+        int FK_Reviews_UserMovieId_UserMovies_Id
         string ReviewText
         datetime DateCreated
     }
 
     Ratings {
         int Id
-        int FK_Ratings_Id_Users_Id
-        int FK_Ratings_Id_MovieLogs_Id
+        int FK_Ratings_UserId_Users_Id
+        int FK_Ratings_UserMovieId_UserMovies_Id
         int Score
     }
 
     Favourites {
         int Id
-        int FK_Favourites_Id_Users_Id
-        int FK_Favourites_Id_Movies_Id
+        int FK_Favourites_UserId_Users_Id
+        int FK_Favourites_MovieId_Movies_Id
         datetime DateAdded
     }
 
-    MovieLogs { 
+    User_Movies { 
         int Id
-        int FK_MovieLogs_Id_Users_Id
-        int FK_MovieLogs_Id_Movies_Id
+        int FK_MovieLogs_UserId_Users_Id
+        int FK_MovieLogs_MovieId_Movies_Id
         datetime DateWatched
     }
 ```
