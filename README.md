@@ -87,7 +87,7 @@ erDiagram
         string Title
         string Description
         datetime ReleaseDate
-        int FK_Movies_GenreId_Genres_Id
+        int GenreId
     }
 
    Genres {
