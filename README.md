@@ -46,14 +46,72 @@ erDiagram
 
 ### Glossary
 
-- **Admin**: A special type of user with elevated permissions. Admins can manage users and moderate content.
+- **Admins**: A special type of user with elevated permissions. Admins can manage users and moderate content.
 
-- **User**: An individual who uses the MovieLogger app. Users can log movies, rate them, write reviews, and add favourites. All users must authenticate to use core features.
+- **Users**: An individual who uses the MovieLogger app. Users can log movies, rate them, write reviews, and add favourites. All users must authenticate to use core features.
 
-- **Movie**: A film entry in the database, containing title, description, release date, and genre. Users interact with movies by logging, rating, reviewing, or favouriting them.
+- **Movies**: A film entry in the database, containing title, description, release date, and genre. Users interact with movies by logging, rating, reviewing, or favouriting them.
 
-- **Review**: A written review that a user attaches to a logged movie. Each review is associated with one movie and one user.
+- **Reviews**: A written review that a user attaches to a logged movie. Each review is associated with one movie and one user.
 
-- **Rating**: A numerical score (e.g., 1–10) that a user assigns to a movie they've logged. Each movie can have multiple ratings, but each user can rate a movie only once.
+- **Ratings**: A numerical score (e.g., 1–10) that a user assigns to a movie they've logged. Each movie can have multiple ratings, but each user can rate a movie only once.
 
-- **Favourite**: A toggle which a user can apply to a movie to mark it as a personal favourite. 
+- **Favourites**: A toggle which a user can apply to a movie to mark it as a personal favourite. 
+
+
+```mermaid
+erDiagram
+    USERS ||--o{ REVIEWS : writes
+    USERS ||--o{ RATINGS : gives
+    USERS ||--o{ FAVOURITES : saves
+    USERS ||--o{ MOVIE_LOGS : logs
+
+    MOVIES ||--o{ REVIEWS : receives
+    MOVIES ||--o{ RATINGS : receives
+    MOVIES ||--o{ FAVOURITES : appears_in
+    MOVIES ||--o{ MOVIE_LOGS : is_logged_in
+
+    USERS {
+        int UserId
+        string UserName
+        string Email
+        string Password
+        boolean IsAdmin
+    }
+
+    MOVIES {
+        int MovieId
+        string Title
+        string Description
+        date ReleaseDate
+        string Genre
+    }
+
+    REVIEWS {
+        int ReviewId
+        int FK_Users_Reviews_UserId_ReviewId
+        int FK_Movies_Reviews_MovieId_ReviewId
+        string ReviewText
+        date DateCreated
+    }
+
+    RATINGS {
+        int RatingId
+        int FK_Users_Ratings_UserId_RatingId
+        int FK_Movies_Ratings_MovieId_RatingId
+        int Score
+    }
+
+    FAVOURITES {
+        int FavouriteId
+        int FK_Users_Favourites_UserId_FavouriteId
+        int FK_Movies_Favourites_MovieId_FavouriteId
+        date DateAdded
+    }
+
+    MOVIE_LOGS {
+        int FK_Users_UserId
+        int FK_Movies_MovieId
+        date DateWatched
+    }
+```
