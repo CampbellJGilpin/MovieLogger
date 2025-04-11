@@ -62,17 +62,15 @@ erDiagram
 
 ```mermaid
 erDiagram
-    Users ||--o{ Reviews : writes
-    Users ||--o{ Ratings : gives
-    Users ||--o{ Favourites : saves
-    Users ||--o{ UserMovies : logs
+    Users ||--o{ User_Movies : logs
 
-    Movies ||--o{ Reviews : receives
-    Movies ||--o{ Ratings : receives
-    Movies ||--o{ Favourites : appears_in
-    Movies ||--o{ UserMovies : is_logged_in
+    Movies ||--o{ User_Movies : is_logged_in
 
-    Genres ||--o{ Movies : has
+    Genres ||--o{ Movies : categorizes
+
+    User_Movies ||--o{ Viewings : appears_in_logs
+
+    Viewings ||--o{ Reviews : receives
 
     Users {
         int Id
@@ -97,30 +95,23 @@ erDiagram
 
     Reviews {
         int Id
-        int UserId
-        int UserMovieId
+        int ViewingId
         string ReviewText
-        datetime DateCreated
-    }
-
-    Ratings {
-        int Id
-        int UserId
-        int UserMovieId
         int Score
     }
 
-    Favourites {
+    Viewings {
         int Id
-        int UserId
-        int MovieId
-        datetime DateAdded
+        int UserMovieId
+        datetime DateViewed
     }
 
-    UserMovies { 
+    User_Movies { 
         int Id
         int UserId
         int MovieId
-        datetime DateWatched
+        bool Favourite
+        bool OwnsMovie
+        datetime UpcomingViewDate
     }
 ```
