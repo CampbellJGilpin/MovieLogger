@@ -21,29 +21,29 @@ CREATE TABLE Movies (
     CONSTRAINT FL_Movies_GenreId_Genres_Id FOREIGN KEY (GenreId) REFERENCES Genres(Id)
 );
 
-CREATE TABLE User_Movies (
+CREATE TABLE UserMovies (
     Id INT PRIMARY KEY,
     UserId INT NOT NULL,
     MovieId INT NOT NULL,
     Favourite BOOLEAN DEFAULT FALSE,
     OwnsMovie BOOLEAN DEFAULT FALSE,
     UpcomingViewDate DATETIME,
-    CONSTRAINT FL_UserMovies_UserId_Users_Id FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
-    CONSTRAINT FL_UserMovies_MovieId_Movies_Id FOREIGN KEY (MovieId) REFERENCES Movies(Id) ON DELETE CASCADE,
+    CONSTRAINT FL_UserMovies_UserId_Users_Id FOREIGN KEY (UserId) REFERENCES Users(Id),
+    CONSTRAINT FL_UserMovies_MovieId_Movies_Id FOREIGN KEY (MovieId) REFERENCES Movies(Id),
     UNIQUE(UserId, MovieId)
 );
 
 CREATE TABLE Viewings (
-    Id SERIAL PRIMARY KEY,
+    Id INT PRIMARY KEY,
     UserMovieId INT NOT NULL,
     DateViewed DATETIME NOT NULL,
-    CONSTRAINT FL_Viewings_UserMovieId_UserMovies_Id FOREIGN KEY (UserMovieId) REFERENCES User_Movies(Id)
+    CONSTRAINT FL_Viewings_UserMovieId_UserMovies_Id FOREIGN KEY (UserMovieId) REFERENCES UserMovies(Id)
 );
 
 CREATE TABLE Reviews (
-    Id SERIAL PRIMARY KEY,
+    Id INT PRIMARY KEY,
     ViewingId INT NOT NULL,
     ReviewText VARCHAR(500),
-    Score INT CHECK (Score BETWEEN 1 AND 10),
+    Score INT,
     CONSTRAINT FL_Reviews_ViewingId_Viewings_Id FOREIGN KEY (ViewingId) REFERENCES Viewings(Id)
 );
