@@ -19,7 +19,7 @@ CREATE TABLE Movies (
     ReleaseDate DATETIME,
     GenreId INT NOT NULL,
     IsDeleted BOOLEAN DEFAULT FALSE,
-    CONSTRAINT FL_Movies_GenreId_Genres_Id FOREIGN KEY (GenreId) REFERENCES Genres(Id)
+    CONSTRAINT FK_Movies_GenreId_Genres_Id FOREIGN KEY (GenreId) REFERENCES Genres(Id)
 );
 
 CREATE TABLE UserMovies (
@@ -29,8 +29,8 @@ CREATE TABLE UserMovies (
     Favourite BOOLEAN DEFAULT FALSE,
     OwnsMovie BOOLEAN DEFAULT FALSE,
     UpcomingViewDate DATETIME,
-    CONSTRAINT FL_UserMovies_UserId_Users_Id FOREIGN KEY (UserId) REFERENCES Users(Id),
-    CONSTRAINT FL_UserMovies_MovieId_Movies_Id FOREIGN KEY (MovieId) REFERENCES Movies(Id),
+    CONSTRAINT FK_UserMovies_UserId_Users_Id FOREIGN KEY (UserId) REFERENCES Users(Id),
+    CONSTRAINT FK_UserMovies_MovieId_Movies_Id FOREIGN KEY (MovieId) REFERENCES Movies(Id),
     UNIQUE(UserId, MovieId)
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE Viewings (
     Id INT PRIMARY KEY,
     UserMovieId INT NOT NULL,
     DateViewed DATETIME NOT NULL,
-    CONSTRAINT FL_Viewings_UserMovieId_UserMovies_Id FOREIGN KEY (UserMovieId) REFERENCES UserMovies(Id)
+    CONSTRAINT FK_Viewings_UserMovieId_UserMovies_Id FOREIGN KEY (UserMovieId) REFERENCES UserMovies(Id)
 );
 
 CREATE TABLE Reviews (
@@ -46,5 +46,5 @@ CREATE TABLE Reviews (
     ViewingId INT NOT NULL,
     ReviewText VARCHAR(500),
     Score INT,
-    CONSTRAINT FL_Reviews_ViewingId_Viewings_Id FOREIGN KEY (ViewingId) REFERENCES Viewings(Id)
+    CONSTRAINT FK_Reviews_ViewingId_Viewings_Id FOREIGN KEY (ViewingId) REFERENCES Viewings(Id)
 );
