@@ -5,14 +5,14 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_DB: testapp
-      POSTGRES_USER: testuser
-      POSTGRES_PASSWORD: password1
+      POSTGRES_DB: movielogger
+      POSTGRES_USER: movieuser
+      POSTGRES_PASSWORD: hotrod1
     volumes:
       - db:/var/lib/postgresql/data
   flyway:
     image: flyway/flyway
-    command: -url=jdbc:postgresql://db/testapp -schemas=master -user=testuser -password=password1 -outOfOrder=true -connectRetries=5 migrate
+    command: -url=jdbc:postgresql://db/movielogger -schemas=master -user=movieuser -password=hotrod1 -outOfOrder=true -connectRetries=5 migrate
     volumes:
       - ./database/migrations:/flyway/sql
     depends_on:
