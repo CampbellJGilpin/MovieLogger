@@ -22,7 +22,7 @@ CREATE TABLE Movies (
     CONSTRAINT FK_Movies_GenreId_Genres_Id FOREIGN KEY (GenreId) REFERENCES Genres(Id)
 );
 
-CREATE TABLE UserMovies (
+CREATE TABLE User_Movies (
     Id SERIAL PRIMARY KEY,
     UserId INT NOT NULL,
     MovieId INT NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE Viewings (
     Id SERIAL PRIMARY KEY,
     UserMovieId INT NOT NULL,
     DateViewed TIMESTAMP NOT NULL,
-    CONSTRAINT FK_Viewings_UserMovieId_UserMovies_Id FOREIGN KEY (UserMovieId) REFERENCES UserMovies(Id)
+    CONSTRAINT FK_Viewings_UserMovieId_UserMovies_Id FOREIGN KEY (UserMovieId) REFERENCES User_Movies(Id)
 );
 
 CREATE TABLE Reviews (
