@@ -69,3 +69,71 @@ erDiagram
 - **Ownership**: A toggle that indicates if a user owns a specific movie. This is independent from viewings and is tied directly to a movie.
 
 - **Viewing**: A snapshot of an invidual movie viewing. This holds the date the user viewed a specific movie, as well as their review and score associated with it.
+
+## API Structure
+
+### Genres
+
+`GET /genres`
+
+**Description: Retrieve all genres in the system.**
+
+Response Example:
+```json
+[
+  { "id": 1, "title": "Action" },
+  { "id": 2, "title": "Horror" },
+  { "id": 3, "title": "Drama" }
+]
+```
+
+---
+
+`GET genres/{id}`
+
+**Description: Retrieve a specific genre by its ID.**
+
+Response Example:
+```json
+{
+  "id": 2,
+  "title": "Horror"
+}
+```
+
+---
+
+`PUT genres/{id}`
+
+**Description: Update the title of an existing genre.**
+
+Request Example:
+```json
+{
+  "title": "Supernatural Horror"
+}
+```
+
+Response Example:
+```json
+{
+  "id": 2,
+  "title": "Supernatural Horror"
+}
+```
+
+---
+
+`DELETE genres/{id}`
+
+**Description: Delete a genre by its ID.**
+
+Responses:
+
+- `204 No Content` if request was successful.
+
+---
+
+### Movies
+
+---
