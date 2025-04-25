@@ -72,7 +72,7 @@ erDiagram
 
 ## API Structure
 
-## Genres
+### Genres
 
 ### `GET /genres`
 
@@ -93,7 +93,10 @@ erDiagram
 
 **Description:** Retrieve a specific genre by its ID.
 
-**Response Example:**
+**Responses:**
+- `200 OK`
+- `404 Not Found`
+
 ```json
 {
   "id": 2,
@@ -115,7 +118,11 @@ erDiagram
 }
 ```
 
-**Response Example:**
+**Responses:**
+- `200 OK`
+- `400 Bad Request`
+- `404 Not Found`
+
 ```
 {
   "id": 2,
@@ -123,7 +130,9 @@ erDiagram
 }
 ```
 
-## Movies
+---
+
+### Movies
 
 ### `GET movies`
 
@@ -157,7 +166,10 @@ erDiagram
 
 **Description:** Retrieve a single movie by its ID.
 
-**Response Example:**
+**Responses:**
+- `200 OK`
+- `404 Not Found`
+
 ```json
 {
   "id": 1,
@@ -185,7 +197,10 @@ erDiagram
 }
 ```
 
-**Response Example:**
+**Responses:**
+- `201 Created`
+- `400 Bad Request`
+
 ```json
 {
   "id": 2,
@@ -213,7 +228,11 @@ erDiagram
 }
 ```
 
-**Response Example:**
+**Responses:**
+- `200 OK`
+- `400 Bad Request`
+- `404 Not Found`
+
 ```json
 {
   "id": 3,
@@ -231,12 +250,13 @@ erDiagram
 
 **Description:** Soft-delete a movie by marking it as deleted (`isDeleted = true`).
 
-**Response Example:**
-```
-204 No Content
-```
+**Responses:**
+- `204 No Content`
+- `404 Not Found`
 
-## Viewings
+---
+
+### Viewings
 
 ### `GET users/{userId}/movies`
 
@@ -294,7 +314,10 @@ erDiagram
 }
 ```
 
-**Response Example:**
+**Responses:**
+- `200 OK`
+- `400 Bad Request`
+
 ```json
 {
   "id": 14,
@@ -321,7 +344,11 @@ erDiagram
 }
 ```
 
-**Response Example:**
+**Responses:**
+- `200 OK`
+- `400 Bad Request`
+- `404 Not Found`
+
 ```json
 {
   "id": 14,
@@ -344,15 +371,93 @@ erDiagram
 204 No Content
 ```
 
-## Users
+---
+
+### Users
 
 ### `GET users`
+
+```json
+[
+  {
+    "id": 1,
+    "userName": "moviebuff88",
+    "email": "buff@example.com",
+    "isAdmin": false,
+    "isDeleted": false
+  },
+  {
+    "id": 2,
+    "userName": "admin_user",
+    "email": "admin@example.com",
+    "isAdmin": true,
+    "isDeleted": false
+  }
+]
+```
+
 ### `GET users/{id}`
+
+```json
+{
+  "id": 1,
+  "userName": "moviebuff88",
+  "email": "buff@example.com",
+  "isAdmin": false,
+  "isDeleted": false
+}
+```
+
 ### `POST users`
+
+```json
+{
+  "userName": "cinemafan123",
+  "email": "cinema@example.com",
+  "password": "supersecurepassword",
+  "isAdmin": false,
+}
+```
+
+```json
+{
+  "id": 3,
+  "userName": "cinemafan123",
+  "email": "cinema@example.com",
+  "isAdmin": false,
+  "isDeleted": false
+}
+```
+
 ### `PUT users/{id}`
+
+```json
+{
+  "userName": "cinemafan_updated",
+  "email": "newemail@example.com",
+  "isAdmin": false,
+  "isDeleted": false
+}
+```
+
+```json
+{
+  "id": 3,
+  "userName": "cinemafan_updated",
+  "email": "newemail@example.com",
+  "isAdmin": false,
+  "isDeleted": false
+}
+```
+
 ### `DELETE users/{id}`
 
-## Reviews
+- `204 No Content`
+- `404 Not Found`
+
+---
+
+### Reviews
 
 ### `GET users/{userId}/reviews`
 ### `PUT reviews/{id}`
