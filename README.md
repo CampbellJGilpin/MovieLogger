@@ -206,7 +206,6 @@ erDiagram
 **Request Body Example:**
 ```json
 {
-  "id": 3,
   "title": "Pulp Fiction",
   "description": "In the realm of underworld, a series of incidents intertwines the lives of two Los Angeles mobsters, a gangster's wife, a boxer and two small-time criminals.",
   "releaseDate": "1992-10-21",
