@@ -116,7 +116,7 @@ erDiagram
 ```
 
 **Response Example:**
-```json
+```
 {
   "id": 2,
   "title": "Supernatural Horror"
@@ -232,11 +232,11 @@ erDiagram
 **Description:** Soft-delete a movie by marking it as deleted (`isDeleted = true`).
 
 **Response Example:**
-```json
+```
 204 No Content
 ```
 
-## UserMovies
+## Viewings
 
 ### `GET users/{userId}/movies`
 
@@ -332,3 +332,27 @@ erDiagram
   "upcomingViewDate": null
 }
 ```
+
+---
+
+### `DELETE /user-movies/{id}`
+
+**Description:** Remove a movie from user's library.
+
+**Response:**
+```
+204 No Content
+```
+
+## Users
+
+### `GET users`
+### `GET users/{id}`
+### `POST users`
+### `PUT users/{id}`
+### `DELETE users/{id}`
+
+## Reviews
+
+### `GET users/{userId}/reviews`
+### `PUT reviews/{id}`
