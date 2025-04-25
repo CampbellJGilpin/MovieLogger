@@ -76,9 +76,9 @@ erDiagram
 
 ### `GET /genres`
 
-**Description: Retrieve all genres in the system.**
+**Description:** Retrieve all genres in the system.
 
-Response Example:
+**Response Example:**
 ```json
 [
   { "id": 1, "title": "Action" },
@@ -91,9 +91,9 @@ Response Example:
 
 ### `GET genres/{id}`
 
-**Description: Retrieve a specific genre by its ID.**
+**Description:** Retrieve a specific genre by its ID.
 
-Response Example:
+**Response Example:**
 ```json
 {
   "id": 2,
@@ -105,16 +105,9 @@ Response Example:
 
 ### `PUT genres/{id}`
 
-**Description: Update the title of an existing genre.**
+**Description:** Update the title of an existing genre.
 
-Request Example:
-```json
-{
-  "title": "Supernatural Horror"
-}
-```
-
-Response Example:
+**Request Example:**
 ```json
 {
   "id": 2,
@@ -122,15 +115,13 @@ Response Example:
 }
 ```
 
----
-
-### `DELETE genres/{id}`
-
-**Description: Delete a genre by its ID.**
-
-Responses:
-
-- `204 No Content` if request was successful.
+**Response Example:**
+```json
+{
+  "id": 2,
+  "title": "Supernatural Horror"
+}
+```
 
 ---
 
@@ -178,4 +169,72 @@ Response Example:
   "genreId": 9,
   "isDeleted": false
 }
+```
+
+---
+
+### `POST /api/movies`
+
+**Description:** Add a new movie to the system.
+
+**Request Example:**
+```json
+{
+  "title": "Companion",
+  "description": "A weekend getaway with friends at a remote cabin turns into chaos after it's revealed that one of the guests is not what they seem.",
+  "releaseDate": "2025-01-31",
+  "genreId": 9
+}
+```
+
+**Response Example:**
+```json
+{
+  "id": 3,
+  "title": "Companion",
+  "description": "A weekend getaway with friends at a remote cabin turns into chaos after it's revealed that one of the guests is not what they seem.",
+  "releaseDate": "2025-01-31",
+  "genreId": 9,
+  "isDeleted": false
+}
+```
+
+---
+
+### `PUT /api/movies/{id}`
+
+**Description:** Update the details of an existing movie.
+
+**Request Body Example:**
+```json
+{
+  "id": 3,
+  "title": "Pulp Fiction",
+  "description": "In the realm of underworld, a series of incidents intertwines the lives of two Los Angeles mobsters, a gangster's wife, a boxer and two small-time criminals.",
+  "releaseDate": "1992-10-21",
+  "genreId": 9
+}
+```
+
+**Response Example:**
+```json
+{
+  "id": 3,
+  "title": "Pulp Fiction",
+  "description": "In the realm of underworld, a series of incidents intertwines the lives of two Los Angeles mobsters, a gangster's wife, a boxer and two small-time criminals.",
+  "releaseDate": "1992-10-21",
+  "genreId": 9,
+  "isDeleted": false
+}
+```
+
+---
+
+### `DELETE /api/movies/{id}`
+
+**Description:** Soft-delete a movie by marking it as deleted (`isDeleted = true`).
+
+**Response:**
+```json
+204 No Content
 ```
