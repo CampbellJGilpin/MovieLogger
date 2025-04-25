@@ -72,9 +72,9 @@ erDiagram
 
 ## API Structure
 
-### Genres
+## Genres
 
-`GET /genres`
+### `GET /genres`
 
 **Description: Retrieve all genres in the system.**
 
@@ -89,7 +89,7 @@ Response Example:
 
 ---
 
-`GET genres/{id}`
+### `GET genres/{id}`
 
 **Description: Retrieve a specific genre by its ID.**
 
@@ -103,7 +103,7 @@ Response Example:
 
 ---
 
-`PUT genres/{id}`
+### `PUT genres/{id}`
 
 **Description: Update the title of an existing genre.**
 
@@ -124,7 +124,7 @@ Response Example:
 
 ---
 
-`DELETE genres/{id}`
+### `DELETE genres/{id}`
 
 **Description: Delete a genre by its ID.**
 
@@ -134,6 +134,48 @@ Responses:
 
 ---
 
-### Movies
+## Movies API
+
+### `GET movies`
+
+**Description:** Retrieve all movies in the system.
+
+Response Example:
+```json
+[
+  {
+    "id": 1,
+    "title": "Sinners",
+    "description": "Trying to leave their troubled lives behind, twin brothers return to their hometown to start again, only to discover that an even greater evil is waiting to welcome them back.",
+    "releaseDate": "2025-04-18",
+    "genreId": 9,
+    "isDeleted": false
+  },
+  {
+    "id": 2,
+    "title": "Mickey 17",
+    "description": "A disposable employee is sent on a human expedition to colonize the ice world Niflheim. After one iteration dies, a new body is regenerated with most of his memories intact.",
+    "releaseDate": "2025-03-07",
+    "genreId": 1,
+    "isDeleted": false
+  }
+]
+```
 
 ---
+
+### `GET movies/{id}`
+
+**Description:** Retrieve a single movie by its ID.
+
+**Response Example:**
+```json
+{
+  "id": 1,
+  "title": "Sinners",
+  "description": "Trying to leave their troubled lives behind, twin brothers return to their hometown to start again, only to discover that an even greater evil is waiting to welcome them back.",
+  "releaseDate": "2025-04-18",
+  "genreId": 9,
+  "isDeleted": false
+}
+```
