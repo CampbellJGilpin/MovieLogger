@@ -123,15 +123,13 @@ erDiagram
 }
 ```
 
----
-
-## Movies API
+## Movies
 
 ### `GET movies`
 
 **Description:** Retrieve all movies in the system.
 
-Response Example:
+**Response Example:**
 ```json
 [
   {
@@ -143,7 +141,7 @@ Response Example:
     "isDeleted": false
   },
   {
-    "id": 2,
+    "id": 4,
     "title": "Mickey 17",
     "description": "A disposable employee is sent on a human expedition to colonize the ice world Niflheim. After one iteration dies, a new body is regenerated with most of his memories intact.",
     "releaseDate": "2025-03-07",
@@ -173,7 +171,7 @@ Response Example:
 
 ---
 
-### `POST /api/movies`
+### `POST movies`
 
 **Description:** Add a new movie to the system.
 
@@ -190,7 +188,7 @@ Response Example:
 **Response Example:**
 ```json
 {
-  "id": 3,
+  "id": 2,
   "title": "Companion",
   "description": "A weekend getaway with friends at a remote cabin turns into chaos after it's revealed that one of the guests is not what they seem.",
   "releaseDate": "2025-01-31",
@@ -201,7 +199,7 @@ Response Example:
 
 ---
 
-### `PUT /api/movies/{id}`
+### `PUT movies/{id}`
 
 **Description:** Update the details of an existing movie.
 
@@ -230,11 +228,108 @@ Response Example:
 
 ---
 
-### `DELETE /api/movies/{id}`
+### `DELETE movies/{id}`
 
 **Description:** Soft-delete a movie by marking it as deleted (`isDeleted = true`).
 
-**Response:**
+**Response Example:**
 ```json
 204 No Content
+```
+
+## UserMovies
+
+### `GET users/{userId}/movies`
+
+**Description:** Retrieve all movies in a specific user's library.
+
+**Response Example:**
+```json
+[
+  {
+    "id": 12,
+    "userId": 4,
+    "movieId": 1,
+    "favourite": true,
+    "ownsMovie": false,
+    "upcomingViewDate": null,
+    "movie": {
+      "id": 2,
+      "title": "Companion",
+      "description": "A weekend getaway with friends at a remote cabin turns into chaos after it's revealed that one of the guests is not what they seem.",
+      "releaseDate": "2025-01-31",
+      "genreId": 9
+    }
+  },
+  {
+    "id": 13,
+    "userId": 4,
+    "movieId": 3,
+    "favourite": false,
+    "ownsMovie": true,
+    "upcomingViewDate": "2025-05-01",
+    "movie": {
+      "id": 3,
+      "title": "Pulp Fiction",
+      "description": "In the realm of underworld, a series of incidents intertwines the lives of two Los Angeles mobsters, a gangster's wife, a boxer and two small-time criminals.",
+      "releaseDate": "1992-10-21",
+      "genreId": 9
+    }
+  }
+]
+```
+
+---
+
+### `POST users/{userId}/movies`
+
+**Description:** Add a movie to the user's collection.
+
+**Request Body Example:**
+```json
+{
+  "movieId": 2,
+  "favourite": false,
+  "ownsMovie": true,
+  "upcomingViewDate": "2025-06-15"
+}
+```
+
+**Response Example:**
+```json
+{
+  "id": 14,
+  "userId": 4,
+  "movieId": 2,
+  "favourite": false,
+  "ownsMovie": true,
+  "upcomingViewDate": "2025-06-15"
+}
+```
+
+---
+
+### `PUT user-movies/{id}`
+
+**Description:** Update flags or viewing info for a user-movie entry.
+
+**Request Body Example:**
+```json
+{
+  "favourite": true,
+  "ownsMovie": false,
+  "upcomingViewDate": null
+}
+```
+
+**Response Example:**
+```json
+{
+  "id": 14,
+  "userId": 4,
+  "movieId": 5,
+  "favourite": true,
+  "ownsMovie": false,
+  "upcomingViewDate": null
+}
 ```
