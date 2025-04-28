@@ -79,20 +79,20 @@ erDiagram
 **Description:** Register a new user account.
 
 **Request Body Example:**
-&#96;&#96;&#96;json
+```json
 {
   "userName": "newuser123",
   "email": "newuser@example.com",
   "password": "securepassword"
 }
-&#96;&#96;&#96;
+```
 
 **Responses:**
 - `201 Created` – User registered successfully.
 - `400 Bad Request` – Missing or invalid registration details.
 
 **Response Example:**
-&#96;&#96;&#96;json
+```json
 {
   "id": 5,
   "userName": "newuser123",
@@ -100,7 +100,7 @@ erDiagram
   "isAdmin": false,
   "isDeleted": false
 }
-&#96;&#96;&#96;
+```
 
 ---
 
@@ -109,12 +109,12 @@ erDiagram
 **Description:** Authenticate a user and receive a token.
 
 **Request Body Example:**
-&#96;&#96;&#96;json
+```json
 {
   "email": "newuser@example.com",
   "password": "securepassword"
 }
-&#96;&#96;&#96;
+```
 
 **Responses:**
 - `200 OK` – Login successful, returns token.
@@ -122,11 +122,11 @@ erDiagram
 - `401 Unauthorized` – Invalid credentials.
 
 **Response Example:**
-&#96;&#96;&#96;json
+```json
 {
   "token": "ayJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
 }
-&#96;&#96;&#96;
+```
 
 ### Users
 
