@@ -74,6 +74,59 @@ erDiagram
 
 ### Authentication
 
+### `POST auth/register`
+
+**Description:** Register a new user account.
+
+**Request Body Example:**
+&#96;&#96;&#96;json
+{
+  "userName": "newuser123",
+  "email": "newuser@example.com",
+  "password": "securepassword"
+}
+&#96;&#96;&#96;
+
+**Responses:**
+- `201 Created` – User registered successfully.
+- `400 Bad Request` – Missing or invalid registration details.
+
+**Response Example:**
+&#96;&#96;&#96;json
+{
+  "id": 5,
+  "userName": "newuser123",
+  "email": "newuser@example.com",
+  "isAdmin": false,
+  "isDeleted": false
+}
+&#96;&#96;&#96;
+
+---
+
+### `POST /auth/login`
+
+**Description:** Authenticate a user and receive a token.
+
+**Request Body Example:**
+&#96;&#96;&#96;json
+{
+  "email": "newuser@example.com",
+  "password": "securepassword"
+}
+&#96;&#96;&#96;
+
+**Responses:**
+- `200 OK` – Login successful, returns token.
+- `400 Bad Request` – Missing credentials.
+- `401 Unauthorized` – Invalid credentials.
+
+**Response Example:**
+&#96;&#96;&#96;json
+{
+  "token": "ayJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+}
+&#96;&#96;&#96;
 
 ### Users
 
@@ -85,6 +138,7 @@ erDiagram
 - `200 OK`
 - `404 Not Found`
 
+**Response Example:**
 ```json
 [
   {
@@ -112,6 +166,7 @@ erDiagram
 - `200 OK`
 - `404 Not Found`
 
+**Response Example:**
 ```json
 {
   "id": 1,
@@ -137,6 +192,10 @@ erDiagram
 ```
 
 **Responses:**
+- `201 Created`
+- `400 Bad Request`
+
+**Response Example:**
 ```json
 {
   "id": 3,
@@ -161,7 +220,7 @@ erDiagram
 }
 ```
 
-**Responses:**
+**Response Example:**
 ```json
 {
   "id": 3,
@@ -192,6 +251,7 @@ erDiagram
 - `200 OK`
 - `404 Not Found`
 
+**Response Example:**
 ```json
 [
   { "id": 1, "title": "Action" },
@@ -210,6 +270,7 @@ erDiagram
 - `200 OK`
 - `404 Not Found`
 
+**Response Example:**
 ```json
 {
   "id": 2,
@@ -236,7 +297,8 @@ erDiagram
 - `400 Bad Request`
 - `404 Not Found`
 
-```
+**Response Example:**
+```json
 {
   "id": 2,
   "title": "Supernatural Horror"
@@ -283,6 +345,7 @@ erDiagram
 - `200 OK`
 - `404 Not Found`
 
+**Response Example:**
 ```json
 {
   "id": 1,
@@ -314,6 +377,7 @@ erDiagram
 - `201 Created`
 - `400 Bad Request`
 
+**Response Example:**
 ```json
 {
   "id": 2,
@@ -346,6 +410,7 @@ erDiagram
 - `400 Bad Request`
 - `404 Not Found`
 
+**Response Example:**
 ```json
 {
   "id": 3,
@@ -374,6 +439,10 @@ erDiagram
 ### `GET users/{userId}/movies`
 
 **Description:** Retrieve all movies in a specific user's library.
+
+**Responses:**
+- `200 OK`
+- `404 Not Found`
 
 **Response Example:**
 ```json
@@ -431,6 +500,7 @@ erDiagram
 - `200 OK`
 - `400 Bad Request`
 
+**Response Example:**
 ```json
 {
   "id": 14,
@@ -462,6 +532,7 @@ erDiagram
 - `400 Bad Request`
 - `404 Not Found`
 
+**Response Example:**
 ```json
 {
   "id": 14,
@@ -475,7 +546,7 @@ erDiagram
 
 ---
 
-### `DELETE /user-movies/{id}`
+### `DELETE user-movies/{id}`
 
 **Description:** Remove a movie from user's library.
 
@@ -490,3 +561,29 @@ erDiagram
 
 ### `GET users/{userId}/reviews`
 ### `PUT reviews/{id}`
+
+## User Personas
+
+### Casual User
+
+- Wants to simply keep track of what they've watched, and want to watch.
+- Will occasionally write reviews.
+
+### Collector
+
+- Wants a solution to easily keep track and search of movies they've collected.
+- Will reguarly add new movies to their owned list.
+
+### Data-Oriented User
+
+- Wants an easy solution to view statistics, such as how many movies they've watched or own.
+- Wants to filter and sort through their viewing history.
+- May organise their films into collections uses tags.
+
+## User Journeys
+
+```mermaid
+flowchart TD
+A[Landing Page] --> B[Login / Register]
+B --> C[Dashboard]
+```
