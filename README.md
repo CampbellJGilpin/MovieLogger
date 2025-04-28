@@ -584,6 +584,11 @@ erDiagram
 
 ```mermaid
 flowchart TD
-A[Landing Page] --> B[Login / Register]
-B --> C[Dashboard]
+    A[Login / Register] --> B[Dashboard]
+    B --> C[Search for Movie]
+    C --> D[Movie Page]
+    D --> E[Add Movie to Library]
+    D --> F[Log a Movie Viewing]
+    D --> G[Write a Review]
+    D --> H[View Watch History]
 ```
