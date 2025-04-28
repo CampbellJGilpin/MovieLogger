@@ -72,13 +72,126 @@ erDiagram
 
 ## API Structure
 
+### Authentication
+
+
+### Users
+
+### `GET users`
+
+**Description:** Get all users.
+
+**Responses:**
+- `200 OK`
+- `404 Not Found`
+
+```json
+[
+  {
+    "id": 1,
+    "userName": "moviebuff88",
+    "email": "buff@example.com",
+    "isAdmin": false,
+    "isDeleted": false
+  },
+  {
+    "id": 2,
+    "userName": "admin_user",
+    "email": "admin@example.com",
+    "isAdmin": true,
+    "isDeleted": false
+  }
+]
+```
+
+### `GET users/{id}`
+
+**Description:** Retrieve a specific user by their id.
+
+**Responses:**
+- `200 OK`
+- `404 Not Found`
+
+```json
+{
+  "id": 1,
+  "userName": "moviebuff88",
+  "email": "buff@example.com",
+  "isAdmin": false,
+  "isDeleted": false
+}
+```
+
+### `POST users`
+
+**Description:** Add a new user to the system.
+
+**Request Example:**
+```json
+{
+  "userName": "cinemafan123",
+  "email": "cinema@example.com",
+  "password": "supersecurepassword",
+  "isAdmin": false,
+}
+```
+
+**Responses:**
+```json
+{
+  "id": 3,
+  "userName": "cinemafan123",
+  "email": "cinema@example.com",
+  "isAdmin": false,
+  "isDeleted": false
+}
+```
+
+### `PUT users/{id}`
+
+**Description:** Update a user.
+
+**Request Example:**
+```json
+{
+  "userName": "cinemafan_updated",
+  "email": "newemail@example.com",
+  "isAdmin": false,
+  "isDeleted": false
+}
+```
+
+**Responses:**
+```json
+{
+  "id": 3,
+  "userName": "cinemafan_updated",
+  "email": "newemail@example.com",
+  "isAdmin": false,
+  "isDeleted": false
+}
+```
+
+### `DELETE users/{id}`
+
+**Description:** Delete a user account.
+
+**Responses:**
+- `204 No Content`
+- `404 Not Found`
+
+---
+
 ### Genres
 
 ### `GET /genres`
 
 **Description:** Retrieve all genres in the system.
 
-**Response Example:**
+**Responses:**
+- `200 OK`
+- `404 Not Found`
+
 ```json
 [
   { "id": 1, "title": "Action" },
@@ -366,94 +479,10 @@ erDiagram
 
 **Description:** Remove a movie from user's library.
 
-**Response:**
+**Responses:**
 ```
 204 No Content
 ```
-
----
-
-### Users
-
-### `GET users`
-
-```json
-[
-  {
-    "id": 1,
-    "userName": "moviebuff88",
-    "email": "buff@example.com",
-    "isAdmin": false,
-    "isDeleted": false
-  },
-  {
-    "id": 2,
-    "userName": "admin_user",
-    "email": "admin@example.com",
-    "isAdmin": true,
-    "isDeleted": false
-  }
-]
-```
-
-### `GET users/{id}`
-
-```json
-{
-  "id": 1,
-  "userName": "moviebuff88",
-  "email": "buff@example.com",
-  "isAdmin": false,
-  "isDeleted": false
-}
-```
-
-### `POST users`
-
-```json
-{
-  "userName": "cinemafan123",
-  "email": "cinema@example.com",
-  "password": "supersecurepassword",
-  "isAdmin": false,
-}
-```
-
-```json
-{
-  "id": 3,
-  "userName": "cinemafan123",
-  "email": "cinema@example.com",
-  "isAdmin": false,
-  "isDeleted": false
-}
-```
-
-### `PUT users/{id}`
-
-```json
-{
-  "userName": "cinemafan_updated",
-  "email": "newemail@example.com",
-  "isAdmin": false,
-  "isDeleted": false
-}
-```
-
-```json
-{
-  "id": 3,
-  "userName": "cinemafan_updated",
-  "email": "newemail@example.com",
-  "isAdmin": false,
-  "isDeleted": false
-}
-```
-
-### `DELETE users/{id}`
-
-- `204 No Content`
-- `404 Not Found`
 
 ---
 
