@@ -74,7 +74,7 @@ erDiagram
 
 ### Authentication
 
-### `POST auth/register`
+### `POST /auth/register`
 
 **Description:** Register a new user account.
 
@@ -130,7 +130,7 @@ erDiagram
 
 ### Users
 
-### `GET users`
+### `GET /users`
 
 **Description:** Get all users.
 
@@ -158,7 +158,7 @@ erDiagram
 ]
 ```
 
-### `GET users/{id}`
+### `GET /users/{id}`
 
 **Description:** Retrieve a specific user by their id.
 
@@ -177,7 +177,7 @@ erDiagram
 }
 ```
 
-### `POST users`
+### `POST /users`
 
 **Description:** Add a new user to the system.
 
@@ -206,7 +206,7 @@ erDiagram
 }
 ```
 
-### `PUT users/{id}`
+### `PUT /users/{id}`
 
 **Description:** Update a user.
 
@@ -231,7 +231,7 @@ erDiagram
 }
 ```
 
-### `DELETE users/{id}`
+### `DELETE /users/{id}`
 
 **Description:** Delete a user account.
 
@@ -262,7 +262,7 @@ erDiagram
 
 ---
 
-### `GET genres/{id}`
+### `GET /genres/{id}`
 
 **Description:** Retrieve a specific genre by its ID.
 
@@ -280,7 +280,7 @@ erDiagram
 
 ---
 
-### `PUT genres/{id}`
+### `PUT /genres/{id}`
 
 **Description:** Update the title of an existing genre.
 
@@ -309,7 +309,7 @@ erDiagram
 
 ### Movies
 
-### `GET movies`
+### `GET /movies`
 
 **Description:** Retrieve all movies in the system.
 
@@ -337,7 +337,7 @@ erDiagram
 
 ---
 
-### `GET movies/{id}`
+### `GET /movies/{id}`
 
 **Description:** Retrieve a single movie by its ID.
 
@@ -359,7 +359,7 @@ erDiagram
 
 ---
 
-### `POST movies`
+### `POST /movies`
 
 **Description:** Add a new movie to the system.
 
@@ -391,7 +391,7 @@ erDiagram
 
 ---
 
-### `PUT movies/{id}`
+### `PUT /movies/{id}`
 
 **Description:** Update the details of an existing movie.
 
@@ -424,7 +424,7 @@ erDiagram
 
 ---
 
-### `DELETE movies/{id}`
+### `DELETE /movies/{id}`
 
 **Description:** Soft-delete a movie by marking it as deleted (`isDeleted = true`).
 
@@ -436,7 +436,7 @@ erDiagram
 
 ### Viewings
 
-### `GET users/{userId}/movies`
+### `GET /users/{userId}/movies`
 
 **Description:** Retrieve all movies in a specific user's library.
 
@@ -482,7 +482,7 @@ erDiagram
 
 ---
 
-### `POST users/{userId}/movies`
+### `POST /users/{userId}/movies`
 
 **Description:** Add a movie to the user's collection.
 
@@ -514,7 +514,7 @@ erDiagram
 
 ---
 
-### `PUT user-movies/{id}`
+### `PUT /user-movies/{id}`
 
 **Description:** Update flags or viewing info for a user-movie entry.
 
@@ -546,7 +546,7 @@ erDiagram
 
 ---
 
-### `DELETE user-movies/{id}`
+### `DELETE /user-movies/{id}`
 
 **Description:** Remove a movie from user's library.
 
@@ -555,12 +555,118 @@ erDiagram
 204 No Content
 ```
 
+### `GET /users/{id}/dashboard`
+
+**Description:** Returns dashboard collections for a specific user, including recently watched movies, their watchlist, and owned films.
+
+**Responses:**
+- `200 OK`
+
+**Response Example:**
+```json
+{
+  "recentlyWatched": [
+    {
+      "movieId": 2,
+      "title": "Companion",
+      "dateViewed": "2025-04-26",
+      "score": 8
+    }
+  ],
+  "watchlist": [
+    {
+      "movieId": 4,
+      "title": "Mickey 17",
+      "upcomingViewDate": "2025-05-01"
+    }
+  ],
+  "owned": [
+    {
+      "movieId": 1,
+      "title": "Sinners"
+    }
+  ]
+}
+```
+
 ---
 
 ### Reviews
 
-### `GET users/{userId}/reviews`
-### `PUT reviews/{id}`
+### `GET /api/users/{userId}/reviews`
+
+**Description:** Get all reviews written by a user.
+
+**Response Example:**
+```json
+[
+  {
+    "reviewId": 33,
+    "movieTitle": "Inception",
+    "dateViewed": "2025-04-25",
+    "score": 9,
+    "reviewText": "Still amazing!"
+  }
+]
+```
+
+**Description:** Log a new viewing for a movie and optionally create a review and score at the same time.
+
+**Request Body Example:**
+```json
+{
+  "dateViewed": "2025-04-26",
+  "reviewText": "Blew my socks off.",
+  "score": 9
+}
+```
+
+**Response Example:**
+```json
+{
+  "viewingId": 42,
+  "userMovieId": 12,
+  "dateViewed": "2025-04-26",
+  "review": {
+    "id": 17,
+    "reviewText": "Blew my socks off.",
+    "score": 9
+  }
+}
+```
+
+**Responses:**
+- `201 Created`
+- `400 Bad Request`
+- `404 Not Found`
+
+---
+
+### `PUT /reviews/{id}`
+
+**Description:** Update the text or score of an existing review.
+
+**Request Body Example:**
+```json
+{
+  "reviewText": "Even better the second time, bumped it up to a 10.",
+  "score": 10
+}
+```
+
+**Response Example:**
+```json
+{
+  "id": 17,
+  "reviewText": "Even better the second time, bumped it up to a 10.",
+  "score": 10
+}
+```
+
+**Responses:**
+- `200 OK`
+- `400 Bad Request`
+- `404 Not Found`
 
 ## User Personas
 
