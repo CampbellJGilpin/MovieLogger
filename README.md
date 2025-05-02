@@ -60,7 +60,7 @@ erDiagram
 
 - **Movies**: A film entry in the database, containing title, description, release date, and genre. Users interact with movies by logging, rating, reviewing, or favouriting them.
 
-- **Reviews**: A written user review that is associated with a viewing. 
+- **Reviews**: A written user review that is associated with a viewing. There is one review per viewing, and a new review would require a new and unique viewing to be logged.
 
 - **Ratings**: A numerical score (e.g., 1–10) that a user assigns to a movie they've logged. This is associated with a viewing.
 
@@ -238,6 +238,119 @@ erDiagram
 **Responses:**
 - `204 No Content`
 - `404 Not Found`
+
+### `GET /users/{id}/dashboard`
+
+**Description:** Returns dashboard collections for a specific user, including recently watched movies, their watchlist, owned films, and favourites. Each item also includes whether the movie is in their library.
+
+**Responses:**
+- `200 OK`
+
+**Response Example:**
+```json
+{
+  "recentlyWatched": [
+    {
+      "movieId": 2,
+      "title": "Companion",
+      "dateViewed": "2025-04-26",
+      "score": 8,
+      "inLibrary": true
+    }
+  ],
+  "watchlist": [
+    {
+      "movieId": 4,
+      "title": "Mickey 17",
+      "upcomingViewDate": "2025-05-01",
+      "inLibrary": true
+    }
+  ],
+  "owned": [
+    {
+      "movieId": 1,
+      "title": "Sinners",
+      "inLibrary": true
+    }
+  ],
+  "favourites": [
+    {
+      "movieId": 3,
+      "title": "Pulp Fiction",
+      "inLibrary": true
+    }
+  ]
+}
+```
+
+### `GET /users/{id}/grid`
+
+**Description:** Returns a grid-style list of movies for the user, with high-level metadata and toggle states.
+
+**Responses:**
+- `200 OK`
+
+**Response Example:**
+```json
+[
+  {
+    "movieId": 1,
+    "title": "Sinners",
+    "releaseDate": "2025-04-18",
+    "genre": "Horror",
+    "favourite": true,
+    "inLibrary": true,
+    "watchLater": false
+  },
+  {
+    "movieId": 2,
+    "title": "Mickey 17",
+    "releaseDate": "2025-03-07",
+    "genre": "Science Fiction",
+    "favourite": false,
+    "inLibrary": true,
+    "watchLater": true
+  }
+]
+```
+
+### `GET /users/{userId}/movies/{movieId}`
+
+**Description:** Retrieve a single movie’s detail and associated user-specific data like toggle states and viewing history.
+
+**Responses:**
+- `200 OK`
+- `404 Not Found`
+
+**Response Example:**
+```json
+{
+  "movie": {
+    "id": 2,
+    "title": "Mickey 17",
+    "description": "A disposable employee is sent on a human expedition to colonize the ice world Niflheim...",
+    "releaseDate": "2025-03-07",
+    "genreId": 1
+  },
+  "favourite": true,
+  "watchLater": false,
+  "inLibrary": true,
+  "viewings": [
+    {
+      "viewingId": 7,
+      "dateViewed": "2025-04-12",
+      "review": "Brilliant concept with fantastic world-building.",
+      "score": 9
+    },
+    {
+      "viewingId": 11,
+      "dateViewed": "2025-04-25",
+      "review": "Second watch was even better.",
+      "score": 10
+    }
+  ]
+}
+```
 
 ---
 
