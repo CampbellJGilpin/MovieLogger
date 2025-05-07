@@ -12,7 +12,7 @@ Deciders: Campbell Gilpin
 
 The application being built is called Movie Logger, and it is a web application for logging, reviewing and maintaining movies and movie collections.
 
-The application will be built and maintained my one person. 
+The application will be built and maintained by one person. 
 
 The priority is to move quickly toward a working MVP, while still building a codebase that is clean, testable, and maintainable. 
 
@@ -48,5 +48,3 @@ The application will be structured following a clear 3 layer structure.
 
 * Could become harder to manage as the codebase grows in size
 * Scaling up individual parts of the app in the future would require refactoring 
-
-## Pros and Cons of the Options 

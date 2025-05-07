@@ -35,7 +35,7 @@ Manually keeping track of movies watched, reviews written, and films to watch ca
 - Social Features (eg. following other users)
 - Mobile version
 - Offline mode
-- Ability for users swap movies
+- Ability for users to swap movies
 
 ## Domain Model Diagram
 
@@ -88,8 +88,8 @@ erDiagram
 ```
 
 **Responses:**
-- `201 Created` – User registered successfully.
-- `400 Bad Request` – Missing or invalid registration details.
+- `201 Created`
+- `400 Bad Request`
 
 **Response Example:**
 ```json
@@ -117,9 +117,9 @@ erDiagram
 ```
 
 **Responses:**
-- `200 OK` – Login successful, returns token.
-- `400 Bad Request` – Missing credentials.
-- `401 Unauthorized` – Invalid credentials.
+- `200 OK` 
+- `400 Bad Request`
+- `401 Unauthorized`
 
 **Response Example:**
 ```json
@@ -231,14 +231,6 @@ erDiagram
 }
 ```
 
-### `DELETE /users/{id}`
-
-**Description:** Delete a user account.
-
-**Responses:**
-- `204 No Content`
-- `404 Not Found`
-
 ### `GET /users/{id}/dashboard`
 
 **Description:** Returns dashboard collections for a specific user, including recently watched movies, their watchlist, owned films, and favourites. Each item also includes whether the movie is in their library.
@@ -283,7 +275,7 @@ erDiagram
 }
 ```
 
-### `GET /users/{id}/grid`
+### `GET /users/{id}/movies`
 
 **Description:** Returns a grid-style list of movies for the user, with high-level metadata and toggle states.
 
@@ -362,7 +354,6 @@ erDiagram
 
 **Responses:**
 - `200 OK`
-- `404 Not Found`
 
 **Response Example:**
 ```json
@@ -425,6 +416,9 @@ erDiagram
 ### `GET /movies`
 
 **Description:** Retrieve all movies in the system.
+
+**Responses:**
+- `200 OK`
 
 **Response Example:**
 ```json
@@ -664,9 +658,7 @@ erDiagram
 **Description:** Remove a movie from user's library.
 
 **Responses:**
-```
-204 No Content
-```
+- `204 No Content`
 
 ### `GET /users/{id}/dashboard`
 
@@ -706,7 +698,7 @@ erDiagram
 
 ### Reviews
 
-### `GET /api/users/{userId}/reviews`
+### `GET /users/{userId}/reviews`
 
 **Description:** Get all reviews written by a user.
 
@@ -723,28 +715,23 @@ erDiagram
 ]
 ```
 
-**Description:** Log a new viewing for a movie and optionally create a review and score at the same time.
+### `POST /user-movies/{id}/viewings`
 
-**Request Body Example:**
+**Description:** Log a new viewing.
+
+**Request Example:**
 ```json
 {
-  "dateViewed": "2025-04-26",
-  "reviewText": "Blew my socks off.",
-  "score": 9
+  "dateViewed": "2025-05-06"
 }
 ```
 
 **Response Example:**
 ```json
 {
-  "viewingId": 42,
-  "userMovieId": 12,
-  "dateViewed": "2025-04-26",
-  "review": {
-    "id": 17,
-    "reviewText": "Blew my socks off.",
-    "score": 9
-  }
+  "id": 21,
+  "userMovieId": 13,
+  "dateViewed": "2025-05-06"
 }
 ```
 
@@ -753,7 +740,32 @@ erDiagram
 - `400 Bad Request`
 - `404 Not Found`
 
----
+### `POST /viewings/{id}/review`
+
+**Description:** Create a review and score for an existing viewing.
+
+**Request Body Example:**
+```json
+{
+  "reviewText": "This movie rocks.",
+  "score": 8
+}
+```
+
+**Responses:**
+- `201 Created`
+- `400 Bad Request`
+- `404 Not Found`
+
+**Response Example:**
+```json
+{
+  "id": 45,
+  "viewingId": 13,
+  "reviewText": "This movie rocks.",
+  "score": 8
+}
+```
 
 ### `PUT /reviews/{id}`
 
