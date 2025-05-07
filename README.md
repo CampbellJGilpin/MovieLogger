@@ -41,17 +41,17 @@ Manually keeping track of movies watched, reviews written, and films to watch ca
 
 ```mermaid
 erDiagram
-    USERS ||--o{ MOVIES : adds
-    USERS ||--o{ REVIEWS : writes
-    USERS ||--o{ RATINGS : gives
-    USERS ||--o{ VIEWINGS : logs
-    USERS ||--o{ FAVOURITES : toggles
+    USERS ||--o{ LIBRARY : tracks
+    LIBRARY ||--o{ FAVOURITES : toggles
+    LIBRARY ||--o{ OWNERSHIP : toggles
+    LIBRARY ||--o{ WATCHLIST : schedules
+    LIBRARY ||--o{ VIEWINGS : logs
 
-    VIEWINGS ||--o{ REVIEWS : receives
-    VIEWINGS ||--o{ RATINGS : receives
+    VIEWINGS ||--o{ REVIEWS : writes
+    VIEWINGS ||--o{ RATINGS : gives
 
-    MOVIES ||--o{ FAVOURITES : receives
-    MOVIES ||--o{ VIEWINGS : logged
+    MOVIES ||--o{ LIBRARY : appears_in
+    MOVIES ||--o{ VIEWINGS : watched_in
 ```
 
 ### Glossary
@@ -60,73 +60,27 @@ erDiagram
 
 - **Movies**: A film entry in the database, containing title, description, release date, and genre. Users interact with movies by logging, rating, reviewing, or favouriting them.
 
+- **Viewings**: A snapshot of an invidual movie viewing. This holds the date the user viewed a specific movie, as well as an optional review and score associated with it.
+
 - **Reviews**: A written user review that is associated with a viewing. There is one review per viewing, and a new review would require a new and unique viewing to be logged.
 
-- **Ratings**: A numerical score (e.g., 1–10) that a user assigns to a movie they've logged. This is associated with a viewing.
+- **Ratings**: A numerical score (e.g., 1–10) that a user assigns to a movie they've logged. This is associated with a review.
 
 - **Favourites**: A toggle which a user can apply to a movie to mark it as a personal favourite. This is independent from viewings and is tied directly to a movie.
 
-- **Ownership**: A toggle that indicates if a user owns a specific movie. This is independent from viewings and is tied directly to a movie.
+- **Watchlist**: Movies that have a view date set.
 
-- **Viewing**: A snapshot of an invidual movie viewing. This holds the date the user viewed a specific movie, as well as their review and score associated with it.
+- **Ownership**: A toggle that indicates if a user owns a specific movie. This is independent from viewings and is tied directly to a movie.
 
 ## API Structure
 
-### Authentication
+- Users
+- Libraries
+- Movies
+- Genres
+- Viewings
+- Reviews
 
-### `POST /auth/register`
-
-**Description:** Register a new user account.
-
-**Request Body Example:**
-```json
-{
-  "userName": "newuser123",
-  "email": "newuser@example.com",
-  "password": "securepassword"
-}
-```
-
-**Responses:**
-- `201 Created`
-- `400 Bad Request`
-
-**Response Example:**
-```json
-{
-  "id": 5,
-  "userName": "newuser123",
-  "email": "newuser@example.com",
-  "isAdmin": false,
-  "isDeleted": false
-}
-```
-
----
-
-### `POST /auth/login`
-
-**Description:** Authenticate a user and receive a token.
-
-**Request Body Example:**
-```json
-{
-  "email": "newuser@example.com",
-  "password": "securepassword"
-}
-```
-
-**Responses:**
-- `200 OK` 
-- `400 Bad Request`
-- `401 Unauthorized`
-
-**Response Example:**
-```json
-{
-  "token": "ayJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
-}
-```
 
 ### Users
 
@@ -231,53 +185,65 @@ erDiagram
 }
 ```
 
-### `GET /users/{id}/dashboard`
+### `POST /auth/register`
 
-**Description:** Returns dashboard collections for a specific user, including recently watched movies, their watchlist, owned films, and favourites. Each item also includes whether the movie is in their library.
+**Description:** Register a new user account.
+
+**Request Body Example:**
+```json
+{
+  "userName": "newuser123",
+  "email": "newuser@example.com",
+  "password": "securepassword"
+}
+```
 
 **Responses:**
-- `200 OK`
+- `201 Created`
+- `400 Bad Request`
 
 **Response Example:**
 ```json
 {
-  "recentlyWatched": [
-    {
-      "movieId": 2,
-      "title": "Companion",
-      "dateViewed": "2025-04-26",
-      "score": 8,
-      "inLibrary": true
-    }
-  ],
-  "watchlist": [
-    {
-      "movieId": 4,
-      "title": "Mickey 17",
-      "upcomingViewDate": "2025-05-01",
-      "inLibrary": true
-    }
-  ],
-  "owned": [
-    {
-      "movieId": 1,
-      "title": "Sinners",
-      "inLibrary": true
-    }
-  ],
-  "favourites": [
-    {
-      "movieId": 3,
-      "title": "Pulp Fiction",
-      "inLibrary": true
-    }
-  ]
+  "id": 5,
+  "userName": "newuser123",
+  "email": "newuser@example.com",
+  "isAdmin": false,
+  "isDeleted": false
 }
 ```
 
-### `GET /users/{id}/movies`
+### `POST /auth/login`
 
-**Description:** Returns a grid-style list of movies for the user, with high-level metadata and toggle states.
+**Description:** Authenticate a user and receive a token.
+
+**Request Body Example:**
+```json
+{
+  "email": "newuser@example.com",
+  "password": "securepassword"
+}
+```
+
+**Responses:**
+- `200 OK` 
+- `400 Bad Request`
+- `401 Unauthorized`
+
+**Response Example:**
+```json
+{
+  "token": "ayJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+}
+```
+
+---
+
+### Libraries
+
+#### `GET /users/{id}/library`
+
+**Description:** Returns a user's movie library, including toggle states.
 
 **Responses:**
 - `200 OK`
@@ -306,51 +272,9 @@ erDiagram
 ]
 ```
 
-### `GET /users/{userId}/movies/{movieId}`
+#### `GET /users/{id}/favourites`
 
-**Description:** Retrieve a single movie’s detail and associated user-specific data like toggle states and viewing history.
-
-**Responses:**
-- `200 OK`
-- `404 Not Found`
-
-**Response Example:**
-```json
-{
-  "movie": {
-    "id": 2,
-    "title": "Mickey 17",
-    "description": "A disposable employee is sent on a human expedition to colonize the ice world Niflheim...",
-    "releaseDate": "2025-03-07",
-    "genreId": 1
-  },
-  "favourite": true,
-  "watchLater": false,
-  "inLibrary": true,
-  "viewings": [
-    {
-      "viewingId": 7,
-      "dateViewed": "2025-04-12",
-      "review": "Brilliant concept with fantastic world-building.",
-      "score": 9
-    },
-    {
-      "viewingId": 11,
-      "dateViewed": "2025-04-25",
-      "review": "Second watch was even better.",
-      "score": 10
-    }
-  ]
-}
-```
-
----
-
-### Genres
-
-### `GET /genres`
-
-**Description:** Retrieve all genres in the system.
+**Description:** Get all favourite movies for a user.
 
 **Responses:**
 - `200 OK`
@@ -358,41 +282,94 @@ erDiagram
 **Response Example:**
 ```json
 [
-  { "id": 1, "title": "Action" },
-  { "id": 2, "title": "Horror" },
-  { "id": 3, "title": "Drama" }
+  {
+    "movieId": 3,
+    "title": "Pulp Fiction",
+    "releaseDate": "1992-10-21",
+    "genre": "Crime",
+    "inLibrary": true
+  },
+  {
+    "movieId": 4,
+    "title": "Interstellar",
+    "releaseDate": "2014-11-07",
+    "genre": "Science Fiction",
+    "inLibrary": false
+  }
 ]
 ```
 
----
+#### `GET /users/{id}/watchlist`
 
-### `GET /genres/{id}`
-
-**Description:** Retrieve a specific genre by its ID.
+**Description:** Get all movies on a user's watchlist (with upcoming view dates).
 
 **Responses:**
 - `200 OK`
-- `404 Not Found`
+
+**Response Example:**
+```json
+[
+  {
+    "movieId": 5,
+    "title": "Blade Runner 2049",
+    "releaseDate": "2017-10-06",
+    "genre": "Science Fiction",
+    "upcomingViewDate": "2025-05-10",
+    "inLibrary": true
+  },
+  {
+    "movieId": 6,
+    "title": "The Batman",
+    "releaseDate": "2022-03-04",
+    "genre": "Action",
+    "upcomingViewDate": "2025-06-01",
+    "inLibrary": true
+  }
+]
+```
+
+### `POST /users/{userId}/movies`
+
+**Description:** Add a movie to the user's library.
+
+**Request Body Example:**
+```json
+{
+  "movieId": 2,
+  "favourite": false,
+  "ownsMovie": true,
+  "upcomingViewDate": "2025-06-15"
+}
+```
+
+**Responses:**
+- `200 OK`
+- `400 Bad Request`
 
 **Response Example:**
 ```json
 {
-  "id": 2,
-  "title": "Horror"
+  "id": 14,
+  "userId": 4,
+  "movieId": 2,
+  "favourite": false,
+  "ownsMovie": true,
+  "upcomingViewDate": "2025-06-15"
 }
 ```
 
 ---
 
-### `PUT /genres/{id}`
+### `PUT /users/{userId}/movies`
 
-**Description:** Update the title of an existing genre.
+**Description:** Update flags or viewing info for a library entry.
 
-**Request Example:**
+**Request Body Example:**
 ```json
 {
-  "id": 2,
-  "title": "Supernatural Horror"
+  "favourite": true,
+  "ownsMovie": false,
+  "upcomingViewDate": null
 }
 ```
 
@@ -404,10 +381,21 @@ erDiagram
 **Response Example:**
 ```json
 {
-  "id": 2,
-  "title": "Supernatural Horror"
+  "id": 14,
+  "userId": 4,
+  "movieId": 5,
+  "favourite": true,
+  "ownsMovie": false,
+  "upcomingViewDate": null
 }
 ```
+
+### `DELETE /users/{userId}/movies`
+
+**Description:** Remove a movie from user's library.
+
+**Responses:**
+- `204 No Content`
 
 ---
 
@@ -442,8 +430,6 @@ erDiagram
 ]
 ```
 
----
-
 ### `GET /movies/{id}`
 
 **Description:** Retrieve a single movie by its ID.
@@ -463,8 +449,6 @@ erDiagram
   "isDeleted": false
 }
 ```
-
----
 
 ### `POST /movies`
 
@@ -495,8 +479,6 @@ erDiagram
   "isDeleted": false
 }
 ```
-
----
 
 ### `PUT /movies/{id}`
 
@@ -529,8 +511,6 @@ erDiagram
 }
 ```
 
----
-
 ### `DELETE /movies/{id}`
 
 **Description:** Soft-delete a movie by marking it as deleted (`isDeleted = true`).
@@ -541,11 +521,96 @@ erDiagram
 
 ---
 
+### Genres
+
+### `GET /genres`
+
+**Description:** Retrieve all genres in the system.
+
+**Responses:**
+- `200 OK`
+
+**Response Example:**
+```json
+[
+  { "id": 1, "title": "Action" },
+  { "id": 2, "title": "Horror" },
+  { "id": 3, "title": "Drama" }
+]
+```
+
+### `GET /genres/{id}`
+
+**Description:** Retrieve a specific genre by its ID.
+
+**Responses:**
+- `200 OK`
+- `404 Not Found`
+
+**Response Example:**
+```json
+{
+  "id": 2,
+  "title": "Horror"
+}
+```
+
+### `POST /genres/{id}`
+
+**Description:** Save a new genre.
+
+**Request Example:**
+```json
+{
+  "title": "Romance"
+}
+```
+
+**Responses:**
+- `200 OK`
+- `400 Bad Request`
+- `404 Not Found`
+
+**Response Example:**
+```json
+{
+  "id": 12,
+  "title": "Romance"
+}
+```
+
+### `PUT /genres/{id}`
+
+**Description:** Update the title of an existing genre.
+
+**Request Example:**
+```json
+{
+  "id": 2,
+  "title": "Supernatural Horror"
+}
+```
+
+**Responses:**
+- `200 OK`
+- `400 Bad Request`
+- `404 Not Found`
+
+**Response Example:**
+```json
+{
+  "id": 2,
+  "title": "Supernatural Horror"
+}
+```
+
+---
+
 ### Viewings
 
 ### `GET /users/{userId}/movies`
 
-**Description:** Retrieve all movies in a specific user's library.
+**Description:** Retrieve all unique viewing records for a user.
 
 **Responses:**
 - `200 OK`
@@ -589,113 +654,6 @@ erDiagram
 
 ---
 
-### `POST /users/{userId}/movies`
-
-**Description:** Add a movie to the user's collection.
-
-**Request Body Example:**
-```json
-{
-  "movieId": 2,
-  "favourite": false,
-  "ownsMovie": true,
-  "upcomingViewDate": "2025-06-15"
-}
-```
-
-**Responses:**
-- `200 OK`
-- `400 Bad Request`
-
-**Response Example:**
-```json
-{
-  "id": 14,
-  "userId": 4,
-  "movieId": 2,
-  "favourite": false,
-  "ownsMovie": true,
-  "upcomingViewDate": "2025-06-15"
-}
-```
-
----
-
-### `PUT /user-movies/{id}`
-
-**Description:** Update flags or viewing info for a user-movie entry.
-
-**Request Body Example:**
-```json
-{
-  "favourite": true,
-  "ownsMovie": false,
-  "upcomingViewDate": null
-}
-```
-
-**Responses:**
-- `200 OK`
-- `400 Bad Request`
-- `404 Not Found`
-
-**Response Example:**
-```json
-{
-  "id": 14,
-  "userId": 4,
-  "movieId": 5,
-  "favourite": true,
-  "ownsMovie": false,
-  "upcomingViewDate": null
-}
-```
-
----
-
-### `DELETE /user-movies/{id}`
-
-**Description:** Remove a movie from user's library.
-
-**Responses:**
-- `204 No Content`
-
-### `GET /users/{id}/dashboard`
-
-**Description:** Returns dashboard collections for a specific user, including recently watched movies, their watchlist, and owned films.
-
-**Responses:**
-- `200 OK`
-
-**Response Example:**
-```json
-{
-  "recentlyWatched": [
-    {
-      "movieId": 2,
-      "title": "Companion",
-      "dateViewed": "2025-04-26",
-      "score": 8
-    }
-  ],
-  "watchlist": [
-    {
-      "movieId": 4,
-      "title": "Mickey 17",
-      "upcomingViewDate": "2025-05-01"
-    }
-  ],
-  "owned": [
-    {
-      "movieId": 1,
-      "title": "Sinners"
-    }
-  ]
-}
-```
-
----
-
 ### Reviews
 
 ### `GET /users/{userId}/reviews`
@@ -714,31 +672,6 @@ erDiagram
   }
 ]
 ```
-
-### `POST /user-movies/{id}/viewings`
-
-**Description:** Log a new viewing.
-
-**Request Example:**
-```json
-{
-  "dateViewed": "2025-05-06"
-}
-```
-
-**Response Example:**
-```json
-{
-  "id": 21,
-  "userMovieId": 13,
-  "dateViewed": "2025-05-06"
-}
-```
-
-**Responses:**
-- `201 Created`
-- `400 Bad Request`
-- `404 Not Found`
 
 ### `POST /viewings/{id}/review`
 
@@ -774,7 +707,7 @@ erDiagram
 **Request Body Example:**
 ```json
 {
-  "reviewText": "Even better the second time, bumped it up to a 10.",
+  "reviewText": "Actually I changed my mind. This movie really rocks!",
   "score": 10
 }
 ```
@@ -783,7 +716,7 @@ erDiagram
 ```json
 {
   "id": 17,
-  "reviewText": "Even better the second time, bumped it up to a 10.",
+  "reviewText": "Actually I changed my mind. This movie really rocks!",
   "score": 10
 }
 ```
@@ -797,29 +730,36 @@ erDiagram
 
 ### Casual User
 
-- Wants to simply keep track of what they've watched, and want to watch.
+- Wants to simply keep track of a watchlist, and what they've watched.
 - Will occasionally write reviews.
 
 ### Collector
 
-- Wants a solution to easily keep track and search of movies they've collected.
+- Wants a solution to easily keep track and search the movies they've collected.
 - Will reguarly add new movies to their owned list.
 
 ### Data-Oriented User
 
 - Wants an easy solution to view statistics, such as how many movies they've watched or own.
 - Wants to filter and sort through their viewing history.
-- May organise their films into collections uses tags.
 
 ## User Journeys
 
+### Log Movie Viewing
+Personas: Casual User, Collector, Data-Oriented User
+
 ```mermaid
 flowchart TD
-    A[Login / Register] --> B[Dashboard]
+    A[User Signs Up] 
+    --> B[User Visits Dashboard]
     B --> C[Search for Movie]
-    C --> D[Movie Page]
-    D --> E[Add Movie to Library]
-    D --> F[Log a Movie Viewing]
-    D --> G[Write a Review]
-    D --> H[View Watch History]
+    C --> D{Movie Found?}
+    D -- Yes --> E[Movie Page]
+    E --> F[Log a Movie Viewing]
+    D -- No --> G[Add Movie to System]
+    G --> E
 ```
+### Review a Movie
+
+### Inspect Library
+
