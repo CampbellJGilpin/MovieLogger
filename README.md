@@ -74,13 +74,13 @@ erDiagram
 
 ## API Structure
 
+- Accounts
 - Users
 - Libraries
 - Movies
 - Genres
 - Viewings
 - Reviews
-
 
 ### Users
 
@@ -133,7 +133,7 @@ erDiagram
 
 ### `POST /users`
 
-**Description:** Add a new user to the system.
+**Description:** Register a new user account.
 
 **Request Example:**
 ```json
@@ -160,6 +160,29 @@ erDiagram
 }
 ```
 
+### `POST /accounts`
+
+**Description:** Authenticate a user and receive a token.
+
+**Request Example:**
+```json
+{
+  "userName": "cinemafan123",
+  "password": "supersecurepassword"
+}
+```
+
+**Responses:**
+- `201 Created`
+- `400 Bad Request`
+
+**Response Example:**
+```json
+{
+  "token": "ayJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+}
+```
+
 ### `PUT /users/{id}`
 
 **Description:** Update a user.
@@ -182,58 +205,6 @@ erDiagram
   "email": "newemail@example.com",
   "isAdmin": false,
   "isDeleted": false
-}
-```
-
-### `POST /auth/register`
-
-**Description:** Register a new user account.
-
-**Request Body Example:**
-```json
-{
-  "userName": "newuser123",
-  "email": "newuser@example.com",
-  "password": "securepassword"
-}
-```
-
-**Responses:**
-- `201 Created`
-- `400 Bad Request`
-
-**Response Example:**
-```json
-{
-  "id": 5,
-  "userName": "newuser123",
-  "email": "newuser@example.com",
-  "isAdmin": false,
-  "isDeleted": false
-}
-```
-
-### `POST /auth/login`
-
-**Description:** Authenticate a user and receive a token.
-
-**Request Body Example:**
-```json
-{
-  "email": "newuser@example.com",
-  "password": "securepassword"
-}
-```
-
-**Responses:**
-- `200 OK` 
-- `400 Bad Request`
-- `401 Unauthorized`
-
-**Response Example:**
-```json
-{
-  "token": "ayJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
 }
 ```
 
@@ -746,7 +717,7 @@ erDiagram
 ## User Journeys
 
 ### Log Movie Viewing
-Personas: Casual User, Collector, Data-Oriented User
+Personas: Casual User, Data-Oriented User
 
 ```mermaid
 flowchart TD
@@ -760,6 +731,32 @@ flowchart TD
     G --> E
 ```
 ### Review a Movie
+Personas: Casual User
+
+```mermaid
+flowchart TD
+    A[User Signs Up]
+    --> B[User Visits Dashboard]
+
+    B --> C[User Searches for a Movie]
+    B --> D[User Visits My Library]
+    B --> E[User Selects a Film from Dashboard]
+
+    C --> F[User Visits Movie Page]
+    D --> F
+    E --> F
+
+    F --> G[User Creates a Review for Movie]
+```
 
 ### Inspect Library
+Personas: Collector
+
+```mermaid
+flowchart TD
+    A[User Signs Up]
+    --> B[User Visits Dashboard]
+    B --> C[User Selects 'My Library' from Side Navigation]
+    C --> D[User Visits Library Page]
+```
 
