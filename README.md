@@ -74,14 +74,6 @@ erDiagram
 
 ## API Structure
 
-- Accounts
-- Users
-- Libraries
-- Movies
-- Genres
-- Viewings
-- Reviews
-
 ### Users
 
 ### `GET /users`
