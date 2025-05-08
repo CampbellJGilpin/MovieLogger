@@ -5,7 +5,7 @@ namespace movielogger.api.controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ViewingsController : ControllerBase
+    public class AccountsController : ControllerBase
     {
     }
 }

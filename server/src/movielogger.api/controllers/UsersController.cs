@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using movielogger.dal.models;
 
-namespace MyApp.Namespace
+namespace movielogger.api.controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -25,7 +26,7 @@ namespace MyApp.Namespace
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] RegisterUserRequest request)
+        public IActionResult UpdateUser(int id, [FromBody] UpdateUserRequest request)
         {
             return Ok();
         }

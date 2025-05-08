@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MyApp.Namespace
+namespace movielogger.api.controllers
 {
     [Route("api/[controller]")]
     [ApiController]
