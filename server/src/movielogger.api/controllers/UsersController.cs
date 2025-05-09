@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.dal.models;
+using movielogger.api.models;
 
 namespace movielogger.api.controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("users")]
     public class UsersController : ControllerBase
     {
         [HttpGet]
@@ -14,37 +14,20 @@ namespace movielogger.api.controllers
             return Ok();
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetUserById()
+        [HttpGet("{userId}")]
+        public IActionResult GetUserById(int userId)
         {
             return Ok();
         }
 
         [HttpPost]
-        public IActionResult RegisterUser([FromBody] RegisterUserRequest request){
-            return Ok();
-        }
-
-        [HttpPut("{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] UpdateUserRequest request)
+        public IActionResult RegisterUser([FromBody] RegisterUserRequest request)
         {
             return Ok();
         }
 
-        [HttpGet("{id}/library")]
-        public IActionResult GetUserLibrary(int id)
-        {
-            return Ok();
-        }
-
-        [HttpGet("{id}/favourites")]
-        public IActionResult GetFavourites(int id)
-        {
-            return Ok();
-        }
-
-        [HttpGet("{id}/watchlist")]
-        public IActionResult GetWatchlist(int id)
+        [HttpPut("{userId}")]
+        public IActionResult UpdateUser(int userId, [FromBody] UpdateUserRequest request)
         {
             return Ok();
         }

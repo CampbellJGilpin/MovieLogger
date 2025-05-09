@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.dal.models;
+using movielogger.api.models;
 
 namespace movielogger.api.controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("movies")]
     public class MoviesController : ControllerBase
     {
         [HttpGet]
@@ -14,8 +14,8 @@ namespace movielogger.api.controllers
             return Ok();
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetMovieById(int id)
+        [HttpGet("{movieId}")]
+        public IActionResult GetMovieById(int movieId)
         {
             return Ok();
         }
@@ -26,14 +26,14 @@ namespace movielogger.api.controllers
             return Ok();
         }
 
-        [HttpPut("{id}")]
-        public IActionResult UpdateMovie(int id, [FromBody] UpdateMovieRequest request)
+        [HttpPut("{movieId}")]
+        public IActionResult UpdateMovie(int movieId, [FromBody] UpdateMovieRequest request)
         {
             return Ok();
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult DeleteMovie(int id)
+        [HttpDelete("{movieId}")]
+        public IActionResult DeleteMovie(int movieId)
         {
             return Ok();
         }

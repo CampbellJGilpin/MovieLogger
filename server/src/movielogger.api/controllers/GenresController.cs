@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.dal.models;
+using movielogger.api.models;
 
 namespace movielogger.api.controllers
 {
-    [Route("api/[controller]")]
+    [Route("genres")]
     [ApiController]
     public class GenresController : ControllerBase
     {
@@ -14,8 +14,8 @@ namespace movielogger.api.controllers
             return Ok();
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetGenreById(int id)
+        [HttpGet("{genreId}")]
+        public IActionResult GetGenreById(int genreId)
         {
             return Ok();
         }
@@ -26,8 +26,8 @@ namespace movielogger.api.controllers
             return Ok();
         }
 
-        [HttpPut("{id}")]
-        public IActionResult UpdateGenre(int id, [FromBody] UpdateGenreRequest request)
+        [HttpPut("{genreId}")]
+        public IActionResult UpdateGenre(int genreId, [FromBody] UpdateGenreRequest request)
         {
             return Ok();
         }

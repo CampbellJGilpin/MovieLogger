@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.dal.models;
+using movielogger.api.models;
 
 namespace movielogger.api.controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("reviews")]
     public class ReviewsController : ControllerBase
     {
         [HttpPost]

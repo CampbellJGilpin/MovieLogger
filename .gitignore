@@ -1,6 +1,14 @@
 node_modules/
 bin/
 obj/
+*.user
+*.suo
+*.cache
+*.csproj.nuget.g.*
+*.AssemblyInfo.cs
+*.assets.json
+*.nuget.info
+*.restore.info
 
 # macOS system files
 .DS_Store

@@ -1,4 +1,4 @@
-namespace movielogger.dal.models;
+namespace movielogger.api.models;
 
 public class RegisterUserRequest
 {

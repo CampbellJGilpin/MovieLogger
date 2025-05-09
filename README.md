@@ -159,14 +159,15 @@ erDiagram
 **Request Example:**
 ```json
 {
-  "userName": "cinemafan123",
+  "email": "cinema@example.com",
   "password": "supersecurepassword"
 }
 ```
 
 **Responses:**
-- `201 Created`
+- `200 OK`
 - `400 Bad Request`
+- `401 Unauthorized`
 
 **Response Example:**
 ```json
@@ -202,9 +203,9 @@ erDiagram
 
 ---
 
-### Libraries
+### Library
 
-#### `GET /users/{id}/library`
+#### `GET /users/{userId}/library`
 
 **Description:** Returns a user's movie library, including toggle states.
 
@@ -235,63 +236,7 @@ erDiagram
 ]
 ```
 
-#### `GET /users/{id}/favourites`
-
-**Description:** Get all favourite movies for a user.
-
-**Responses:**
-- `200 OK`
-
-**Response Example:**
-```json
-[
-  {
-    "movieId": 3,
-    "title": "Pulp Fiction",
-    "releaseDate": "1992-10-21",
-    "genre": "Crime",
-    "inLibrary": true
-  },
-  {
-    "movieId": 4,
-    "title": "Interstellar",
-    "releaseDate": "2014-11-07",
-    "genre": "Science Fiction",
-    "inLibrary": false
-  }
-]
-```
-
-#### `GET /users/{id}/watchlist`
-
-**Description:** Get all movies on a user's watchlist (with upcoming view dates).
-
-**Responses:**
-- `200 OK`
-
-**Response Example:**
-```json
-[
-  {
-    "movieId": 5,
-    "title": "Blade Runner 2049",
-    "releaseDate": "2017-10-06",
-    "genre": "Science Fiction",
-    "upcomingViewDate": "2025-05-10",
-    "inLibrary": true
-  },
-  {
-    "movieId": 6,
-    "title": "The Batman",
-    "releaseDate": "2022-03-04",
-    "genre": "Action",
-    "upcomingViewDate": "2025-06-01",
-    "inLibrary": true
-  }
-]
-```
-
-### `POST /users/{userId}/movies`
+### `POST /users/{userId}/library`
 
 **Description:** Add a movie to the user's library.
 
@@ -319,6 +264,94 @@ erDiagram
   "ownsMovie": true,
   "upcomingViewDate": "2025-06-15"
 }
+```
+
+### `PUT /users/{userId}/library`
+
+**Description:** Update a movie in the user's library.
+
+**Request Body Example:**
+```json
+{
+  "userMovieId": 12,
+  "movieId": 2,
+  "favourite": false,
+  "ownsMovie": true,
+  "upcomingViewDate": "2025-06-15"
+}
+```
+
+**Responses:**
+- `200 OK`
+- `400 Bad Request`
+- `404 Not Found`
+
+**Response Example:**
+```json
+{
+  "id": 14,
+  "userId": 4,
+  "movieId": 2,
+  "favourite": false,
+  "ownsMovie": true,
+  "upcomingViewDate": "2025-06-15"
+}
+```
+
+#### `GET /users/{userId}/library/favourites`
+
+**Description:** Get all favourite movies for a user.
+
+**Responses:**
+- `200 OK`
+
+**Response Example:**
+```json
+[
+  {
+    "movieId": 3,
+    "title": "Pulp Fiction",
+    "releaseDate": "1992-10-21",
+    "genre": "Crime",
+    "inLibrary": true
+  },
+  {
+    "movieId": 4,
+    "title": "Interstellar",
+    "releaseDate": "2014-11-07",
+    "genre": "Science Fiction",
+    "inLibrary": false
+  }
+]
+```
+
+#### `GET /users/{userId}/library/watchlist`
+
+**Description:** Get all movies on a user's watchlist (with upcoming view dates).
+
+**Responses:**
+- `200 OK`
+
+**Response Example:**
+```json
+[
+  {
+    "movieId": 5,
+    "title": "Blade Runner 2049",
+    "releaseDate": "2017-10-06",
+    "genre": "Science Fiction",
+    "upcomingViewDate": "2025-05-10",
+    "inLibrary": true
+  },
+  {
+    "movieId": 6,
+    "title": "The Batman",
+    "releaseDate": "2022-03-04",
+    "genre": "Action",
+    "upcomingViewDate": "2025-06-01",
+    "inLibrary": true
+  }
+]
 ```
 
 ---
@@ -518,7 +551,7 @@ erDiagram
 }
 ```
 
-### `POST /genres/{id}`
+### `POST /genres`
 
 **Description:** Save a new genre.
 
@@ -571,7 +604,7 @@ erDiagram
 
 ### Viewings
 
-### `GET /users/{userId}/movies`
+### `GET /users/{userId}/viewings`
 
 **Description:** Retrieve all unique viewing records for a user.
 
