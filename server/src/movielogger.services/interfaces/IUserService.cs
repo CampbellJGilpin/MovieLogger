@@ -1,6 +1,6 @@
 namespace movielogger.services.interfaces;
 
-public class IUserService
+public interface IUserService
 {
     
 }

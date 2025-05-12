@@ -1,6 +1,8 @@
+using movielogger.services.interfaces;
+
 namespace movielogger.services.services;
 
-public class UserService
+public class UserService : IUserService
 {
     
 }

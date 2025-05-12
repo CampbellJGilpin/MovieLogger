@@ -11,7 +11,7 @@ This is the backend server for the MovieLogger application.
   - `movielogger.services` – Business logic layer
   - `movielogger.dal` – Data access layer
   - `movielogger.tests` - Unit Tests
-  - **Database**:
+  - **Database**: PostgresSQL
 
 ## Testing
 

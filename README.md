@@ -582,7 +582,6 @@ erDiagram
 **Request Example:**
 ```json
 {
-  "id": 2,
   "title": "Supernatural Horror"
 }
 ```

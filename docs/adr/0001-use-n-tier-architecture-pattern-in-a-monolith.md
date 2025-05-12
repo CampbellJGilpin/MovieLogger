@@ -1,12 +1,12 @@
 # 1. Use N-Tier Architecture Pattern in a Monolith
 
-Date: 2025-05-05
+Date: 05-05-2025
 
 Deciders: Campbell Gilpin
 
 ## Status
 
-2025-05-05 proposed
+05-05-2025 proposed
 
 ## Context and Problem Statement
 
@@ -27,8 +27,6 @@ The priority is to move quickly toward a working MVP, while still building a cod
 
 - **Microservices:** Decided against for being unnecessarily complicated for the scope of the application. There doesn't seem to be any advantage to breaking out the domains into separate services and databases.
 - **Event Driven:** Decided against as the positives provided by this approach would be redundant in the context of what the application is set to achieve, and there isn't much need for firing and forgetting for heavy processing. 
-
-
 
 ## Decision Outcome
 
