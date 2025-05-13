@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
+using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
 {
@@ -8,6 +9,13 @@ namespace movielogger.api.controllers
     [Route("Users")]
     public class UsersController : ControllerBase
     {
+        private readonly IUsersService _usersService;
+        
+        public UsersController(IUsersService usersService)
+        {
+            _usersService = usersService;
+        }
+        
         [HttpGet]
         public IActionResult GetAllUsers()
         {

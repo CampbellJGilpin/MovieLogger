@@ -3,7 +3,7 @@ using movielogger.api.models;
 
 namespace movielogger.api.validators;
 
-public class UserLoginRequestValidator : AbstractValidator<UserLoginRequest>
+public class UserLoginRequestValidator : AbstractValidator<LoginUserRequest>
 {
     public UserLoginRequestValidator()
     {

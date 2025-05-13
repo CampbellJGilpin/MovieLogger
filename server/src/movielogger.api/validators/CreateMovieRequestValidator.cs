@@ -3,9 +3,9 @@ using movielogger.api.models;
 
 namespace movielogger.api.validators;
 
-public class AddMovieRequestValidator : AbstractValidator<AddMovieRequest>
+public class CreateMovieRequestValidator : AbstractValidator<CreateMovieRequest>
 {
-    public AddMovieRequestValidator()
+    public CreateMovieRequestValidator()
     {
         RuleFor(x => x.Title).NotEmpty().WithMessage("Title is required.");
         RuleFor(x => x.Description).NotEmpty().WithMessage("Description is required.");

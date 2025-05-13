@@ -19,7 +19,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
-builder.Services.AddValidatorsFromAssemblyContaining<AddMovieRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateMovieRequestValidator>();
 
 builder.Services.AddOpenApi();
 

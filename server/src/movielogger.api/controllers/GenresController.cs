@@ -29,7 +29,7 @@ namespace movielogger.api.controllers
         }
 
         [HttpPost]
-        public IActionResult CreateGenre([FromBody] AddGenreRequest request)
+        public IActionResult CreateGenre([FromBody] CreateGenreRequest request)
         {
             return Ok();
         }

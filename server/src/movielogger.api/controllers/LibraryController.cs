@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
+using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
 {
@@ -8,6 +9,13 @@ namespace movielogger.api.controllers
     [ApiController]
     public class LibraryController : ControllerBase
     {
+        private readonly ILibraryService libraryService;
+        
+        public LibraryController(ILibraryService libraryService)
+        {
+            this.libraryService = libraryService;
+        }
+        
         [HttpGet]
         public IActionResult GetLibrary(int userId)
         {
@@ -15,7 +23,7 @@ namespace movielogger.api.controllers
         }
 
         [HttpPost]
-        public IActionResult AddToLibrary(int userId, [FromBody] AddLibraryRequest request)
+        public IActionResult AddToLibrary(int userId, [FromBody] CreateLibraryRequest request)
         {
             return Ok();
         }

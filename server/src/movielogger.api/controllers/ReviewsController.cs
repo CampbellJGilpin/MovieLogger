@@ -22,13 +22,13 @@ namespace movielogger.api.controllers
         }
         
         [HttpPost("Viewings/{viewingId}/Reviews")]
-        public IActionResult CreateReview(int viewingId, [FromBody] AddReviewRequest request)
+        public IActionResult CreateReview(int viewingId, [FromBody] CreateReviewRequest request)
         {
             return Ok();
         }
 
         [HttpPut("Reviews/{reviewId}")]
-        public IActionResult UpdateReview(int reviewId, [FromBody] AddReviewRequest request)
+        public IActionResult UpdateReview(int reviewId, [FromBody] CreateReviewRequest request)
         {
             return Ok();
         }

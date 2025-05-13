@@ -1,6 +1,6 @@
 namespace movielogger.api.models;
 
-public class AddLibraryRequest
+public class CreateLibraryRequest
 {
     
 }

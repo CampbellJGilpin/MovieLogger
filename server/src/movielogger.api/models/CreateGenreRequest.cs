@@ -1,6 +1,6 @@
 namespace movielogger.api.models;
 
-public class AddGenreRequest
+public class CreateGenreRequest
 {
     public string Title { get; set; } = string.Empty;
 }

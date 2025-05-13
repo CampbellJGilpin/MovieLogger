@@ -3,9 +3,9 @@ using movielogger.api.models;
 
 namespace movielogger.api.validators;
 
-public class AddReviewRequestValidator : AbstractValidator<AddReviewRequest>
+public class CreateReviewRequestValidator : AbstractValidator<CreateReviewRequest>
 {
-    public AddReviewRequestValidator()
+    public CreateReviewRequestValidator()
     {
         RuleFor(x => x.ReviewText).NotEmpty().WithMessage("Review text cannot be empty");
         RuleFor(x => x.Score).GreaterThan(0).LessThanOrEqualTo(5).WithMessage("Score must be between 1 and 5");

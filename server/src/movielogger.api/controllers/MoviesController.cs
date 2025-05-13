@@ -34,9 +34,9 @@ namespace movielogger.api.controllers
         }
         
         [HttpPost]
-        public IActionResult AddMovie([FromBody] AddMovieRequest request)
+        public IActionResult AddMovie([FromBody] CreateMovieRequest request)
         {
-            var validator = new AddMovieRequestValidator();
+            var validator = new CreateMovieRequestValidator();
             var results = validator.Validate(request);
 
             if (!results.IsValid)

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
+using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
 {
@@ -8,6 +9,13 @@ namespace movielogger.api.controllers
     [Route("Viewings")]
     public class ViewingsController : ControllerBase
     {
+        private readonly IViewingsService _viewingsService;
+        
+        public ViewingsController(IViewingsService viewingsService)
+        {
+            _viewingsService = viewingsService;
+        }
+        
         [HttpGet("{viewingId}")]
         public IActionResult GetViewing(int viewingId)
         {
