@@ -4,7 +4,7 @@ using movielogger.api.models;
 
 namespace movielogger.api.controllers
 {
-    [Route("users/{userId}/library")]
+    [Route("Users/{userId}/Library")]
     [ApiController]
     public class LibraryController : ControllerBase
     {
@@ -26,7 +26,7 @@ namespace movielogger.api.controllers
             return Ok();
         }
         
-        [HttpGet("favourites")]
+        [HttpGet("Favourites")]
         public IActionResult GetFavourites(int id)
         {
             return Ok();

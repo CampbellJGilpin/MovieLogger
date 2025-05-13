@@ -5,7 +5,7 @@ using movielogger.api.models;
 namespace movielogger.api.controllers
 {
     [ApiController]
-    [Route("viewings")]
+    [Route("Viewings")]
     public class ViewingsController : ControllerBase
     {
         [HttpGet("{viewingId}")]
@@ -14,14 +14,8 @@ namespace movielogger.api.controllers
             return Ok();
         }
         
-        [HttpPost]
+        [HttpPost("Users/{userId}/Viewings")]
         public IActionResult CreateViewing([FromBody] CreateViewingRequest request)
-        {
-            return Ok();
-        }
-
-        [HttpPost("{viewingId}/review")]
-        public IActionResult CreateReview(int viewingId, [FromBody] CreateReviewRequest request)
         {
             return Ok();
         }

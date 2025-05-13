@@ -412,7 +412,10 @@ erDiagram
     "title": "Sinners",
     "description": "Trying to leave their troubled lives behind, twin brothers return to their hometown to start again, only to discover that an even greater evil is waiting to welcome them back.",
     "releaseDate": "2025-04-18",
-    "genreId": 9,
+    "genre": {
+      "id": 9,
+      "title": "Horror"
+    },
     "isDeleted": false
   },
   {
@@ -420,7 +423,10 @@ erDiagram
     "title": "Mickey 17",
     "description": "A disposable employee is sent on a human expedition to colonize the ice world Niflheim. After one iteration dies, a new body is regenerated with most of his memories intact.",
     "releaseDate": "2025-03-07",
-    "genreId": 1,
+    "genre": {
+      "id": 1,
+      "title": "Sci-Fi"
+    },
     "isDeleted": false
   }
 ]
@@ -441,7 +447,10 @@ erDiagram
   "title": "Sinners",
   "description": "Trying to leave their troubled lives behind, twin brothers return to their hometown to start again, only to discover that an even greater evil is waiting to welcome them back.",
   "releaseDate": "2025-04-18",
-  "genreId": 9,
+  "genre": {
+    "id": 9,
+    "title": "Horror"
+  },
   "isDeleted": false
 }
 ```
@@ -668,7 +677,7 @@ erDiagram
 ]
 ```
 
-### `POST /viewings/{id}/review`
+### `POST /viewings/{viewingId}/review`
 
 **Description:** Create a review and score for an existing viewing.
 
@@ -695,7 +704,7 @@ erDiagram
 }
 ```
 
-### `PUT /reviews/{id}`
+### `PUT /reviews/{reviewId}`
 
 **Description:** Update the text or score of an existing review.
 

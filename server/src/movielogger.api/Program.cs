@@ -17,9 +17,9 @@ builder.Services
 
 builder.Services.AddControllers();
 
-builder.Services.AddValidatorsFromAssemblyContaining<AddMovieRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
-builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<AddMovieRequestValidator>();
 
 builder.Services.AddOpenApi();
 

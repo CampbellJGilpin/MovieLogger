@@ -1,13 +1,21 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
+using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
 {
-    [Route("genres")]
+    [Route("Genres")]
     [ApiController]
     public class GenresController : ControllerBase
     {
+        private readonly IGenresService _genresService;
+        
+        public GenresController(IGenresService genresService)
+        {
+            _genresService = genresService;
+        }
+        
         [HttpGet]
         public IActionResult GetAllGenres()
         {

@@ -6,7 +6,7 @@ using movielogger.api.models;
 namespace movielogger.api.controllers
 {
     [ApiController]
-    [Route("accounts")]
+    [Route("Accounts")]
     public class AccountsController : ControllerBase
     {
         [HttpPost]

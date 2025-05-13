@@ -5,7 +5,7 @@ using movielogger.api.models;
 namespace movielogger.api.controllers
 {
     [ApiController]
-    [Route("users")]
+    [Route("Users")]
     public class UsersController : ControllerBase
     {
         [HttpGet]
