@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
 using movielogger.services.interfaces;
+using AutoMapper;
 
 namespace movielogger.api.controllers
 {
@@ -11,10 +12,12 @@ namespace movielogger.api.controllers
     public class AccountsController : ControllerBase
     {
         private readonly IAccountsService _accountsService;
-        
-        public AccountsController(IAccountsService accountsService)
+        private readonly IMapper _mapper;
+
+        public AccountsController(IAccountsService accountsService, IMapper mapper)
         {
             _accountsService = accountsService;
+            _mapper = mapper;
         }
         
         [HttpPost]

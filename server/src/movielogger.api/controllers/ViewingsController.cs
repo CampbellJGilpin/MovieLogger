@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
@@ -10,10 +11,12 @@ namespace movielogger.api.controllers
     public class ViewingsController : ControllerBase
     {
         private readonly IViewingsService _viewingsService;
-        
-        public ViewingsController(IViewingsService viewingsService)
+        private readonly IMapper _mapper;
+
+        public ViewingsController(IViewingsService viewingsService, IMapper mapper)
         {
             _viewingsService = viewingsService;
+            _mapper = mapper;
         }
         
         [HttpGet("{viewingId}")]

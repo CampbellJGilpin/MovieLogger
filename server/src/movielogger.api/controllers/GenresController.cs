@@ -1,6 +1,9 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
+using movielogger.api.validators;
+using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
@@ -10,34 +13,62 @@ namespace movielogger.api.controllers
     public class GenresController : ControllerBase
     {
         private readonly IGenresService _genresService;
-        
-        public GenresController(IGenresService genresService)
+        private readonly IMapper _mapper;
+
+        public GenresController(IGenresService genresService, IMapper mapper)
         {
             _genresService = genresService;
+            _mapper = mapper;
         }
         
         [HttpGet]
-        public IActionResult GetAllGenres()
+        public async Task<IActionResult> GetAllGenres()
         {
-            return Ok();
+            var serviceResponse = await _genresService.GetGenresAsync();
+            var mappedResponse = _mapper.Map<List<GenreDto>>(serviceResponse);
+            
+            return Ok(mappedResponse);
         }
 
         [HttpGet("{genreId}")]
-        public IActionResult GetGenreById(int genreId)
+        public async Task<IActionResult> GetGenreById(int genreId)
         {
-            return Ok();
+            var serviceResponse = await _genresService.GetGenreByIdAsync(genreId);
+            var mappedResponse = _mapper.Map<GenreDto>(serviceResponse);
+            
+            return Ok(mappedResponse);
         }
 
         [HttpPost]
-        public IActionResult CreateGenre([FromBody] CreateGenreRequest request)
+        public async Task<IActionResult> CreateGenre([FromBody] CreateGenreRequest request)
         {
-            return Ok();
+            var validator = new CreateGenreRequestValidator();
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                
+            }
+            
+            var mappedRequest = _mapper.Map<CreateGenreRequest>(request);
+            
+            return Ok(mappedRequest);
         }
 
         [HttpPut("{genreId}")]
-        public IActionResult UpdateGenre(int genreId, [FromBody] UpdateGenreRequest request)
+        public async Task<IActionResult> UpdateGenre(int genreId, [FromBody] UpdateGenreRequest request)
         {
-            return Ok();
+            var validator = new UpdateGenreRequestValidator();
+            var validationResult = await validator.ValidateAsync(request);
+            
+            if (!validationResult.IsValid)
+            {
+                
+            }
+            
+            var mappedRequest = _mapper.Map<UpdateGenreRequest>(request);
+            
+            return Ok(mappedRequest);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
@@ -10,56 +11,77 @@ namespace movielogger.api.controllers
 {
     [ApiController]
     [Route("movies")]
-    public class MoviesController : ControllerBase
+    public class MoviesController: ControllerBase
     {
         private readonly IMoviesService _movieService;
-        
-        public MoviesController(IMoviesService movieService)
+        private readonly IMapper _mapper;
+
+        public MoviesController(IMoviesService movieService, IMapper mapper)
         {
             _movieService = movieService;
+            _mapper = mapper;
         }
         
         [HttpGet]
-        public IActionResult GetAllMovies()
+        public async Task<IActionResult> GetAllMovies()
         {
-            return Ok();
+            var serviceResponse = await _movieService.GetAllMoviesAsync();
+            var mappedResponse = _mapper.Map<List<MovieResponse>>(serviceResponse);
+            
+            return Ok(mappedResponse);
         }
 
         [HttpGet("{movieId}")]
-        public IActionResult GetMovieById(int movieId)
+        public async Task<IActionResult> GetMovieById(int movieId)
         {
+            var serviceResponse = await _movieService.GetMovieByIdAsync(movieId);
+            var mappedResponse = _mapper.Map<MovieResponse>(serviceResponse);
             
-            
-            return Ok();
+            return Ok(mappedResponse);
         }
         
         [HttpPost]
-        public IActionResult AddMovie([FromBody] CreateMovieRequest request)
+        public async Task<IActionResult> CreateMovie([FromBody] CreateMovieRequest request)
         {
             var validator = new CreateMovieRequestValidator();
-            var results = validator.Validate(request);
+            var validationResult = await validator.ValidateAsync(request);
 
-            if (!results.IsValid)
+            if (!validationResult.IsValid)
             {
                 
             }
 
-            var movieDto = new MovieDto(); // Automapper to turn request to MovieDto
-            _movieService.CreateMovieAsync(movieDto);
+            var mappedRequest = _mapper.Map<MovieDto>(request);
+            var serviceResponse = await _movieService.CreateMovieAsync(mappedRequest);
+            var mappedResponse = _mapper.Map<MovieResponse>(serviceResponse);
             
-            return Ok();
+            return Ok(mappedResponse);
         }
 
         [HttpPut("{movieId}")]
-        public IActionResult UpdateMovie(int movieId, [FromBody] UpdateMovieRequest request)
+        public async Task<IActionResult> UpdateMovie(int movieId, [FromBody] UpdateMovieRequest request)
         {
-            return Ok();
+            var validator = new UpdateMovieRequestValidator();
+            var validationResult = await validator.ValidateAsync(request);
+            
+            if (!validationResult.IsValid)
+            {
+                
+            }
+
+            var mappedRequest = _mapper.Map<MovieDto>(request);
+            var serviceResponse = await _movieService.UpdateMovieAsync(movieId, mappedRequest);
+            var mappedResponse = _mapper.Map<MovieResponse>(serviceResponse);
+            
+            return Ok(mappedResponse);
         }
 
         [HttpDelete("{movieId}")]
-        public IActionResult DeleteMovie(int movieId)
+        public async Task<IActionResult> DeleteMovie(int movieId)
         {
-            return Ok();
+            var serviceResponse = await _movieService.DeleteMovieAsync(movieId);
+            
+            return Ok(serviceResponse);
         }
     }
 }

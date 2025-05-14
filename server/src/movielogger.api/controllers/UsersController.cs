@@ -1,6 +1,8 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
+using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
@@ -10,22 +12,30 @@ namespace movielogger.api.controllers
     public class UsersController : ControllerBase
     {
         private readonly IUsersService _usersService;
-        
-        public UsersController(IUsersService usersService)
+        private readonly IMapper _mapper;
+
+        public UsersController(IUsersService usersService, IMapper mapper)
         {
             _usersService = usersService;
+            _mapper = mapper;
         }
         
         [HttpGet]
-        public IActionResult GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            return Ok();
+            var serviceResponse = await _usersService.GetAllUsersAsync();
+            var mappedResponse = _mapper.Map<IList<UserDto>>(serviceResponse);
+            
+            return Ok(mappedResponse);
         }
 
         [HttpGet("{userId}")]
-        public IActionResult GetUserById(int userId)
+        public async Task <IActionResult> GetUserById(int userId)
         {
-            return Ok();
+            var serviceResponse = await _usersService.GetUserByIdAsync(userId);
+            var mappedResponse = _mapper.Map<UserDto>(serviceResponse);
+            
+            return Ok(mappedResponse);
         }
 
         [HttpPost]

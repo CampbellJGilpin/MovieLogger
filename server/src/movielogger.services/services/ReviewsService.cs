@@ -5,7 +5,7 @@ namespace movielogger.services.services;
 
 public class ReviewsService : IReviewsService
 {
-    public Task<IEnumerable<ReviewDto>> GetAllReviewsAsync()
+    public Task<IEnumerable<ReviewDto>> GetAllReviewsByUserIdAsync(int userId)
     {
         throw new NotImplementedException();
     }

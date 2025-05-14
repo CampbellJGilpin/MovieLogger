@@ -1,5 +1,6 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using movielogger.api.mappings;
 using movielogger.api.validators;
 using movielogger.services.interfaces;
 using movielogger.services.services;
@@ -14,6 +15,8 @@ builder.Services
     .AddScoped<IMoviesService, MoviesService>()
     .AddScoped<IReviewsService, ReviewsService>()
     .AddScoped<IViewingsService, ViewingsService>();
+
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 builder.Services.AddControllers();
 
