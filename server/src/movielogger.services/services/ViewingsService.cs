@@ -14,4 +14,9 @@ public class ViewingsService : IViewingsService
     {
         throw new NotImplementedException();
     }
+
+    public Task<ViewingDto> UpdateViewingAsync(int userId, ViewingDto viewing)
+    {
+        throw new NotImplementedException();
+    }
 }

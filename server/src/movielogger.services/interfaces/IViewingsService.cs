@@ -6,4 +6,5 @@ public interface IViewingsService
 {
     Task<ViewingDto> GetViewingAsync(int viewingId);
     Task<ViewingDto> CreateViewingAsync(int userId, ViewingDto viewing);
+    Task<ViewingDto> UpdateViewingAsync(int userId, ViewingDto viewing);
 }

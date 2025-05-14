@@ -8,14 +8,18 @@ public class AutoMapperProfile : Profile
 {
     public AutoMapperProfile()
     {
-        CreateMap<CreateMovieRequest, MovieDto>();
-        CreateMap<UpdateMovieRequest, MovieDto>();
         CreateMap<CreateGenreRequest, GenreDto>();
         CreateMap<UpdateGenreRequest, GenreDto>();
+        CreateMap<CreateMovieRequest, MovieDto>();
+        CreateMap<UpdateMovieRequest, MovieDto>();
         CreateMap<CreateReviewRequest, ReviewDto>();
         CreateMap<UpdateReviewRequest, ReviewDto>();
+        CreateMap<CreateViewingRequest, ViewingDto>();
+        CreateMap<UpdateViewingRequest, ViewingDto>();
         
-        CreateMap<MovieDto, MovieResponse>();
         CreateMap<GenreDto, GenreResponse>();
+        CreateMap<MovieDto, MovieResponse>();
+        CreateMap<ReviewDto, ReviewResponse>();
+        CreateMap<ViewingDto, ViewingReponse>();
     }
 }
