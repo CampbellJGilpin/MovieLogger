@@ -3,6 +3,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
+using movielogger.api.models.requests.viewings;
+using movielogger.api.models.responses.viewings;
 using movielogger.api.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
@@ -39,7 +41,7 @@ namespace movielogger.api.controllers
 
             if (!validationResult.IsValid)
             {
-                
+                return BadRequest(validationResult.Errors);
             }
             
             var mappedRequest = _mapper.Map<ViewingDto>(request);
@@ -57,7 +59,7 @@ namespace movielogger.api.controllers
 
             if (!validationResult.IsValid)
             {
-                
+                return BadRequest(validationResult.Errors);
             }
             
             var mappedRequest = _mapper.Map<ViewingDto>(request);

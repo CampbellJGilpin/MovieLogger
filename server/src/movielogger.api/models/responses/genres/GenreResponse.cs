@@ -1,4 +1,4 @@
-namespace movielogger.api.models;
+namespace movielogger.api.models.responses.genres;
 
 public class GenreResponse
 {

@@ -3,6 +3,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
+using movielogger.api.models.requests.movies;
+using movielogger.api.models.responses.movies;
 using movielogger.api.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
@@ -48,7 +50,7 @@ namespace movielogger.api.controllers
 
             if (!validationResult.IsValid)
             {
-                
+                return BadRequest(validationResult.Errors);
             }
 
             var mappedRequest = _mapper.Map<MovieDto>(request);
@@ -63,12 +65,12 @@ namespace movielogger.api.controllers
         {
             var validator = new UpdateMovieRequestValidator();
             var validationResult = await validator.ValidateAsync(request);
-            
+
             if (!validationResult.IsValid)
             {
-                
+                return BadRequest(validationResult.Errors);
             }
-
+            
             var mappedRequest = _mapper.Map<MovieDto>(request);
             var serviceResponse = await _movieService.UpdateMovieAsync(movieId, mappedRequest);
             var mappedResponse = _mapper.Map<MovieResponse>(serviceResponse);

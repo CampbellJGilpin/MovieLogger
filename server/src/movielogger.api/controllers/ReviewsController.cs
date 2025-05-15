@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
+using movielogger.api.models.requests.reviews;
 using movielogger.api.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
@@ -33,12 +34,12 @@ namespace movielogger.api.controllers
         {
             var validator = new CreateReviewRequestValidator();
             var validationResult = await validator.ValidateAsync(request);
-            
+
             if (!validationResult.IsValid)
             {
-                
+                return BadRequest(validationResult.Errors);
             }
-
+            
             var reviewRequest = _mapper.Map<ReviewDto>(request);
             var serviceResponse = await _reviewsService.CreateReviewAsync(reviewRequest);
             var mappedResponse = _mapper.Map<ReviewDto>(serviceResponse);
@@ -51,12 +52,12 @@ namespace movielogger.api.controllers
         {
             var validator = new UpdateReviewRequestValidator();
             var validationResult = await validator.ValidateAsync(request);
-            
+
             if (!validationResult.IsValid)
             {
-                
+                return BadRequest(validationResult.Errors);
             }
-
+            
             var reviewRequest = _mapper.Map<ReviewDto>(request);
             var serviceResponse = await _reviewsService.UpdateReviewAsync(reviewId, reviewRequest);
             var mappedResponse = _mapper.Map<ReviewDto>(serviceResponse);

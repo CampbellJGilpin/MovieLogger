@@ -1,4 +1,4 @@
-namespace movielogger.api.models;
+namespace movielogger.api.models.requests.reviews;
 
 public class CreateReviewRequest
 {

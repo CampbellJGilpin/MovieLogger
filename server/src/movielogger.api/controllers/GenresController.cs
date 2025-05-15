@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
+using movielogger.api.models.requests.genres;
 using movielogger.api.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
@@ -47,7 +48,7 @@ namespace movielogger.api.controllers
 
             if (!validationResult.IsValid)
             {
-                
+                return BadRequest(validationResult.Errors);
             }
             
             var mappedRequest = _mapper.Map<CreateGenreRequest>(request);
@@ -60,10 +61,10 @@ namespace movielogger.api.controllers
         {
             var validator = new UpdateGenreRequestValidator();
             var validationResult = await validator.ValidateAsync(request);
-            
+
             if (!validationResult.IsValid)
             {
-                
+                return BadRequest(validationResult.Errors);
             }
             
             var mappedRequest = _mapper.Map<UpdateGenreRequest>(request);

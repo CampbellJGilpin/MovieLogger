@@ -2,6 +2,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
+using movielogger.api.models.requests.users;
+using movielogger.api.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
@@ -39,14 +41,36 @@ namespace movielogger.api.controllers
         }
 
         [HttpPost]
-        public IActionResult RegisterUser([FromBody] RegisterUserRequest request)
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
         {
+            var validator = new CreateUserRequestValidator();
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+            
+            var mappedRequest = _mapper.Map<UserDto>(request);
+            var serviceResponse = await _usersService.CreateUserAsync(mappedRequest);
+            
             return Ok();
         }
 
         [HttpPut("{userId}")]
-        public IActionResult UpdateUser(int userId, [FromBody] UpdateUserRequest request)
+        public async Task<IActionResult> UpdateUser(int userId, [FromBody] UpdateUserRequest request)
         {
+            var validator = new UpdateUserRequestValidator();
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+            
+            var mappedRequest = _mapper.Map<UserDto>(request);
+            var serviceResponse = await _usersService.UpdateUserAsync(userId, mappedRequest);
+            
             return Ok();
         }
     }

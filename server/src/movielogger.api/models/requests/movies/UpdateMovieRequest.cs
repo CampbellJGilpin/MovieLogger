@@ -1,7 +1,8 @@
-namespace movielogger.api.models;
+namespace movielogger.api.models.requests.movies;
 
 public class UpdateMovieRequest
 {
+    public int MovieId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public DateTime ReleaseDate { get; set; } = DateTime.Today;

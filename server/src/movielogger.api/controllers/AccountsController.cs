@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
 using movielogger.services.interfaces;
 using AutoMapper;
+using movielogger.api.models.requests.users;
 
 namespace movielogger.api.controllers
 {
@@ -21,9 +22,11 @@ namespace movielogger.api.controllers
         }
         
         [HttpPost]
-        public IActionResult Login([FromBody] LoginUserRequest request)
+        public async Task <IActionResult> Login([FromBody] LoginUserRequest request)
         {
-            return Ok();
+            var response = await _accountsService.AuthenticateUserAsync(request.Email, request.Password);
+            
+            return Ok(response);
         }
     }
 }

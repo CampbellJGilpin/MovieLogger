@@ -1,4 +1,4 @@
-namespace movielogger.api.models;
+namespace movielogger.api.models.requests.users;
 
 public class LoginUserRequest
 {

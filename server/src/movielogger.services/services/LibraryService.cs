@@ -20,12 +20,12 @@ public class LibraryService : ILibraryService
         throw new NotImplementedException();
     }
 
-    public Task<LibraryItemDto> CreateLibraryEntryAsync(LibraryItemDto libraryItemDto)
+    public Task<LibraryItemDto> CreateLibraryEntryAsync(int userId, LibraryItemDto libraryItemDto)
     {
         throw new NotImplementedException();
     }
 
-    public Task<LibraryItemDto> UpdateLibraryEntryAsync(LibraryItemDto libraryItemDto)
+    public Task<LibraryItemDto> UpdateLibraryEntryAsync(int userId, LibraryItemDto libraryItemDto)
     {
         throw new NotImplementedException();
     }

@@ -7,6 +7,6 @@ public interface ILibraryService
     Task<LibraryDto> GetLibraryByUserIdAsync(int userId);
     Task<LibraryDto> GetLibraryFavouritesByUserIdAsync(int userId);
     Task<LibraryDto> GetLibraryWatchlistByUserIdAsync(int userId);
-    Task<LibraryItemDto> CreateLibraryEntryAsync(LibraryItemDto libraryItemDto);
-    Task<LibraryItemDto> UpdateLibraryEntryAsync(LibraryItemDto libraryItemDto);
+    Task<LibraryItemDto> CreateLibraryEntryAsync(int userId, LibraryItemDto libraryItemDto);
+    Task<LibraryItemDto> UpdateLibraryEntryAsync(int userId, LibraryItemDto libraryItemDto);
 }

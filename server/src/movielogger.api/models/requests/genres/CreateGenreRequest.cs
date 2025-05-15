@@ -1,4 +1,4 @@
-namespace movielogger.api.models;
+namespace movielogger.api.models.requests.genres;
 
 public class CreateGenreRequest
 {

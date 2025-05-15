@@ -1,4 +1,6 @@
-namespace movielogger.api.models;
+using movielogger.api.models.responses.movies;
+
+namespace movielogger.api.models.responses.viewings;
 
 public class ViewingReponse
 {
