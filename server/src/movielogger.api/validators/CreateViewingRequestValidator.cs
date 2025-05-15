@@ -9,7 +9,7 @@ public class CreateViewingRequestValidator : AbstractValidator<CreateViewingRequ
     public CreateViewingRequestValidator()
     {
         RuleFor(x => x.MovieId)
-            .GreaterThan(0).WithMessage("{PropertyName} must be greater than 0")
+            .GreaterThan(0).WithMessage("MovieId must be greater than 0")
             .NotEmpty().WithMessage("MovieId is required");
         RuleFor(x => x.DateViewed).NotEmpty().WithMessage("DateViewed is required");
     }

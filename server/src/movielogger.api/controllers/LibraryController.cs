@@ -23,9 +23,12 @@ namespace movielogger.api.controllers
         }
         
         [HttpGet("Users/{userId}/Library")]
-        public IActionResult GetLibrary(int userId)
+        public async Task<IActionResult> GetLibrary(int userId)
         {
-            return Ok();
+            var serviceResponse = await _libraryService.GetLibraryByUserIdAsync(userId);
+            var mappedResponse = _mapper.Map<LibraryResponse>(serviceResponse);
+            
+            return Ok(mappedResponse);
         }
 
         [HttpPost("Users/{userId}/Library")]
@@ -65,15 +68,21 @@ namespace movielogger.api.controllers
         }
         
         [HttpGet("Users/{userId}/Library/Favourites")]
-        public IActionResult GetFavourites(int id)
+        public async Task<IActionResult> GetFavourites(int userId)
         {
-            return Ok();
+            var serviceResponse = await _libraryService.GetLibraryFavouritesByUserIdAsync(userId);
+            var mappedResponse = _mapper.Map<LibraryResponse>(serviceResponse);
+            
+            return Ok(mappedResponse);
         }
         
         [HttpGet("Users/{userId}/Library/Watchlist")]
-        public IActionResult GetWatchlist(int id)
+        public async Task<IActionResult> GetWatchlist(int userId)
         {
-            return Ok();
+            var serviceResponse = await _libraryService.GetLibraryWatchlistByUserIdAsync(userId);
+            var mappedResponse = _mapper.Map<LibraryResponse>(serviceResponse);
+            
+            return Ok(mappedResponse);
         }
     }
 }

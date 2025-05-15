@@ -1,7 +1,6 @@
 using FluentValidation;
-using FluentValidation.AspNetCore;
+using Microsoft.OpenApi.Models;
 using movielogger.api.mappings;
-using movielogger.api.validators;
 using movielogger.services.interfaces;
 using movielogger.services.services;
 
@@ -16,21 +15,24 @@ builder.Services
     .AddScoped<IReviewsService, ReviewsService>()
     .AddScoped<IViewingsService, ViewingsService>();
 
-builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-
-builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
-builder.Services.AddValidatorsFromAssemblyContaining<CreateMovieRequestValidator>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MovieLogger API", Version = "v1" });
+});
 
-builder.Services.AddOpenApi();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
