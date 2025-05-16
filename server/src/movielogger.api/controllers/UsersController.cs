@@ -1,14 +1,17 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
 using movielogger.api.models.requests.users;
+using movielogger.api.models.responses.users;
 using movielogger.api.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
 {
+    [Authorize]
     [ApiController]
     [Route("Users")]
     public class UsersController : ControllerBase
@@ -53,8 +56,9 @@ namespace movielogger.api.controllers
             
             var mappedRequest = _mapper.Map<UserDto>(request);
             var serviceResponse = await _usersService.CreateUserAsync(mappedRequest);
+            var mappedResponse = _mapper.Map<UserResponse>(serviceResponse);
             
-            return Ok();
+            return Ok(mappedResponse);
         }
 
         [HttpPut("{userId}")]
@@ -70,8 +74,9 @@ namespace movielogger.api.controllers
             
             var mappedRequest = _mapper.Map<UserDto>(request);
             var serviceResponse = await _usersService.UpdateUserAsync(userId, mappedRequest);
+            var mappedResponse = _mapper.Map<UserResponse>(serviceResponse);
             
-            return Ok();
+            return Ok(mappedResponse);
         }
     }
 }

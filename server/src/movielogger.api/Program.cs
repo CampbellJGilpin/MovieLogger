@@ -3,8 +3,15 @@ using Microsoft.OpenApi.Models;
 using movielogger.api.mappings;
 using movielogger.services.interfaces;
 using movielogger.services.services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+
 
 builder.Services
     .AddScoped<IUsersService, UsersService>()

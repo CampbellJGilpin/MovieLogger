@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
@@ -11,6 +12,7 @@ using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
 {
+    [Authorize]
     [ApiController]
     [Route("movies")]
     public class MoviesController: ControllerBase

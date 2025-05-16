@@ -1,6 +1,6 @@
 namespace movielogger.api.models.requests.library;
 
-public class CreateLibraryRequest
+public class CreateLibraryItemRequest
 {
     public int MovieId { get; set; }
     public bool Favorite { get; set; }

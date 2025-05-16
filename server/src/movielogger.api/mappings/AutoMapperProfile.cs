@@ -8,6 +8,7 @@ using movielogger.api.models.responses.genres;
 using movielogger.api.models.responses.library;
 using movielogger.api.models.responses.movies;
 using movielogger.api.models.responses.reviews;
+using movielogger.api.models.responses.users;
 using movielogger.api.models.responses.viewings;
 using movielogger.dal.dtos;
 
@@ -32,5 +33,6 @@ public class AutoMapperProfile : Profile
         CreateMap<ViewingDto, ViewingReponse>();
         CreateMap<LibraryDto, LibraryResponse>();
         CreateMap<LibraryItemDto, LibraryItemResponse>();
+        CreateMap<UserDto, UserResponse>();
     }
 }

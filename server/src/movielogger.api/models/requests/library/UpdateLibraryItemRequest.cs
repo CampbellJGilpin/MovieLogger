@@ -1,6 +1,6 @@
 namespace movielogger.api.models.requests.library;
 
-public class UpdateLibraryRequest
+public class UpdateLibraryItemRequest
 {
     public int LibraryId { get; set; }
     public int MovieId { get; set; }

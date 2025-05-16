@@ -8,9 +8,9 @@ public class CreateMovieRequestValidator : AbstractValidator<CreateMovieRequest>
 {
     public CreateMovieRequestValidator()
     {
-        RuleFor(x => x.Title).NotEmpty().WithMessage("Title is required.");
-        RuleFor(x => x.Description).NotEmpty().WithMessage("Description is required.");
+        RuleFor(x => x.Title).NotEmpty().WithMessage("Title is required");
+        RuleFor(x => x.Description).NotEmpty().WithMessage("Description is required");
         RuleFor(x => x.ReleaseDate).NotEmpty().WithMessage("ReleaseDate is required");
-        RuleFor(x => x.GenreId).GreaterThan(0).WithMessage("Genre must be specified.");
+        RuleFor(x => x.GenreId).GreaterThan(0).WithMessage("GenreId must be greater than 0");
     }
 }
