@@ -37,7 +37,7 @@ public class ReviewsControllerTests  : BaseTestController
         _factory.ReviewsServiceMock.GetAllReviewsByUserIdAsync(5).Returns(mockGenres);
         
         // Act
-        var response = await _client.GetAsync("/Reviews/5");
+        var response = await _client.GetAsync("/Users/5/Reviews");
         
         // Assert
         response.EnsureSuccessStatusCode();
@@ -47,12 +47,12 @@ public class ReviewsControllerTests  : BaseTestController
         Assert.NotNull(content);
         Assert.Equal(2, content.Count);
         
-        Assert.Equal("Sinners", content[0].MovieTitle);
-        Assert.Equal(5, content[0].Score);
-        Assert.Equal("Film was amazing.", content[0].ReviewText);
+        Assert.Equal(mockGenres[0].MovieTitle, content[0].MovieTitle);
+        Assert.Equal(mockGenres[0].Score, content[0].Score);
+        Assert.Equal(mockGenres[0].ReviewText, content[0].ReviewText);
         
-        Assert.Equal("Captain America Brave New World", content[1].MovieTitle);
-        Assert.Equal(3, content[1].Score);
-        Assert.Equal("Film was Ok.", content[0].ReviewText);
+        Assert.Equal(mockGenres[1].MovieTitle, content[1].MovieTitle);
+        Assert.Equal(mockGenres[1].Score, content[1].Score);
+        Assert.Equal(mockGenres[1].ReviewText, content[1].ReviewText);
     }
 }

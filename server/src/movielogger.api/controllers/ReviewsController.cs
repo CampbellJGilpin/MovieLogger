@@ -27,8 +27,9 @@ namespace movielogger.api.controllers
         public async Task<IActionResult> GetUserReviews(int userId)
         {
             var serviceResponse = await _reviewsService.GetAllReviewsByUserIdAsync(userId);
+            var mappedResponse = _mapper.Map<List<ReviewDto>>(serviceResponse);
             
-            return Ok();
+            return Ok(mappedResponse);
         }
         
         [HttpPost("Viewings/{viewingId}/Reviews")]
