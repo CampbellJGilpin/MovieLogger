@@ -10,7 +10,7 @@ using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("Genres")]
     [ApiController]
     public class GenresController : ControllerBase

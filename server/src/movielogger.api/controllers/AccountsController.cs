@@ -8,7 +8,7 @@ using movielogger.api.models.requests.users;
 
 namespace movielogger.api.controllers
 {
-    [ApiController]
+    //[Authorize]
     [Route("Accounts")]
     public class AccountsController : ControllerBase
     {

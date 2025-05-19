@@ -1,9 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.api.models;
 using movielogger.api.models.requests.movies;
 using movielogger.api.models.responses.movies;
 using movielogger.api.validators;
@@ -12,9 +9,9 @@ using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
-    [Route("movies")]
+    [Route("Movies")]
     public class MoviesController: ControllerBase
     {
         private readonly IMoviesService _movieService;

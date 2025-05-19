@@ -11,7 +11,7 @@ using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     public class LibraryController : ControllerBase
     {

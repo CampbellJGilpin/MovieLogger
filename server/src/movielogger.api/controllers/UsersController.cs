@@ -11,7 +11,7 @@ using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("Users")]
     public class UsersController : ControllerBase
