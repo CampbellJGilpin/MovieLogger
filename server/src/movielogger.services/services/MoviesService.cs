@@ -1,32 +1,78 @@
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using movielogger.dal;
 using movielogger.dal.dtos;
+using movielogger.dal.entities;
 using movielogger.services.interfaces;
 
 namespace movielogger.services.services;
 
 public class MoviesService : IMoviesService
 {
-    public Task<IEnumerable<MovieDto>> GetAllMoviesAsync()
+    private readonly AssessmentDbContext _db;
+    private readonly IMapper _mapper;
+
+    public MoviesService(AssessmentDbContext db, IMapper mapper)
     {
-        throw new NotImplementedException();
+        _db = db;
+        _mapper = mapper;
     }
 
-    public Task<MovieDto> GetMovieByIdAsync(int id)
+    public async Task<IEnumerable<MovieDto>> GetAllMoviesAsync()
     {
-        throw new NotImplementedException();
+        var movies = await _db.Movies
+            .Include(m => m.Genre)
+            .Where(m => !m.IsDeleted)
+            .ToListAsync();
+
+        return _mapper.Map<List<MovieDto>>(movies);
     }
 
-    public Task<MovieDto> CreateMovieAsync(MovieDto movieDto)
+    public async Task<MovieDto> GetMovieByIdAsync(int movieId)
     {
-        throw new NotImplementedException();
+        var movie = await _db.Movies
+            .Include(m => m.Genre)
+            .FirstOrDefaultAsync(m => m.Id == movieId && !m.IsDeleted);
+
+        if (movie == null)
+        {
+            throw new KeyNotFoundException($"Movie with ID {movieId} not found.");
+        }
+
+        return _mapper.Map<MovieDto>(movie);
     }
 
-    public Task<MovieDto> UpdateMovieAsync(int id, MovieDto movieDto)
+    public async Task<MovieDto> CreateMovieAsync(MovieDto dto)
     {
-        throw new NotImplementedException();
+        var movie = _mapper.Map<Movie>(dto);
+        _db.Movies.Add(movie);
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<MovieDto>(movie);
     }
 
-    public Task<bool> DeleteMovieAsync(int id)
+    public async Task<MovieDto> UpdateMovieAsync(int movieId, MovieDto dto)
     {
-        throw new NotImplementedException();
+        var movie = await _db.Movies.FirstOrDefaultAsync(m => m.Id == movieId && !m.IsDeleted);
+        if (movie == null)
+        {
+            throw new KeyNotFoundException($"Movie with ID {movieId} not found.");
+        }
+
+        _mapper.Map(dto, movie);
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<MovieDto>(movie);
+    }
+
+    public async Task<bool> DeleteMovieAsync(int movieId)
+    {
+        var movie = await _db.Movies.FirstOrDefaultAsync(m => m.Id == movieId && !m.IsDeleted);
+        if (movie == null) return false;
+
+        movie.IsDeleted = true;
+        await _db.SaveChangesAsync();
+
+        return true;
     }
 }

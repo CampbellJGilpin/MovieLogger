@@ -63,4 +63,32 @@ public class UsersControllerTests  : BaseTestController
         Assert.Equal(secondUserName, content[1].UserName);
         Assert.Equal(secondEmail, content[1].Email);
     }
+    
+    [Fact]
+    public async Task GetById_IfExists_ReturnsAllMovies()
+    {
+        const int userId = 1;
+        const string userName = "Username 1";
+        const string email = "email1@email.com";
+        const string password = "password1";
+        
+        // Arrange 
+        var mockUser = new UserDto { Id = userId, UserName = userName, Email = email, Password = password };
+
+        _factory.UsersService.GetUserByIdAsync(userId).Returns(mockUser);
+        
+        // Act
+        var response = await _client.GetAsync($"/Users/{userId}");
+        
+        // Assert
+        response.EnsureSuccessStatusCode();
+        
+        var content = await response.Content.ReadFromJsonAsync<UserResponse>();
+        
+        Assert.NotNull(content);
+        
+        Assert.Equal(userId, content.Id);
+        Assert.Equal(userName, content.UserName);
+        Assert.Equal(email, content.Email);
+    }
 }
