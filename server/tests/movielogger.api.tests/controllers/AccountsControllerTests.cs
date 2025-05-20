@@ -3,12 +3,7 @@ using Microsoft.VisualStudio.TestPlatform.TestHost;
 
 namespace movielogger.api.tests.controllers;
 
-public class AccountsControllerTests : IClassFixture<WebApplicationFactory<Program>>
+public class AccountsControllerTests : BaseTestController
 {
-    private readonly HttpClient _client;
 
-    public AccountsControllerTests(WebApplicationFactory<Program> factory)
-    {
-        _client = factory.CreateClient();
-    }
 }

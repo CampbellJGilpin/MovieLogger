@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
 using movielogger.api.models.requests.genres;
+using movielogger.api.models.responses.genres;
 using movielogger.api.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
@@ -53,9 +54,11 @@ namespace movielogger.api.controllers
                 return BadRequest(validationResult.Errors);
             }
             
-            var mappedRequest = _mapper.Map<CreateGenreRequest>(request);
+            var mappedRequest = _mapper.Map<GenreDto>(request);
+            var serviceResponse = await _genresService.CreateGenreAsync(mappedRequest);
+            var mappedResponse = _mapper.Map<GenreResponse>(serviceResponse);
             
-            return Ok(mappedRequest);
+            return Ok(mappedResponse);
         }
 
         [HttpPut("{genreId}")]

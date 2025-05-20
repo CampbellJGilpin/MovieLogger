@@ -14,10 +14,16 @@ public class GenresControllerTests : BaseTestController
     public async Task Get_Always_ReturnsAllGenres()
     {
         // Arrange 
+        const string firstGenreTitle = "Genre 1";
+        const int firstGenreId = 1;
+        const string secondGenreTitle = "Genre 2";
+        const int secondGenreId = 2;
+        
+        
         var mockGenres = new GenreDto[]
         {
-            new() { Id = 1, Title = "Action" },
-            new() { Id = 2, Title = "Adventure" },
+            new() { Id = firstGenreId, Title = firstGenreTitle },
+            new() { Id = secondGenreId, Title = secondGenreTitle },
         }.ToList();
 
         _factory.GenresServiceMock.GetGenresAsync().Returns(mockGenres);
@@ -32,23 +38,25 @@ public class GenresControllerTests : BaseTestController
         
         Assert.NotNull(content);
         Assert.Equal(2, content.Count);
-        Assert.Equal("Action", content[0].Title);
+        Assert.Equal(firstGenreTitle, content[0].Title);
+        Assert.Equal(firstGenreId, content[0].Id);
+        Assert.Equal(secondGenreTitle, content[1].Title);
+        Assert.Equal(secondGenreId, content[1].Id);
     }
     
     [Fact]
     public async Task Get_IfExists_ReturnsGenre()
     {
         // Arrange 
-        var movieGenre = new GenreDto()
-        {
-            Id = 4,
-            Title = "Horror",
-        };
+        const string genreTitle = "Genre 3";
+        const int genreId = 3;
         
-        _factory.GenresServiceMock.GetGenreByIdAsync(4).Returns(movieGenre);
+        var mockGenre = new GenreDto { Id = genreId, Title = genreTitle };
+        
+        _factory.GenresServiceMock.GetGenreByIdAsync(genreId).Returns(mockGenre);
         
         // Act
-        var response = await _client.GetAsync("/Genres/4");
+        var response = await _client.GetAsync($"/Genres/{genreId}");
         
         // Assert
         response.EnsureSuccessStatusCode();
@@ -56,16 +64,19 @@ public class GenresControllerTests : BaseTestController
         var content = await response.Content.ReadFromJsonAsync<GenreResponse>();
 
         Assert.NotNull(content);
-        Assert.Equal("Horror", content.Title);
-        Assert.Equal(4, content.Id);
+        Assert.Equal(genreTitle, content.Title);
+        Assert.Equal(genreId, content.Id);
     }
     
     [Fact]
     public async Task Post_WithValidData_SavesGenre()
     {
         // Arrange 
-        var newGenre = new CreateGenreRequest { Title = "Romance" };
-        var mockGenre = new GenreDto { Id = 21, Title = "Romance" };
+        const string genreTitle = "Genre 4";
+        const int genreId = 4;
+        
+        var newGenre = new CreateGenreRequest { Title = genreTitle };
+        var mockGenre = new GenreDto { Id = genreId, Title = genreTitle };
         
         _factory.GenresServiceMock.CreateGenreAsync(Arg.Any<GenreDto>()).Returns(mockGenre);
         
@@ -78,7 +89,7 @@ public class GenresControllerTests : BaseTestController
         var content = await response.Content.ReadFromJsonAsync<GenreResponse>();
         
         Assert.NotNull(content);
-        Assert.Equal(21, content.Id);
-        Assert.Equal("Romance", content.Title);
+        Assert.Equal(genreId, content.Id);
+        Assert.Equal(genreTitle, content.Title);
     }
 }
