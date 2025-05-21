@@ -19,6 +19,8 @@ public class AssessmentDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.HasDefaultSchema("master");
+        
         // User
         modelBuilder.Entity<User>(entity =>
         {

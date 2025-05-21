@@ -3,9 +3,10 @@ using Microsoft.OpenApi.Models;
 using movielogger.api.mappings;
 using movielogger.services.interfaces;
 using movielogger.services.services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using movielogger.services.mapping;
+using movielogger.dal;
+using Microsoft.EntityFrameworkCore;
 
 public class Program
 {
@@ -16,6 +17,8 @@ public class Program
         var jwtSettings = builder.Configuration.GetSection("Jwt");
         var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
 
+        builder.Services.AddDbContext<AssessmentDbContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
         builder.Services
             .AddScoped<IUsersService, UsersService>()
@@ -26,7 +29,9 @@ public class Program
             .AddScoped<IReviewsService, ReviewsService>()
             .AddScoped<IViewingsService, ViewingsService>();
 
-        builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+        builder.Services.AddAutoMapper(
+            typeof(ApiMappingProfile).Assembly,
+            typeof(ServicesMappingProfile).Assembly);
 
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 

@@ -1,4 +1,4 @@
-INSERT INTO Genres(Id, Title) 
+INSERT INTO "Genres" ("Id", "Title") 
 VALUES 
 (1, 'Action'), 
 (2, 'Horror'), 

@@ -46,9 +46,9 @@ public class MoviesService : IMoviesService
     {
         var movie = _mapper.Map<Movie>(dto);
         _db.Movies.Add(movie);
-        await _db.SaveChangesAsync();
+        var movieId = await _db.SaveChangesAsync();
 
-        return _mapper.Map<MovieDto>(movie);
+        return _mapper.Map<MovieDto>(movieId);
     }
 
     public async Task<MovieDto> UpdateMovieAsync(int movieId, MovieDto dto)
@@ -68,7 +68,10 @@ public class MoviesService : IMoviesService
     public async Task<bool> DeleteMovieAsync(int movieId)
     {
         var movie = await _db.Movies.FirstOrDefaultAsync(m => m.Id == movieId && !m.IsDeleted);
-        if (movie == null) return false;
+        if (movie == null)
+        {
+            return false;
+        }
 
         movie.IsDeleted = true;
         await _db.SaveChangesAsync();

@@ -43,6 +43,8 @@ namespace movielogger.api.controllers
                 return BadRequest(validationResult.Errors);
             }
             
+            request.ViewingId = viewingId;
+            
             var reviewRequest = _mapper.Map<ReviewDto>(request);
             var serviceResponse = await _reviewsService.CreateReviewAsync(reviewRequest);
             var mappedResponse = _mapper.Map<ReviewDto>(serviceResponse);

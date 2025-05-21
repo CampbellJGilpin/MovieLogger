@@ -7,4 +7,5 @@ public class ReviewDto
     public DateTime DateViewed { get; set; }
     public int Score { get; set; }
     public string ReviewText { get; set; } = string.Empty;
+    public int ViewingId { get; set; }
 }

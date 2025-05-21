@@ -1,32 +1,72 @@
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using movielogger.dal;
 using movielogger.dal.dtos;
+using movielogger.dal.entities;
 using movielogger.services.interfaces;
 
 namespace movielogger.services.services;
 
 public class GenresService : IGenresService
 {
-    public Task<IEnumerable<GenreDto>> GetGenresAsync()
+    private readonly AssessmentDbContext _db;
+    private readonly IMapper _mapper;
+
+    public GenresService(AssessmentDbContext db, IMapper mapper)
     {
-        throw new NotImplementedException();
+        _db = db;
+        _mapper = mapper;
     }
 
-    public Task<GenreDto> GetGenreByIdAsync(int id)
+    public async Task<IEnumerable<GenreDto>> GetGenresAsync()
     {
-        throw new NotImplementedException();
+        var genres = await _db.Genres.ToListAsync();
+        return _mapper.Map<IEnumerable<GenreDto>>(genres);
     }
 
-    public Task<GenreDto> CreateGenreAsync(GenreDto genre)
+    public async Task<GenreDto> GetGenreByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        var genre = await _db.Genres.FindAsync(id);
+        if (genre == null)
+        {
+            throw new KeyNotFoundException($"Genre with ID {id} not found.");
+        }
+
+        return _mapper.Map<GenreDto>(genre);
     }
 
-    public Task<GenreDto> UpdateGenreAsync(int id, GenreDto genre)
+    public async Task<GenreDto> CreateGenreAsync(GenreDto genreDto)
     {
-        throw new NotImplementedException();
+        var genre = _mapper.Map<Genre>(genreDto);
+        _db.Genres.Add(genre);
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<GenreDto>(genre);
     }
 
-    public Task DeleteGenreAsync(int id)
+    public async Task<GenreDto> UpdateGenreAsync(int id, GenreDto genreDto)
     {
-        throw new NotImplementedException();
+        var genre = await _db.Genres.FindAsync(id);
+        if (genre == null)
+        {
+            throw new KeyNotFoundException($"Genre with ID {id} not found.");
+        }
+
+        _mapper.Map(genreDto, genre);
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<GenreDto>(genre);
+    }
+
+    public async Task DeleteGenreAsync(int id)
+    {
+        var genre = await _db.Genres.FindAsync(id);
+        if (genre == null)
+        {
+            throw new KeyNotFoundException($"Genre with ID {id} not found.");
+        }
+
+        _db.Genres.Remove(genre);
+        await _db.SaveChangesAsync();
     }
 }
