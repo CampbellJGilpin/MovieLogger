@@ -1,27 +1,64 @@
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using movielogger.dal;
 using movielogger.dal.dtos;
+using movielogger.dal.entities;
 using movielogger.services.interfaces;
 
 namespace movielogger.services.services;
 
 public class UsersService : IUsersService
 {
-    public Task<IEnumerable<UserDto>> GetAllUsersAsync()
+    private readonly AssessmentDbContext _db;
+    private readonly IMapper _mapper;
+
+    public UsersService(AssessmentDbContext db, IMapper mapper)
     {
-        throw new NotImplementedException();
+        _db = db;
+        _mapper = mapper;
     }
 
-    public Task<UserDto> GetUserByIdAsync(int userId)
+    public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
     {
-        throw new NotImplementedException();
+        var users = await _db.Users.Where(u => !u.IsDeleted).ToListAsync();
+        return _mapper.Map<IEnumerable<UserDto>>(users);
     }
 
-    public Task<UserDto> CreateUserAsync(UserDto userDto)
+    public async Task<UserDto> GetUserByIdAsync(int userId)
     {
-        throw new NotImplementedException();
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        return _mapper.Map<UserDto>(user);
     }
 
-    public Task<UserDto> UpdateUserAsync(int userId, UserDto userDto)
+    public async Task<UserDto> CreateUserAsync(UserDto userDto)
     {
-        throw new NotImplementedException();
+        var user = _mapper.Map<User>(userDto);
+        user.Id = 0;
+
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<UserDto>(user);
+    }
+
+    public async Task<UserDto> UpdateUserAsync(int userId, UserDto userDto)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        _mapper.Map(userDto, user);
+        user.Id = userId; // Explicitly ensure the correct ID remains
+
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<UserDto>(user);
     }
 }

@@ -31,12 +31,16 @@ public class AssessmentDbContext : DbContext
             entity.Property(e => e.Password).IsRequired();
         });
 
-        // Genre
         modelBuilder.Entity<Genre>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Title).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd();
+            entity.Property(e => e.Title)
+                .IsRequired()
+                .HasMaxLength(100);
         });
+
 
         // Movie
         modelBuilder.Entity<Movie>(entity =>

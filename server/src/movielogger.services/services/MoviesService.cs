@@ -59,6 +59,8 @@ public class MoviesService : IMoviesService
             throw new KeyNotFoundException($"Movie with ID {movieId} not found.");
         }
 
+        dto.Id = movieId;
+        
         _mapper.Map(dto, movie);
         await _db.SaveChangesAsync();
 

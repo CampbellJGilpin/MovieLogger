@@ -1,32 +1,90 @@
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using movielogger.dal;
 using movielogger.dal.dtos;
+using movielogger.dal.entities;
 using movielogger.services.interfaces;
 
 namespace movielogger.services.services;
 
 public class LibraryService : ILibraryService
 {
-    public Task<LibraryDto> GetLibraryByUserIdAsync(int userId)
+    private readonly AssessmentDbContext _db;
+    private readonly IMapper _mapper;
+
+    public LibraryService(AssessmentDbContext db, IMapper mapper)
     {
-        throw new NotImplementedException();
+        _db = db;
+        _mapper = mapper;
     }
 
-    public Task<LibraryDto> GetLibraryFavouritesByUserIdAsync(int userId)
+    public async Task<LibraryDto> GetLibraryByUserIdAsync(int userId)
     {
-        throw new NotImplementedException();
+        var entries = await _db.UserMovies
+            .Include(um => um.Movie)
+            .ThenInclude(m => m.Genre)
+            .Where(um => um.UserId == userId)
+            .ToListAsync();
+
+        var dto = new LibraryDto { UserId = userId, LibraryItems = _mapper.Map<List<LibraryItemDto>>(entries) };
+        return dto;
     }
 
-    public Task<LibraryDto> GetLibraryWatchlistByUserIdAsync(int userId)
+    public async Task<LibraryDto> GetLibraryFavouritesByUserIdAsync(int userId)
     {
-        throw new NotImplementedException();
+        var entries = await _db.UserMovies
+            .Include(um => um.Movie)
+            .ThenInclude(m => m.Genre)
+            .Where(um => um.UserId == userId && um.Favourite)
+            .ToListAsync();
+
+        var dto = new LibraryDto { UserId = userId, LibraryItems = _mapper.Map<List<LibraryItemDto>>(entries) };
+        return dto;
     }
 
-    public Task<LibraryItemDto> CreateLibraryEntryAsync(int userId, LibraryItemDto libraryItemDto)
+    public async Task<LibraryDto> GetLibraryWatchlistByUserIdAsync(int userId)
     {
-        throw new NotImplementedException();
+        var entries = await _db.UserMovies
+            .Include(um => um.Movie)
+            .ThenInclude(m => m.Genre)
+            .Where(um => um.UserId == userId && um.UpcomingViewDate != null)
+            .ToListAsync();
+
+        var dto = new LibraryDto { UserId = userId, LibraryItems = _mapper.Map<List<LibraryItemDto>>(entries) };
+        return dto;
     }
 
-    public Task<LibraryItemDto> UpdateLibraryEntryAsync(int userId, LibraryItemDto libraryItemDto)
+    public async Task<LibraryItemDto> CreateLibraryEntryAsync(int userId, LibraryItemDto libraryItemDto)
     {
-        throw new NotImplementedException();
+        var exists = await _db.UserMovies.AnyAsync(um => um.UserId == userId && um.MovieId == libraryItemDto.MovieId);
+        if (exists)
+        {
+            throw new InvalidOperationException("Library entry already exists for this user and movie.");
+        }
+
+        var entry = _mapper.Map<UserMovie>(libraryItemDto);
+        entry.Id = 0;
+        entry.UserId = userId;
+
+        _db.UserMovies.Add(entry);
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<LibraryItemDto>(entry);
+    }
+
+    public async Task<LibraryItemDto> UpdateLibraryEntryAsync(int userId, LibraryItemDto libraryItemDto)
+    {
+        var entry = await _db.UserMovies.FirstOrDefaultAsync(um => um.MovieId == libraryItemDto.MovieId && um.UserId == userId);
+        if (entry == null)
+        {
+            throw new KeyNotFoundException("Library entry not found for this user.");
+        }
+
+        _mapper.Map(libraryItemDto, entry);
+        entry.UserId = userId;
+
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<LibraryItemDto>(entry);
     }
 }

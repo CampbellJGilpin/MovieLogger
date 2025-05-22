@@ -1,4 +1,4 @@
-INSERT INTO "Genres" ("Id", "Title") 
+INSERT INTO genres (Id, Title) 
 VALUES 
 (1, 'Action'), 
 (2, 'Horror'), 
@@ -13,3 +13,6 @@ VALUES
 (11, 'Musical'),
 (12, 'Fantasy'),
 (13, 'War');
+
+-- Bump the sequence so inserts won't collide
+ALTER SEQUENCE master.genres_id_seq RESTART WITH 14;

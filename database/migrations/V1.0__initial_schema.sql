@@ -1,50 +1,50 @@
-CREATE TABLE "Genres" (
-    "Id" SERIAL PRIMARY KEY,
-    "Title" VARCHAR(100) NOT NULL
+CREATE TABLE genres (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE "Users" (
-    "Id" SERIAL PRIMARY KEY,
-    "UserName" VARCHAR(100) NOT NULL,
-    "Email" VARCHAR(255) UNIQUE NOT NULL,
-    "Password" VARCHAR(255) NOT NULL,
-    "IsAdmin" BOOLEAN DEFAULT FALSE,
-    "IsDeleted" BOOLEAN DEFAULT FALSE
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    user_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE,
+    is_deleted BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE "Movies" (
-    "Id" SERIAL PRIMARY KEY,
-    "Title" VARCHAR(500) NOT NULL,
-    "Description" TEXT,
-    "ReleaseDate" TIMESTAMP,
-    "GenreId" INT NOT NULL,
-    "IsDeleted" BOOLEAN DEFAULT FALSE,
-    CONSTRAINT "FK_Movies_GenreId_Genres_Id" FOREIGN KEY ("GenreId") REFERENCES "Genres"("Id")
+CREATE TABLE movies (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(500) NOT NULL,
+    description TEXT,
+    release_date TIMESTAMP,
+    genre_id INT NOT NULL,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    CONSTRAINT fk_movies_genre_id FOREIGN KEY (genre_id) REFERENCES genres(id)
 );
 
-CREATE TABLE "User_Movies" (
-    "Id" SERIAL PRIMARY KEY,
-    "UserId" INT NOT NULL,
-    "MovieId" INT NOT NULL,
-    "Favourite" BOOLEAN DEFAULT FALSE,
-    "OwnsMovie" BOOLEAN DEFAULT FALSE,
-    "UpcomingViewDate" TIMESTAMP,
-    CONSTRAINT "FK_UserMovies_UserId_Users_Id" FOREIGN KEY ("UserId") REFERENCES "Users"("Id"),
-    CONSTRAINT "FK_UserMovies_MovieId_Movies_Id" FOREIGN KEY ("MovieId") REFERENCES "Movies"("Id"),
-    UNIQUE("UserId", "MovieId")
+CREATE TABLE user_movies (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    movie_id INT NOT NULL,
+    favourite BOOLEAN DEFAULT FALSE,
+    owns_movie BOOLEAN DEFAULT FALSE,
+    upcoming_view_date TIMESTAMP,
+    CONSTRAINT fk_user_movies_user_id FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_user_movies_movie_id FOREIGN KEY (movie_id) REFERENCES movies(id),
+    UNIQUE(user_id, movie_id)
 );
 
-CREATE TABLE "Viewings" (
-    "Id" SERIAL PRIMARY KEY,
-    "UserMovieId" INT NOT NULL,
-    "DateViewed" TIMESTAMP NOT NULL,
-    CONSTRAINT "FK_Viewings_UserMovieId_UserMovies_Id" FOREIGN KEY ("UserMovieId") REFERENCES "User_Movies"("Id")
+CREATE TABLE viewings (
+    id SERIAL PRIMARY KEY,
+    user_movie_id INT NOT NULL,
+    date_viewed TIMESTAMP NOT NULL,
+    CONSTRAINT fk_viewings_user_movie_id FOREIGN KEY (user_movie_id) REFERENCES user_movies(id)
 );
 
-CREATE TABLE "Reviews" (
-    "Id" SERIAL PRIMARY KEY,
-    "ViewingId" INT NOT NULL,
-    "ReviewText" TEXT,
-    "Score" INT,
-    CONSTRAINT "FK_Reviews_ViewingId_Viewings_Id" FOREIGN KEY ("ViewingId") REFERENCES "Viewings"("Id")
+CREATE TABLE reviews (
+    id SERIAL PRIMARY KEY,
+    viewing_id INT NOT NULL,
+    review_text TEXT,
+    score INT,
+    CONSTRAINT fk_reviews_viewing_id FOREIGN KEY (viewing_id) REFERENCES viewings(id)
 );

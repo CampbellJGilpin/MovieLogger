@@ -71,10 +71,18 @@ namespace movielogger.api.controllers
             }
             
             var mappedRequest = _mapper.Map<MovieDto>(request);
-            var serviceResponse = await _movieService.UpdateMovieAsync(movieId, mappedRequest);
-            var mappedResponse = _mapper.Map<MovieResponse>(serviceResponse);
             
-            return Ok(mappedResponse);
+            try
+            {
+                var serviceResponse = await _movieService.UpdateMovieAsync(movieId, mappedRequest);
+                var mappedResponse = _mapper.Map<MovieResponse>(serviceResponse);
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+
         }
 
         [HttpDelete("{movieId}")]

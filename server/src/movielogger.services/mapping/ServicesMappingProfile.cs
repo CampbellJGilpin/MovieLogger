@@ -8,9 +8,32 @@ public class ServicesMappingProfile : Profile
 {
     public ServicesMappingProfile()
     {
-        CreateMap<Genre, GenreDto>().ReverseMap();
-        CreateMap<Movie, MovieDto>().ReverseMap();
+        CreateMap<Genre, GenreDto>();
+        
+        CreateMap<GenreDto, Genre>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Movies, opt => opt.Ignore());
+        
+        CreateMap<Movie, MovieDto>();
+
+        CreateMap<MovieDto, Movie>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Genre, opt => opt.Ignore()) 
+            .ForMember(dest => dest.UserMovies, opt => opt.Ignore()); 
+
+        
         CreateMap<Review, ReviewDto>().ReverseMap();
+        
         CreateMap<Viewing, ViewingDto>().ReverseMap();
+        
+        CreateMap<User, UserDto>().ReverseMap();
+        
+        CreateMap<LibraryItemDto, UserMovie>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.User, opt => opt.Ignore())
+            .ForMember(dest => dest.Movie, opt => opt.Ignore())
+            .ForMember(dest => dest.Viewings, opt => opt.Ignore());
+
+        CreateMap<UserMovie, LibraryItemDto>();
     }
 }

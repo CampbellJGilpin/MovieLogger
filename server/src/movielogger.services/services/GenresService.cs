@@ -38,32 +38,37 @@ public class GenresService : IGenresService
     public async Task<GenreDto> CreateGenreAsync(GenreDto genreDto)
     {
         var genre = _mapper.Map<Genre>(genreDto);
+        
+        genre.Id = 0;
+        
         _db.Genres.Add(genre);
         await _db.SaveChangesAsync();
 
         return _mapper.Map<GenreDto>(genre);
     }
 
-    public async Task<GenreDto> UpdateGenreAsync(int id, GenreDto genreDto)
+    public async Task<GenreDto> UpdateGenreAsync(int genreId, GenreDto genreDto)
     {
-        var genre = await _db.Genres.FindAsync(id);
+        var genre = await _db.Genres.FindAsync(genreId);
         if (genre == null)
         {
-            throw new KeyNotFoundException($"Genre with ID {id} not found.");
+            throw new KeyNotFoundException($"Genre with ID {genreId} not found.");
         }
 
+        genre.Id = genreId;
+        
         _mapper.Map(genreDto, genre);
         await _db.SaveChangesAsync();
 
         return _mapper.Map<GenreDto>(genre);
     }
 
-    public async Task DeleteGenreAsync(int id)
+    public async Task DeleteGenreAsync(int genreId)
     {
-        var genre = await _db.Genres.FindAsync(id);
+        var genre = await _db.Genres.FindAsync(genreId);
         if (genre == null)
         {
-            throw new KeyNotFoundException($"Genre with ID {id} not found.");
+            throw new KeyNotFoundException($"Genre with ID {genreId} not found.");
         }
 
         _db.Genres.Remove(genre);

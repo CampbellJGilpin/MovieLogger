@@ -72,9 +72,11 @@ namespace movielogger.api.controllers
                 return BadRequest(validationResult.Errors);
             }
             
-            var mappedRequest = _mapper.Map<UpdateGenreRequest>(request);
+            var mappedRequest = _mapper.Map<GenreDto>(request);
+            var serviceResponse = await _genresService.UpdateGenreAsync(genreId, mappedRequest);
+            var mappedResponse = _mapper.Map<GenreResponse>(serviceResponse);
             
-            return Ok(mappedRequest);
+            return Ok(mappedResponse);
         }
     }
 }
