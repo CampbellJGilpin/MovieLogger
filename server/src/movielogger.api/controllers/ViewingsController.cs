@@ -29,10 +29,17 @@ namespace movielogger.api.controllers
         [HttpGet("{viewingId}")]
         public async Task<IActionResult> GetViewing(int viewingId)
         {
-            var serviceResponse = await _viewingsService.GetViewingAsync(viewingId);
-            var mappedResponse = _mapper.Map<ViewingDto>(serviceResponse);
-            
-            return Ok(mappedResponse);
+            try
+            {
+                var serviceResponse = await _viewingsService.GetViewingAsync(viewingId);
+                var mappedResponse = _mapper.Map<ViewingDto>(serviceResponse);
+                
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound($"Viewing with ID {viewingId} not found.");
+            }
         }
         
         [HttpPost("Users/{userId}/Viewings")]
@@ -46,29 +53,30 @@ namespace movielogger.api.controllers
                 return BadRequest(validationResult.Errors);
             }
             
-            var mappedRequest = _mapper.Map<ViewingDto>(request);
-            var serviceResponse = _viewingsService.CreateViewingAsync(userId, mappedRequest);
+            var viewingDto = _mapper.Map<ViewingDto>(request);
+            var serviceResponse = await _viewingsService.CreateViewingAsync(userId, viewingDto);
             var mappedResponse = _mapper.Map<ViewingReponse>(serviceResponse);
             
             return Ok(mappedResponse);
         }
         
-        [HttpPut("Users/{userId}/Viewings")]
-        public async Task<IActionResult> UpdateViewing(int userId, [FromBody] UpdateViewingRequest request)
+        [HttpPut("Viewings/{viewingId}")]
+        public async Task<IActionResult> UpdateViewing(int viewingId, [FromBody] UpdateViewingRequest request)
         {
-            var viewingValidator = new UpdateViewingRequestValidator();
-            var validationResult = await viewingValidator.ValidateAsync(request);
+            var validator = new UpdateViewingRequestValidator();
+            var validationResult = await validator.ValidateAsync(request);
 
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Errors);
             }
-            
+
             var mappedRequest = _mapper.Map<ViewingDto>(request);
-            var serviceResponse = _viewingsService.UpdateViewingAsync(userId, mappedRequest);
+            var serviceResponse = await _viewingsService.UpdateViewingAsync(viewingId, mappedRequest);
             var mappedResponse = _mapper.Map<ViewingReponse>(serviceResponse);
-            
+
             return Ok(mappedResponse);
         }
+        
     }
 }

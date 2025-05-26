@@ -48,7 +48,7 @@ public class MoviesService : IMoviesService
         _db.Movies.Add(movie);
         var movieId = await _db.SaveChangesAsync();
 
-        return _mapper.Map<MovieDto>(movieId);
+        return _mapper.Map<MovieDto>(movie);
     }
 
     public async Task<MovieDto> UpdateMovieAsync(int movieId, MovieDto dto)

@@ -19,6 +19,6 @@ public class Review
     [Column("score")]
     public int? Score { get; set; }
 
-    [ForeignKey("viewing_id")]
+    [ForeignKey(nameof(ViewingId))]
     public Viewing Viewing { get; set; } = default!;
 }

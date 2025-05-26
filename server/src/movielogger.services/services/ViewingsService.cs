@@ -35,44 +35,54 @@ public class ViewingsService : IViewingsService
 
     public async Task<ViewingDto> CreateViewingAsync(int userId, ViewingDto viewingDto)
     {
-        // Validate that UserMovie exists and belongs to the user
+        // Check if UserMovie exists
         var userMovie = await _db.UserMovies
-            .FirstOrDefaultAsync(um => um.Id == viewingDto.UserMovieId && um.UserId == userId);
+            .FirstOrDefaultAsync(um => um.MovieId == viewingDto.MovieId && um.UserId == userId);
 
         if (userMovie == null)
         {
-            throw new InvalidOperationException($"UserMovie with ID {viewingDto.UserMovieId} does not belong to User {userId}.");
+            userMovie = new UserMovie
+            {
+                UserId = userId,
+                MovieId = viewingDto.MovieId,
+                Favourite = false,
+                OwnsMovie = false,
+                UpcomingViewDate = null
+            };
+
+            _db.UserMovies.Add(userMovie);
+            await _db.SaveChangesAsync();
         }
 
-        var viewing = _mapper.Map<Viewing>(viewingDto);
+        var viewing = new Viewing { UserMovieId = userMovie.Id, DateViewed = viewingDto.DateViewed };
+        
         _db.Viewings.Add(viewing);
         await _db.SaveChangesAsync();
 
-        return _mapper.Map<ViewingDto>(viewing);
+        // Reload viewing with eager includes
+        var savedViewing = await _db.Viewings
+            .Include(v => v.UserMovie)
+            .ThenInclude(um => um.Movie)
+            .FirstOrDefaultAsync(v => v.Id == viewing.Id);
+        
+        return _mapper.Map<ViewingDto>(savedViewing);
     }
-
-
-    public async Task<ViewingDto> UpdateViewingAsync(int userId, ViewingDto viewingDto)
+    
+    public async Task<ViewingDto> UpdateViewingAsync(int viewingId, ViewingDto viewingDto)
     {
         var viewing = await _db.Viewings
             .Include(v => v.UserMovie)
-            .FirstOrDefaultAsync(v => v.Id == viewingDto.Id);
+            .ThenInclude(um => um.Movie)
+            .FirstOrDefaultAsync(v => v.Id == viewingId);
 
         if (viewing == null)
         {
-            throw new KeyNotFoundException($"Viewing with ID {viewingDto.Id} not found.");
+            throw new KeyNotFoundException($"Viewing with ID {viewingId} not found.");
         }
 
-        // Check ownership of the associated UserMovie
-        if (viewing.UserMovie.UserId != userId || viewing.UserMovie.Id != viewingDto.UserMovieId)
-        {
-            throw new InvalidOperationException($"User {userId} does not have access to UserMovie {viewingDto.UserMovieId}.");
-        }
-
-        _mapper.Map(viewingDto, viewing);
+        viewing.DateViewed = viewingDto.DateViewed;
         await _db.SaveChangesAsync();
 
         return _mapper.Map<ViewingDto>(viewing);
     }
-
 }

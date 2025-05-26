@@ -18,7 +18,7 @@ public class Viewing
     [Column("date_viewed")]
     public DateTime DateViewed { get; set; }
 
-    [ForeignKey("user_movie_id")]
+    [ForeignKey(nameof(UserMovieId))]
     public UserMovie UserMovie { get; set; } = default!;
 
     public Review? Review { get; set; }

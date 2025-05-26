@@ -24,7 +24,11 @@ public class ServicesMappingProfile : Profile
         
         CreateMap<Review, ReviewDto>().ReverseMap();
         
-        CreateMap<Viewing, ViewingDto>().ReverseMap();
+        CreateMap<Viewing, ViewingDto>()
+            .ForMember(dest => dest.Movie, opt => opt.MapFrom(src => src.UserMovie.Movie))
+            .ForMember(dest => dest.MovieId, opt => opt.MapFrom(src => src.UserMovie.MovieId))
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserMovie.UserId));
+        CreateMap<ViewingDto, Viewing>();
         
         CreateMap<User, UserDto>().ReverseMap();
         
