@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models;
 using movielogger.api.models.requests.reviews;
+using movielogger.api.models.responses.reviews;
 using movielogger.api.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
@@ -27,7 +28,7 @@ namespace movielogger.api.controllers
         public async Task<IActionResult> GetUserReviews(int userId)
         {
             var serviceResponse = await _reviewsService.GetAllReviewsByUserIdAsync(userId);
-            var mappedResponse = _mapper.Map<List<ReviewDto>>(serviceResponse);
+            var mappedResponse = _mapper.Map<List<ReviewResponse>>(serviceResponse);
             
             return Ok(mappedResponse);
         }
@@ -43,11 +44,9 @@ namespace movielogger.api.controllers
                 return BadRequest(validationResult.Errors);
             }
             
-            request.ViewingId = viewingId;
-            
             var reviewRequest = _mapper.Map<ReviewDto>(request);
-            var serviceResponse = await _reviewsService.CreateReviewAsync(reviewRequest);
-            var mappedResponse = _mapper.Map<ReviewDto>(serviceResponse);
+            var serviceResponse = await _reviewsService.CreateReviewAsync(viewingId, reviewRequest);
+            var mappedResponse = _mapper.Map<ReviewResponse>(serviceResponse);
             
             return Ok(mappedResponse);
         }
@@ -65,7 +64,7 @@ namespace movielogger.api.controllers
             
             var reviewRequest = _mapper.Map<ReviewDto>(request);
             var serviceResponse = await _reviewsService.UpdateReviewAsync(reviewId, reviewRequest);
-            var mappedResponse = _mapper.Map<ReviewDto>(serviceResponse);
+            var mappedResponse = _mapper.Map<ReviewResponse>(serviceResponse);
             
             return Ok(mappedResponse);
         }

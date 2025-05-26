@@ -32,7 +32,7 @@ namespace movielogger.api.controllers
             try
             {
                 var serviceResponse = await _viewingsService.GetViewingAsync(viewingId);
-                var mappedResponse = _mapper.Map<ViewingDto>(serviceResponse);
+                var mappedResponse = _mapper.Map<ViewingReponse>(serviceResponse);
                 
                 return Ok(mappedResponse);
             }

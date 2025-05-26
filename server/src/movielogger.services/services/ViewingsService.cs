@@ -22,6 +22,7 @@ public class ViewingsService : IViewingsService
     {
         var viewing = await _db.Viewings
             .Include(v => v.UserMovie)
+            .ThenInclude(um => um.Movie)
             .Include(v => v.Review)
             .FirstOrDefaultAsync(v => v.Id == viewingId);
 

@@ -22,7 +22,13 @@ public class ServicesMappingProfile : Profile
             .ForMember(dest => dest.UserMovies, opt => opt.Ignore()); 
 
         
-        CreateMap<Review, ReviewDto>().ReverseMap();
+        CreateMap<Review, ReviewDto>()
+            .ForMember(dest => dest.DateViewed, opt => opt.MapFrom(src => src.Viewing.DateViewed))
+            .ForMember(dest => dest.MovieTitle, opt => opt.MapFrom(src => src.Viewing.UserMovie.Movie.Title));
+        
+        CreateMap<ReviewDto, Review>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.ViewingId, opt => opt.Ignore());
         
         CreateMap<Viewing, ViewingDto>()
             .ForMember(dest => dest.Movie, opt => opt.MapFrom(src => src.UserMovie.Movie))
@@ -38,6 +44,11 @@ public class ServicesMappingProfile : Profile
             .ForMember(dest => dest.Movie, opt => opt.Ignore())
             .ForMember(dest => dest.Viewings, opt => opt.Ignore());
 
-        CreateMap<UserMovie, LibraryItemDto>();
+        CreateMap<UserMovie, LibraryItemDto>()
+            .ForMember(dest => dest.MovieTitle, opt => opt.MapFrom(src => src.Movie.Title))
+            .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => src.Movie.ReleaseDate))
+            .ForMember(dest => dest.Favourite, opt => opt.MapFrom(src => src.Favourite))
+            .ForMember(dest => dest.InLibrary, opt => opt.MapFrom(src => src.OwnsMovie))
+            .ForMember(dest => dest.WatchLater, opt => opt.MapFrom(src => src.UpcomingViewDate.HasValue));
     }
 }

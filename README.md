@@ -214,26 +214,29 @@ erDiagram
 
 **Response Example:**
 ```json
-[
-  {
-    "movieId": 1,
-    "title": "Sinners",
-    "releaseDate": "2025-04-18",
-    "genre": "Horror",
-    "favourite": true,
-    "inLibrary": true,
-    "watchLater": false
-  },
-  {
-    "movieId": 2,
-    "title": "Mickey 17",
-    "releaseDate": "2025-03-07",
-    "genre": "Science Fiction",
-    "favourite": false,
-    "inLibrary": true,
-    "watchLater": true
-  }
-]
+{
+  "userId": 1,
+  "libraryItems": [
+    {
+      "movieId": 1,
+      "movieTitle": "28 Days Later Later",
+      "releaseDate": "2025-05-22T15:38:12.627",
+      "genre": "",
+      "favourite": "False",
+      "inLibrary": "False",
+      "watchLater": "False"
+    },
+    {
+      "movieId": 2,
+      "movieTitle": "Sinners",
+      "releaseDate": "2025-05-26T13:52:48.769",
+      "genre": "",
+      "favourite": "False",
+      "inLibrary": "False",
+      "watchLater": "False"
+    }
+  ]
+}
 ```
 
 ### `POST /users/{userId}/library`

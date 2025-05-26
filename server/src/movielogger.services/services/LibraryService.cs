@@ -63,7 +63,6 @@ public class LibraryService : ILibraryService
         }
 
         var entry = _mapper.Map<UserMovie>(libraryItemDto);
-        entry.Id = 0;
         entry.UserId = userId;
 
         _db.UserMovies.Add(entry);
