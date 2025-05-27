@@ -1,8 +1,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.api.models;
 using movielogger.api.models.requests.reviews;
 using movielogger.api.models.responses.reviews;
 using movielogger.api.validators;
@@ -24,7 +22,7 @@ namespace movielogger.api.controllers
             _mapper = mapper;
         }
         
-        [HttpGet("Users/{userId}/Reviews")]
+        [HttpGet("users/{userId}/reviews")]
         public async Task<IActionResult> GetUserReviews(int userId)
         {
             var serviceResponse = await _reviewsService.GetAllReviewsByUserIdAsync(userId);
@@ -33,7 +31,7 @@ namespace movielogger.api.controllers
             return Ok(mappedResponse);
         }
         
-        [HttpPost("Viewings/{viewingId}/Reviews")]
+        [HttpPost("viewings/{viewingId}/reviews")]
         public async Task<IActionResult> CreateReview(int viewingId, [FromBody] CreateReviewRequest request)
         {
             var validator = new CreateReviewRequestValidator();
@@ -51,7 +49,7 @@ namespace movielogger.api.controllers
             return Ok(mappedResponse);
         }
 
-        [HttpPut("Reviews/{reviewId}")]
+        [HttpPut("reviews/{reviewId}")]
         public async Task<IActionResult> UpdateReview(int reviewId, [FromBody] UpdateReviewRequest request)
         {
             var validator = new UpdateReviewRequestValidator();

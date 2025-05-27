@@ -11,6 +11,7 @@ using movielogger.services.tests.services;
 using NSubstitute;
 using Xunit;
 using System.Linq.Expressions;
+using AutoFixture;
 using MockQueryable.NSubstitute;
 
 namespace movielogger.services.tests.services;
@@ -27,68 +28,74 @@ public class MoviesServiceTests : BaseServiceTest
     [Fact]
     public async Task GetAllMoviesAsync_ReturnsMappedMovies()
     {
-        var genre = new Genre { Id = 1, Title = "Action" };
-        var movieEntities = new List<Movie>
-        {
-            new() { Id = 1, Title = "Movie 1", Genre = genre, IsDeleted = false },
-            new() { Id = 2, Title = "Movie 2", Genre = genre, IsDeleted = false }
-        }.AsQueryable();
+        var genre = Fixture.Create<Genre>();
 
-        var mockSet = movieEntities.BuildMockDbSet();
+        var movies = Fixture.Build<Movie>()
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, false)
+            .CreateMany(2)
+            .AsQueryable();
+
+        var mockSet = movies.BuildMockDbSet();
         _dbContext.Movies.Returns(mockSet);
 
         var result = (await _service.GetAllMoviesAsync()).ToList();
 
         result.Should().HaveCount(2);
-        result.Should().Contain(m => m.Title == "Movie 1");
-        result.Should().Contain(m => m.Title == "Movie 2");
+        result.All(m => m.Genre.Title == genre.Title).Should().BeTrue();
     }
 
     [Fact]
     public async Task GetAllMoviesAsync_ReturnsNonDeletedMovies()
     {
-        var genre = new Genre { Id = 1, Title = "Action" };
-        var movieEntities = new List<Movie>
-        {
-            new() { Id = 1, Title = "Movie 1", Genre = genre, IsDeleted = true },
-            new() { Id = 2, Title = "Movie 2", Genre = genre, IsDeleted = false }
-        }.AsQueryable();
+        var genre = Fixture.Create<Genre>();
 
+        var deletedMovie = Fixture.Build<Movie>()
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, true)
+            .Create();
+
+        var activeMovie = Fixture.Build<Movie>()
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, false)
+            .Create();
+
+        var movieEntities = new[] { deletedMovie, activeMovie }.AsQueryable();
         var mockSet = movieEntities.BuildMockDbSet();
+
         _dbContext.Movies.Returns(mockSet);
 
         var result = (await _service.GetAllMoviesAsync()).ToList();
 
         result.Should().HaveCount(1);
-        result.Should().ContainSingle(m => m.Title == "Movie 2");
-        result.Should().NotContain(m => m.Title == "Movie 1");
+        result.Should().ContainSingle(m => m.Title == activeMovie.Title);
+        result.Should().NotContain(m => m.Title == deletedMovie.Title);
     }
 
     [Fact]
     public async Task CreateMovieAsync_ValidDto_AddsMovieAndReturnsMappedDto()
     {
-        var genre = new Genre { Id = 1, Title = "Action" };
+        var genre = Fixture.Create<Genre>();
 
-        var inputDto = new MovieDto
-        {
-            Title = "New Movie",
-            Description = "About film",
-            Genre = new GenreDto { Id = 1, Title = "Action" }
-        };
+        var inputDto = Fixture.Build<MovieDto>()
+            .With(m => m.Genre, new GenreDto { Id = genre.Id, Title = genre.Title })
+            .Create();
 
-        var returnedMovieFromDb = new Movie
-        {
-            Id = 1,
-            Title = "New Movie",
-            Description = "About film",
-            GenreId = 1,
-            Genre = genre
-        };
+        var returnedMovieFromDb = Fixture.Build<Movie>()
+            .With(m => m.Id, 1)
+            .With(m => m.Title, inputDto.Title)
+            .With(m => m.Description, inputDto.Description)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.Genre, genre)
+            .Create();
 
-        var movieQueryable = new List<Movie> { returnedMovieFromDb }.AsQueryable();
-        var mockSet = movieQueryable.BuildMockDbSet();
+        var mockSet = new List<Movie> { returnedMovieFromDb }
+            .AsQueryable()
+            .BuildMockDbSet();
 
-        // Simulate EF behavior on Add
         mockSet.Add(Arg.Do<Movie>(m =>
         {
             m.Id = 1;
@@ -101,12 +108,13 @@ public class MoviesServiceTests : BaseServiceTest
         var result = await _service.CreateMovieAsync(inputDto);
 
         await _dbContext.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        mockSet.Received(1).Add(Arg.Any<Movie>());
 
         result.Should().NotBeNull();
-        result.Title.Should().Be("New Movie");
-        result.Description.Should().Be("About film");
+        result.Title.Should().Be(inputDto.Title);
+        result.Description.Should().Be(inputDto.Description);
         result.Genre.Should().NotBeNull();
-        result.Genre.Title.Should().Be("Action");
-        result.Genre.Id.Should().Be(1);
+        result.Genre.Title.Should().Be(genre.Title);
+        result.Genre.Id.Should().Be(genre.Id);
     }
 }

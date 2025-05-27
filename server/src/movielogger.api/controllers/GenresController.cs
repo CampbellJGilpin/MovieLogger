@@ -1,8 +1,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.api.models;
 using movielogger.api.models.requests.genres;
 using movielogger.api.models.responses.genres;
 using movielogger.api.validators;
@@ -12,7 +10,7 @@ using movielogger.services.interfaces;
 namespace movielogger.api.controllers
 {
     //[Authorize]
-    [Route("Genres")]
+    [Route("genres")]
     [ApiController]
     public class GenresController : ControllerBase
     {

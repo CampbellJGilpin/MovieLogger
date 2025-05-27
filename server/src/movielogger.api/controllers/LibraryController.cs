@@ -1,8 +1,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.api.models;
 using movielogger.api.models.requests.library;
 using movielogger.api.models.responses.library;
 using movielogger.api.validators;
@@ -24,7 +22,7 @@ namespace movielogger.api.controllers
             _mapper = mapper;
         }
         
-        [HttpGet("Users/{userId}/Library")]
+        [HttpGet("users/{userId}/library")]
         public async Task<IActionResult> GetLibrary(int userId)
         {
             var serviceResponse = await _libraryService.GetLibraryByUserIdAsync(userId);
@@ -33,7 +31,7 @@ namespace movielogger.api.controllers
             return Ok(mappedResponse);
         }
 
-        [HttpPost("Users/{userId}/Library")]
+        [HttpPost("users/{userId}/library")]
         public async Task<IActionResult> AddToLibrary(int userId, [FromBody] CreateLibraryItemRequest itemRequest)
         {
             var validator = new CreateLibraryItemRequestValidator();
@@ -51,7 +49,7 @@ namespace movielogger.api.controllers
             return Ok(mappedResponse);
         }
 
-        [HttpPut("Users/{userId}/Library")]
+        [HttpPut("users/{userId}/library")]
         public async Task<IActionResult> UpdateLibraryEntry(int userId, [FromBody] UpdateLibraryItemRequest itemRequest)
         {
             var validator = new UpdateLibraryItemRequestValidator();
@@ -69,7 +67,7 @@ namespace movielogger.api.controllers
             return Ok(mappedResponse);
         }
         
-        [HttpGet("Users/{userId}/Library/Favourites")]
+        [HttpGet("users/{userId}/library/favourites")]
         public async Task<IActionResult> GetFavourites(int userId)
         {
             var serviceResponse = await _libraryService.GetLibraryFavouritesByUserIdAsync(userId);
@@ -78,7 +76,7 @@ namespace movielogger.api.controllers
             return Ok(mappedResponse);
         }
         
-        [HttpGet("Users/{userId}/Library/Watchlist")]
+        [HttpGet("users/{userId}/library/watchlist")]
         public async Task<IActionResult> GetWatchlist(int userId)
         {
             var serviceResponse = await _libraryService.GetLibraryWatchlistByUserIdAsync(userId);

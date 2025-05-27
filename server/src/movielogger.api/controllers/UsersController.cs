@@ -1,8 +1,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.api.models;
 using movielogger.api.models.requests.users;
 using movielogger.api.models.responses.users;
 using movielogger.api.validators;
@@ -13,7 +11,7 @@ namespace movielogger.api.controllers
 {
     //[Authorize]
     [ApiController]
-    [Route("Users")]
+    [Route("users")]
     public class UsersController : ControllerBase
     {
         private readonly IUsersService _usersService;

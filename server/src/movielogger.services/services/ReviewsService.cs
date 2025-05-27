@@ -9,10 +9,10 @@ namespace movielogger.services.services;
 
 public class ReviewsService : IReviewsService
 {
-    private readonly AssessmentDbContext _db;
+    private readonly IAssessmentDbContext _db;
     private readonly IMapper _mapper;
 
-    public ReviewsService(AssessmentDbContext db, IMapper mapper)
+    public ReviewsService(IAssessmentDbContext db, IMapper mapper)
     {
         _db = db;
         _mapper = mapper;

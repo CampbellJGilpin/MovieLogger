@@ -1,9 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.api.models;
 using movielogger.api.models.requests.viewings;
 using movielogger.api.models.responses.viewings;
 using movielogger.api.validators;
@@ -14,7 +12,7 @@ namespace movielogger.api.controllers
 {
     //[Authorize]
     [ApiController]
-    [Route("Viewings")]
+    [Route("viewings")]
     public class ViewingsController : ControllerBase
     {
         private readonly IViewingsService _viewingsService;
@@ -42,7 +40,7 @@ namespace movielogger.api.controllers
             }
         }
         
-        [HttpPost("Users/{userId}/Viewings")]
+        [HttpPost("users/{userId}/viewings")]
         public async Task<IActionResult> CreateViewing(int userId, [FromBody] CreateViewingRequest request)
         {
             var viewingValidator = new CreateViewingRequestValidator();
@@ -60,7 +58,7 @@ namespace movielogger.api.controllers
             return Ok(mappedResponse);
         }
         
-        [HttpPut("Viewings/{viewingId}")]
+        [HttpPut("viewings/{viewingId}")]
         public async Task<IActionResult> UpdateViewing(int viewingId, [FromBody] UpdateViewingRequest request)
         {
             var validator = new UpdateViewingRequestValidator();

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("movielogger.api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cc447ef80307591680c5c937df946942cc9a68a0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1f44bbbf0ad85c90bea3986702dcb3afaf454567")]
 [assembly: System.Reflection.AssemblyProductAttribute("movielogger.api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("movielogger.api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

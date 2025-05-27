@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.api.models;
 using movielogger.services.interfaces;
 using AutoMapper;
 using movielogger.api.models.requests.users;

@@ -11,7 +11,7 @@ namespace movielogger.api.controllers
 {
     //[Authorize]
     [ApiController]
-    [Route("Movies")]
+    [Route("movies")]
     public class MoviesController: ControllerBase
     {
         private readonly IMoviesService _movieService;
