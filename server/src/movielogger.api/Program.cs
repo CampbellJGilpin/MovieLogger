@@ -19,6 +19,7 @@ public class Program
 
         builder.Services.AddDbContext<AssessmentDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Services.AddScoped<IAssessmentDbContext>(provider => provider.GetRequiredService<AssessmentDbContext>());
 
         builder.Services
             .AddScoped<IUsersService, UsersService>()

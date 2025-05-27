@@ -9,10 +9,10 @@ namespace movielogger.services.services;
 
 public class MoviesService : IMoviesService
 {
-    private readonly AssessmentDbContext _db;
+    private readonly IAssessmentDbContext _db;
     private readonly IMapper _mapper;
 
-    public MoviesService(AssessmentDbContext db, IMapper mapper)
+    public MoviesService(IAssessmentDbContext db, IMapper mapper)
     {
         _db = db;
         _mapper = mapper;
@@ -48,7 +48,11 @@ public class MoviesService : IMoviesService
         _db.Movies.Add(movie);
         var movieId = await _db.SaveChangesAsync();
 
-        return _mapper.Map<MovieDto>(movie);
+        var savedMovie = await _db.Movies
+            .Include(g => g.Genre)
+            .FirstOrDefaultAsync(x => x.Id == movieId);
+        
+        return _mapper.Map<MovieDto>(savedMovie);
     }
 
     public async Task<MovieDto> UpdateMovieAsync(int movieId, MovieDto dto)

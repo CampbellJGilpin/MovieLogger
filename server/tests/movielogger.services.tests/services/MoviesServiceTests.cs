@@ -1,55 +1,112 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
+using EntityFrameworkCore.Testing.NSubstitute;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using movielogger.dal;
 using movielogger.dal.dtos;
 using movielogger.dal.entities;
+using movielogger.services.interfaces;
 using movielogger.services.services;
+using movielogger.services.tests.services;
 using NSubstitute;
 using Xunit;
+using System.Linq.Expressions;
+using MockQueryable.NSubstitute;
 
 namespace movielogger.services.tests.services;
 
 public class MoviesServiceTests : BaseServiceTest
 {
-    private readonly MoviesService _service;
+    private readonly IMoviesService _service;
 
     public MoviesServiceTests()
     {
-        _service = new MoviesService(DbContext, Mapper);
+        _service = new MoviesService(_dbContext, _mapper);
     }
-    
+
     [Fact]
-    public async Task GetAllMoviesAsync_ShouldReturnOnlyNonDeletedMovies()
+    public async Task GetAllMoviesAsync_ReturnsMappedMovies()
     {
-        // Arrange
-        var movies = new List<Movie>
+        var genre = new Genre { Id = 1, Title = "Action" };
+        var movieEntities = new List<Movie>
         {
-            new() { Id = 1, Title = "Interstellar", Genre = new Genre { Id = 1, Title = "Sci-Fi" }, IsDeleted = false },
-            new() { Id = 2, Title = "Inception", Genre = new Genre { Id = 2, Title = "Thriller" }, IsDeleted = false },
-            new() { Id = 3, Title = "Old Deleted Movie", Genre = new Genre { Id = 3, Title = "Drama" }, IsDeleted = true }
+            new() { Id = 1, Title = "Movie 1", Genre = genre, IsDeleted = false },
+            new() { Id = 2, Title = "Movie 2", Genre = genre, IsDeleted = false }
+        }.AsQueryable();
+
+        var mockSet = movieEntities.BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        var result = (await _service.GetAllMoviesAsync()).ToList();
+
+        result.Should().HaveCount(2);
+        result.Should().Contain(m => m.Title == "Movie 1");
+        result.Should().Contain(m => m.Title == "Movie 2");
+    }
+
+    [Fact]
+    public async Task GetAllMoviesAsync_ReturnsNonDeletedMovies()
+    {
+        var genre = new Genre { Id = 1, Title = "Action" };
+        var movieEntities = new List<Movie>
+        {
+            new() { Id = 1, Title = "Movie 1", Genre = genre, IsDeleted = true },
+            new() { Id = 2, Title = "Movie 2", Genre = genre, IsDeleted = false }
+        }.AsQueryable();
+
+        var mockSet = movieEntities.BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        var result = (await _service.GetAllMoviesAsync()).ToList();
+
+        result.Should().HaveCount(1);
+        result.Should().ContainSingle(m => m.Title == "Movie 2");
+        result.Should().NotContain(m => m.Title == "Movie 1");
+    }
+
+    [Fact]
+    public async Task CreateMovieAsync_ValidDto_AddsMovieAndReturnsMappedDto()
+    {
+        var genre = new Genre { Id = 1, Title = "Action" };
+
+        var inputDto = new MovieDto
+        {
+            Title = "New Movie",
+            Description = "About film",
+            Genre = new GenreDto { Id = 1, Title = "Action" }
         };
 
-        DbContext.Movies.AddRange(movies);
-        await DbContext.SaveChangesAsync();
-
-        var expectedDtos = new List<MovieDto>
+        var returnedMovieFromDb = new Movie
         {
-            new() { Id = 1, Title = "Interstellar", GenreId = 1, Genre = new GenreDto { Id = 1, Title = "Sci-Fi" } },
-            new() { Id = 2, Title = "Inception", GenreId = 2, Genre = new GenreDto { Id = 2, Title = "Thriller" } }
+            Id = 1,
+            Title = "New Movie",
+            Description = "About film",
+            GenreId = 1,
+            Genre = genre
         };
 
-        Mapper.Map<List<MovieDto>>(Arg.Is<List<Movie>>(m => m.Count == 2)).Returns(expectedDtos);
+        var movieQueryable = new List<Movie> { returnedMovieFromDb }.AsQueryable();
+        var mockSet = movieQueryable.BuildMockDbSet();
 
-        // Act
-        var result = await _service.GetAllMoviesAsync();
+        // Simulate EF behavior on Add
+        mockSet.Add(Arg.Do<Movie>(m =>
+        {
+            m.Id = 1;
+            m.Genre = genre;
+        }));
 
-        // Assert
-        Assert.Equal(2, result.Count());
-        Assert.DoesNotContain(result, m => m.Title == "Old Deleted Movie");
-        Assert.Contains(result, m => m.Title == "Interstellar");
-        Assert.Contains(result, m => m.Title == "Inception");
+        _dbContext.Movies.Returns(mockSet);
+        _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
+
+        var result = await _service.CreateMovieAsync(inputDto);
+
+        await _dbContext.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+
+        result.Should().NotBeNull();
+        result.Title.Should().Be("New Movie");
+        result.Description.Should().Be("About film");
+        result.Genre.Should().NotBeNull();
+        result.Genre.Title.Should().Be("Action");
+        result.Genre.Id.Should().Be(1);
     }
 }

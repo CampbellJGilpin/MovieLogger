@@ -3,17 +3,17 @@ using movielogger.dal.entities;
 
 namespace movielogger.dal;
 
-public class AssessmentDbContext : DbContext
+public class AssessmentDbContext : DbContext, IAssessmentDbContext
 {
     public AssessmentDbContext(DbContextOptions<AssessmentDbContext> options)
         : base(options) { }
 
-    public DbSet<User> Users => Set<User>();
-    public DbSet<Movie> Movies => Set<Movie>();
-    public DbSet<Genre> Genres => Set<Genre>();
-    public DbSet<UserMovie> UserMovies => Set<UserMovie>();
-    public DbSet<Viewing> Viewings => Set<Viewing>();
-    public DbSet<Review> Reviews => Set<Review>();
+    public virtual DbSet<User> Users => Set<User>();
+    public virtual DbSet<Movie> Movies => Set<Movie>();
+    public virtual DbSet<Genre> Genres => Set<Genre>();
+    public virtual DbSet<UserMovie> UserMovies => Set<UserMovie>();
+    public virtual DbSet<Viewing> Viewings => Set<Viewing>();
+    public virtual DbSet<Review> Reviews => Set<Review>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

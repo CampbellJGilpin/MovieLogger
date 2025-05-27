@@ -1,25 +1,27 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using movielogger.dal;
+using movielogger.dal.dtos;
+using movielogger.dal.entities;
+using movielogger.services.mapping;
 using NSubstitute;
 
 namespace movielogger.services.tests.services;
 
 public abstract class BaseServiceTest
 {
-    protected readonly AssessmentDbContext DbContext;
-    protected readonly IMapper Mapper;
+    protected readonly IAssessmentDbContext _dbContext;
+    protected readonly IMapper _mapper;
 
     protected BaseServiceTest()
     {
-        // Substitute the DbContext (using in-memory options)
-        var options = new DbContextOptionsBuilder<AssessmentDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
+        _dbContext = Substitute.For<IAssessmentDbContext>();
+        
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile<ServicesMappingProfile>();
+        });
 
-        DbContext = new AssessmentDbContext(options);
-
-        // Substitute IMapper unless you need real mapping
-        Mapper = Substitute.For<IMapper>();
+        _mapper = config.CreateMapper();
     }
 }
