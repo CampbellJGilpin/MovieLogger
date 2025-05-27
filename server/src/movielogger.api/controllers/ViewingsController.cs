@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models.requests.viewings;
 using movielogger.api.models.responses.viewings;
-using movielogger.api.validators;
+using movielogger.api.validation;
+using movielogger.api.validation.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
@@ -43,13 +44,8 @@ namespace movielogger.api.controllers
         [HttpPost("users/{userId}/viewings")]
         public async Task<IActionResult> CreateViewing(int userId, [FromBody] CreateViewingRequest request)
         {
-            var viewingValidator = new CreateViewingRequestValidator();
-            var validationResult = await viewingValidator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
+            var errorResult = request.Validate();
+            if (errorResult is not null) return errorResult;
             
             var viewingDto = _mapper.Map<ViewingDto>(request);
             var serviceResponse = await _viewingsService.CreateViewingAsync(userId, viewingDto);
@@ -61,13 +57,8 @@ namespace movielogger.api.controllers
         [HttpPut("viewings/{viewingId}")]
         public async Task<IActionResult> UpdateViewing(int viewingId, [FromBody] UpdateViewingRequest request)
         {
-            var validator = new UpdateViewingRequestValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
+            var errorResult = request.Validate();
+            if (errorResult is not null) return errorResult;
 
             var mappedRequest = _mapper.Map<ViewingDto>(request);
             var serviceResponse = await _viewingsService.UpdateViewingAsync(viewingId, mappedRequest);

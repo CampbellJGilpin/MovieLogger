@@ -2,7 +2,7 @@ using FluentValidation;
 using movielogger.api.models;
 using movielogger.api.models.requests.viewings;
 
-namespace movielogger.api.validators;
+namespace movielogger.api.validation.validators;
 
 public class UpdateViewingRequestValidator : AbstractValidator<UpdateViewingRequest>
 {

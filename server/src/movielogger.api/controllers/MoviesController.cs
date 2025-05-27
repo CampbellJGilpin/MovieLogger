@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models.requests.movies;
 using movielogger.api.models.responses.movies;
-using movielogger.api.validators;
+using movielogger.api.validation;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
@@ -44,13 +44,8 @@ namespace movielogger.api.controllers
         [HttpPost]
         public async Task<IActionResult> CreateMovie([FromBody] CreateMovieRequest request)
         {
-            var validator = new CreateMovieRequestValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
+            var errorResult = request.Validate();
+            if (errorResult is not null) return errorResult;
 
             var mappedRequest = _mapper.Map<MovieDto>(request);
             var serviceResponse = await _movieService.CreateMovieAsync(mappedRequest);
@@ -62,13 +57,8 @@ namespace movielogger.api.controllers
         [HttpPut("{movieId}")]
         public async Task<IActionResult> UpdateMovie(int movieId, [FromBody] UpdateMovieRequest request)
         {
-            var validator = new UpdateMovieRequestValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
+            var errorResult = request.Validate();
+            if (errorResult is not null) return errorResult;
             
             var mappedRequest = _mapper.Map<MovieDto>(request);
             

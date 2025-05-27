@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models.requests.genres;
 using movielogger.api.models.responses.genres;
-using movielogger.api.validators;
+using movielogger.api.validation;
+using movielogger.api.validation.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
@@ -44,13 +45,8 @@ namespace movielogger.api.controllers
         [HttpPost]
         public async Task<IActionResult> CreateGenre([FromBody] CreateGenreRequest request)
         {
-            var validator = new CreateGenreRequestValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
+            var errorResult = request.Validate();
+            if (errorResult is not null) return errorResult;
             
             var mappedRequest = _mapper.Map<GenreDto>(request);
             var serviceResponse = await _genresService.CreateGenreAsync(mappedRequest);
@@ -62,13 +58,8 @@ namespace movielogger.api.controllers
         [HttpPut("{genreId}")]
         public async Task<IActionResult> UpdateGenre(int genreId, [FromBody] UpdateGenreRequest request)
         {
-            var validator = new UpdateGenreRequestValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
+            var errorResult = request.Validate();
+            if (errorResult is not null) return errorResult;
             
             var mappedRequest = _mapper.Map<GenreDto>(request);
             var serviceResponse = await _genresService.UpdateGenreAsync(genreId, mappedRequest);

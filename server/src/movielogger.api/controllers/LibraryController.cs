@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models.requests.library;
 using movielogger.api.models.responses.library;
-using movielogger.api.validators;
+using movielogger.api.validation;
+using movielogger.api.validation.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
@@ -32,17 +33,12 @@ namespace movielogger.api.controllers
         }
 
         [HttpPost("users/{userId}/library")]
-        public async Task<IActionResult> AddToLibrary(int userId, [FromBody] CreateLibraryItemRequest itemRequest)
+        public async Task<IActionResult> AddToLibrary(int userId, [FromBody] CreateLibraryItemRequest request)
         {
-            var validator = new CreateLibraryItemRequestValidator();
-            var validationResult = await validator.ValidateAsync(itemRequest);
+            var errorResult = request.Validate();
+            if (errorResult is not null) return errorResult;
 
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
-
-            var mappedRequest = _mapper.Map<LibraryItemDto>(itemRequest);
+            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
             var serviceResponse = await _libraryService.CreateLibraryEntryAsync(userId, mappedRequest);
             var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
             
@@ -50,17 +46,12 @@ namespace movielogger.api.controllers
         }
 
         [HttpPut("users/{userId}/library")]
-        public async Task<IActionResult> UpdateLibraryEntry(int userId, [FromBody] UpdateLibraryItemRequest itemRequest)
+        public async Task<IActionResult> UpdateLibraryEntry(int userId, [FromBody] UpdateLibraryItemRequest request)
         {
-            var validator = new UpdateLibraryItemRequestValidator();
-            var validationResult = await validator.ValidateAsync(itemRequest);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
+            var errorResult = request.Validate();
+            if (errorResult is not null) return errorResult;
             
-            var mappedRequest = _mapper.Map<LibraryItemDto>(itemRequest);
+            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
             var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
             var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
             

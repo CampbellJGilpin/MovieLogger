@@ -14,6 +14,8 @@ using System.Linq.Expressions;
 using AutoFixture;
 using MockQueryable.NSubstitute;
 
+namespace movielogger.services.tests.services;
+
 public class GenresServiceTests : BaseServiceTest
 {
     private readonly IGenresService _service;
@@ -108,7 +110,7 @@ public class GenresServiceTests : BaseServiceTest
         _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act 
-        var result = await _service.UpdateGenreAsync(existingGenre.Id, genreDto);
+        var result = await _service.UpdateGenreAsync(genreDto.Id, genreDto);
 
         // Assert
         result.Should().NotBeNull();

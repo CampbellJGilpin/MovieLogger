@@ -1,7 +1,7 @@
 using FluentValidation;
 using movielogger.api.models.requests.library;
 
-namespace movielogger.api.validators;
+namespace movielogger.api.validation.validators;
 
 public class UpdateLibraryItemRequestValidator : AbstractValidator<UpdateLibraryItemRequest>
 {

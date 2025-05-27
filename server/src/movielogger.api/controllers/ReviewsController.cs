@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models.requests.reviews;
 using movielogger.api.models.responses.reviews;
-using movielogger.api.validators;
+using movielogger.api.validation;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
@@ -34,13 +34,8 @@ namespace movielogger.api.controllers
         [HttpPost("viewings/{viewingId}/reviews")]
         public async Task<IActionResult> CreateReview(int viewingId, [FromBody] CreateReviewRequest request)
         {
-            var validator = new CreateReviewRequestValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
+            var errorResult = request.Validate();
+            if (errorResult is not null) return errorResult;
             
             var reviewRequest = _mapper.Map<ReviewDto>(request);
             var serviceResponse = await _reviewsService.CreateReviewAsync(viewingId, reviewRequest);
@@ -52,13 +47,8 @@ namespace movielogger.api.controllers
         [HttpPut("reviews/{reviewId}")]
         public async Task<IActionResult> UpdateReview(int reviewId, [FromBody] UpdateReviewRequest request)
         {
-            var validator = new UpdateReviewRequestValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
+            var errorResult = request.Validate();
+            if (errorResult is not null) return errorResult;
             
             var reviewRequest = _mapper.Map<ReviewDto>(request);
             var serviceResponse = await _reviewsService.UpdateReviewAsync(reviewId, reviewRequest);
