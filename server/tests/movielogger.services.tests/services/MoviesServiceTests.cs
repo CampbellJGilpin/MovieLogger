@@ -28,6 +28,7 @@ public class MoviesServiceTests : BaseServiceTest
     [Fact]
     public async Task GetAllMoviesAsync_ReturnsMappedMovies()
     {
+        // Arrange
         var genre = Fixture.Create<Genre>();
 
         var movies = Fixture.Build<Movie>()
@@ -40,8 +41,10 @@ public class MoviesServiceTests : BaseServiceTest
         var mockSet = movies.BuildMockDbSet();
         _dbContext.Movies.Returns(mockSet);
 
+        // Act 
         var result = (await _service.GetAllMoviesAsync()).ToList();
 
+        // Assert
         result.Should().HaveCount(2);
         result.All(m => m.Genre.Title == genre.Title).Should().BeTrue();
     }
@@ -49,6 +52,7 @@ public class MoviesServiceTests : BaseServiceTest
     [Fact]
     public async Task GetAllMoviesAsync_ReturnsNonDeletedMovies()
     {
+        // Arrange
         var genre = Fixture.Create<Genre>();
 
         var deletedMovie = Fixture.Build<Movie>()
@@ -68,8 +72,10 @@ public class MoviesServiceTests : BaseServiceTest
 
         _dbContext.Movies.Returns(mockSet);
 
+        // Act 
         var result = (await _service.GetAllMoviesAsync()).ToList();
 
+        // Assert
         result.Should().HaveCount(1);
         result.Should().ContainSingle(m => m.Title == activeMovie.Title);
         result.Should().NotContain(m => m.Title == deletedMovie.Title);
@@ -78,6 +84,7 @@ public class MoviesServiceTests : BaseServiceTest
     [Fact]
     public async Task CreateMovieAsync_ValidDto_AddsMovieAndReturnsMappedDto()
     {
+        // Arrange
         var genre = Fixture.Create<Genre>();
 
         var inputDto = Fixture.Build<MovieDto>()
@@ -105,8 +112,10 @@ public class MoviesServiceTests : BaseServiceTest
         _dbContext.Movies.Returns(mockSet);
         _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
 
+        // Act 
         var result = await _service.CreateMovieAsync(inputDto);
 
+        // Assert
         await _dbContext.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         mockSet.Received(1).Add(Arg.Any<Movie>());
 
