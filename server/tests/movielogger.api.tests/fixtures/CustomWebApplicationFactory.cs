@@ -49,13 +49,123 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     private static void SeedTestData(AssessmentDbContext db)
     {
         db.Genres.RemoveRange(db.Genres);
+        db.Movies.RemoveRange(db.Movies);
         db.SaveChanges();
         
+        db.Users.AddRange(
+            new dal.entities.User
+            {
+                Id = 1, 
+                UserName = "John Doe", 
+                Email = "johndoe@gmail.com", 
+                Password = "password123"
+            },    
+            new dal.entities.User
+            {
+                Id = 2, 
+                UserName = "Jane Doe", 
+                Email = "janedoe@gmail.com", 
+                Password = "password456"
+            }
+        );
+        
         db.Genres.AddRange(
-            new dal.entities.Genre { Title = "Drama" },
-            new dal.entities.Genre { Title = "Comedy" }
+            new dal.entities.Genre { Id = 1, Title = "Horror" },
+            new dal.entities.Genre { Id = 2, Title = "Comedy" }
         );
 
+        db.Movies.AddRange(
+            new dal.entities.Movie
+            {
+                Id = 1, 
+                Title = "The Thing", 
+                GenreId = 1, 
+                Description = "Scary movie", 
+                IsDeleted = false, 
+                ReleaseDate = DateTime.Now.AddYears(-1)
+            },
+            new dal.entities.Movie
+            {
+                Id = 2, 
+                Title = "Dumb and Dumber", 
+                GenreId = 2, 
+                Description = "Funny movie", 
+                IsDeleted = false, 
+                ReleaseDate = DateTime.Now.AddYears(-2)
+            }
+        );
+        
+        db.UserMovies.AddRange(
+            new dal.entities.UserMovie
+            {
+                Id = 1,
+                UserId = 1,
+                MovieId = 1
+            },
+            new dal.entities.UserMovie
+            {
+                Id = 2,
+                UserId = 1,
+                MovieId = 2
+            },
+            new dal.entities.UserMovie
+            {
+                Id = 3,
+                UserId = 2,
+                MovieId = 1
+            },
+            new dal.entities.UserMovie
+            {
+                Id = 4,
+                UserId = 2,
+                MovieId = 2
+            }
+        );
+        
+        db.Viewings.AddRange(
+            new dal.entities.Viewing
+            {
+                Id = 1,
+                DateViewed = DateTime.Now.AddDays(-1),
+                UserMovieId = 1
+            },   
+            new dal.entities.Viewing
+            {
+                Id = 2,
+                DateViewed = DateTime.Now.AddDays(-2),
+                UserMovieId = 2
+            },
+            new dal.entities.Viewing
+            {
+                Id = 3,
+                DateViewed = DateTime.Now.AddDays(-3),
+                UserMovieId = 3
+            },   
+            new dal.entities.Viewing
+            {
+                Id = 4,
+                DateViewed = DateTime.Now.AddDays(-4),
+                UserMovieId = 4
+            }
+        );
+        
+        db.Reviews.AddRange(
+            new dal.entities.Review
+            {
+                Id = 1,
+                ReviewText = "Review Text 1",
+                Score = 4,
+                ViewingId = 1
+            },
+            new dal.entities.Review
+            {
+                Id = 2,
+                ReviewText = "Review Text 2",
+                Score = 5,
+                ViewingId = 2
+            }
+        );
+        
         db.SaveChanges();
     }
 }

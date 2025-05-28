@@ -4,7 +4,7 @@ namespace movielogger.services.interfaces;
 
 public interface IViewingsService
 {
-    Task<ViewingDto> GetViewingAsync(int viewingId);
+    Task<ViewingDto> GetViewingByIdAsync(int viewingId);
     Task<ViewingDto> CreateViewingAsync(int userId, ViewingDto viewing);
     Task<ViewingDto> UpdateViewingAsync(int viewingId, ViewingDto viewingDto);
 }

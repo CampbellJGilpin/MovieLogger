@@ -18,7 +18,7 @@ public class ViewingsService : IViewingsService
         _mapper = mapper;
     }
 
-    public async Task<ViewingDto> GetViewingAsync(int viewingId)
+    public async Task<ViewingDto> GetViewingByIdAsync(int viewingId)
     {
         var viewing = await _db.Viewings
             .Include(v => v.UserMovie)

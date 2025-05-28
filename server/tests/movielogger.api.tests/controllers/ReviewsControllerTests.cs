@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 using movielogger.api.models.requests.reviews;
@@ -12,22 +13,13 @@ namespace movielogger.api.tests.controllers;
 public class ReviewsControllerTests  : BaseTestController
 {
     [Fact]
-    public async Task GetAllReviews_ReturnsSuccess()
+    public async Task GetUserReviews_ReturnsSeededReviews()
     {
-        // Arrange 
+        var response = await _client.GetAsync("/users/1/reviews");
         
-        // Act
+        response.EnsureSuccessStatusCode();
         
-        // Assert
-    }
-    
-    [Fact]
-    public async Task Post_WithValidData_SavesReview()
-    {
-        // Arrange 
-        
-        // Act
-        
-        // Assert
+        var reviews = await response.Content.ReadFromJsonAsync<List<ReviewResponse>>();
+        reviews.Should().HaveCountGreaterThanOrEqualTo(2);
     }
 }

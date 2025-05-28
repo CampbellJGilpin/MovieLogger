@@ -34,18 +34,12 @@ public class GenresControllerTests : BaseTestController
     [Fact]
     public async Task GetGenreById_ReturnsCorrectGenre()
     {
-        var allGenresResponse = await _client.GetAsync("/genres");
-        allGenresResponse.EnsureSuccessStatusCode();
-
-        var genres = await allGenresResponse.Content.ReadFromJsonAsync<List<GenreResponse>>();
-        var drama = genres!.First(g => g.Title == "Drama");
-        
-        var singleGenreResponse = await _client.GetAsync($"/genres/{drama.Id}");
+        var singleGenreResponse = await _client.GetAsync($"/genres/1");
         singleGenreResponse.EnsureSuccessStatusCode();
 
         var genre = await singleGenreResponse.Content.ReadFromJsonAsync<GenreResponse>();
         genre.Should().NotBeNull();
-        genre!.Id.Should().Be(drama.Id);
-        genre.Title.Should().Be("Drama");
+        genre!.Id.Should().Be(1);
+        genre.Title.Should().Be("Horror");
     }
 }
