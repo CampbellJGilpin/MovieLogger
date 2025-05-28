@@ -60,10 +60,12 @@ public class UsersServiceTests : BaseServiceTest
     }
     
     [Fact]
-    public async Task GetUserByIdAsync_NotFound_ReturnsMappedUser()
+    public async Task GetUserByIdAsync_NotFound_ThrowsKeyNotFoundException()
     {
         // Arrange
-        _dbContext.Users.FindAsync(Arg.Any<int>()).Returns((User?)null);
+        var users = new List<User>().AsQueryable();
+        var mockSet = users.BuildMockDbSet();
+        _dbContext.Users.Returns(mockSet);
 
         // Act 
         var act = async () => await _service.GetUserByIdAsync(999);
@@ -141,7 +143,9 @@ public class UsersServiceTests : BaseServiceTest
     public async Task UpdateUserAsync_NotFound_ThrowsKeyNotFoundException()
     {
         // Arrange
-        _dbContext.Users.FindAsync(Arg.Any<int>()).Returns((User?)null);
+        var users = new List<User>().AsQueryable();
+        var mockSet = users.BuildMockDbSet();
+        _dbContext.Users.Returns(mockSet);
 
         var dto = Fixture.Create<UserDto>();
         
