@@ -17,9 +17,16 @@ public class Program
         var jwtSettings = builder.Configuration.GetSection("Jwt");
         var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
 
-        builder.Services.AddDbContext<AssessmentDbContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-        builder.Services.AddScoped<IAssessmentDbContext>(provider => provider.GetRequiredService<AssessmentDbContext>());
+        var isTesting = builder.Environment.EnvironmentName == "Testing";
+
+        if (!isTesting)
+        {
+            builder.Services.AddDbContext<AssessmentDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            
+            builder.Services.AddScoped<IAssessmentDbContext>(provider => 
+                provider.GetRequiredService<AssessmentDbContext>());
+        }
 
         builder.Services
             .AddScoped<IUsersService, UsersService>()

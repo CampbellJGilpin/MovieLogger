@@ -11,4 +11,49 @@ public class LibraryServiceTests : BaseServiceTest
     {
         _service = new LibraryService(_dbContext, _mapper);
     }
+
+    public async Task GetLibraryByUserIdAsync_ValidId_ReturnsMappedLibrary()
+    {
+        // Arrange
+        
+        // Act
+        
+        // Assert
+    }
+
+    public async Task GetLibraryFavouritesByUserIdAsync_ValidId_ReturnsMappedLibrary()
+    {
+        // Arrange
+        
+        // Act
+        
+        // Assert
+    }
+
+    public async Task GetLibraryWatchlistByUserIdAsync_ValidId_ReturnsMappedLibrary()
+    {
+        // Arrange
+        
+        // Act
+        
+        // Assert
+    }
+
+    public async Task CreateLibraryEntryAsync_ValidInput_AddsLibraryEntryAndReturnsDto()
+    {
+        // Arrange
+        
+        // Act
+        
+        // Assert
+    }
+    
+    public async Task UpdateLibraryEntryAsync_ExistingLibraryItem_AddsLibraryEntryAndReturnsDto()
+    {
+        // Arrange
+        
+        // Act
+        
+        // Assert
+    }
 }
