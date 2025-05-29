@@ -31,7 +31,7 @@ namespace movielogger.api.controllers
             try
             {
                 var serviceResponse = await _viewingsService.GetViewingByIdAsync(viewingId);
-                var mappedResponse = _mapper.Map<ViewingReponse>(serviceResponse);
+                var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
                 
                 return Ok(mappedResponse);
             }
@@ -49,7 +49,7 @@ namespace movielogger.api.controllers
             
             var viewingDto = _mapper.Map<ViewingDto>(request);
             var serviceResponse = await _viewingsService.CreateViewingAsync(userId, viewingDto);
-            var mappedResponse = _mapper.Map<ViewingReponse>(serviceResponse);
+            var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
             
             return Ok(mappedResponse);
         }
@@ -62,7 +62,7 @@ namespace movielogger.api.controllers
 
             var mappedRequest = _mapper.Map<ViewingDto>(request);
             var serviceResponse = await _viewingsService.UpdateViewingAsync(viewingId, mappedRequest);
-            var mappedResponse = _mapper.Map<ViewingReponse>(serviceResponse);
+            var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
 
             return Ok(mappedResponse);
         }

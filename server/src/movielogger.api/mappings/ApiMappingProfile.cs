@@ -45,7 +45,7 @@ public class ApiMappingProfile : Profile
         CreateMap<ReviewDto, ReviewResponse>();
         CreateMap<UserDto, UserResponse>();
         
-        CreateMap<ViewingDto, ViewingReponse>()
+        CreateMap<ViewingDto, ViewingResponse>()
             .ForMember(dest => dest.ViewingId, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.UpcomingViewDate, opt => opt.MapFrom(src => src.DateViewed));
     }

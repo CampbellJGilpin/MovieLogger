@@ -31,7 +31,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             
             services.AddDbContext<AssessmentDbContext>(options =>
             {
-                options.UseInMemoryDatabase("TestDb");
+                // TODO - Temp fix to stop running into ID conflicts. Check for better fix.
+                options.UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}");
             });
 
             services.AddScoped<IAssessmentDbContext>(provider =>
@@ -48,8 +49,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     private static void SeedTestData(AssessmentDbContext db)
     {
-        db.Genres.RemoveRange(db.Genres);
+        db.Reviews.RemoveRange(db.Reviews);
+        db.Viewings.RemoveRange(db.Viewings);
+        db.UserMovies.RemoveRange(db.UserMovies);
         db.Movies.RemoveRange(db.Movies);
+        db.Users.RemoveRange(db.Users);
+        db.Genres.RemoveRange(db.Genres);
         db.SaveChanges();
         
         db.Users.AddRange(

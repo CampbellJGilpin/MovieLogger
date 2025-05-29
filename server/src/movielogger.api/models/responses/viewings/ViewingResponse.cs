@@ -2,7 +2,7 @@ using movielogger.api.models.responses.movies;
 
 namespace movielogger.api.models.responses.viewings;
 
-public class ViewingReponse
+public class ViewingResponse
 {
     public int ViewingId { get; set; }
     public int UserId { get; set; }
