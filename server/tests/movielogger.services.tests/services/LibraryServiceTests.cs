@@ -73,6 +73,40 @@ public class LibraryServiceTests : BaseServiceTest
     }
 
     [Fact]
+    public async Task GetLibraryFavouritesByUserIdAsync_IncludeNonFavourites_FiltersOutNonFavouriteMovies()
+    {
+        // Arrange
+        var favouriteMovie = Fixture.Build<Movie>().With(m => m.IsDeleted, false).Create();
+        var notFavouriteMovie = Fixture.Build<Movie>().With(m => m.IsDeleted, false).Create();
+
+        var favUserMovie = Fixture.Build<UserMovie>()
+            .With(um => um.UserId, UserId)
+            .With(um => um.Favourite, true)
+            .With(um => um.MovieId, favouriteMovie.Id)
+            .With(um => um.Movie, favouriteMovie)
+            .Create();
+
+        var nonFavUserMovie = Fixture.Build<UserMovie>()
+            .With(um => um.UserId, UserId)
+            .With(um => um.Favourite, false)
+            .With(um => um.MovieId, notFavouriteMovie.Id)
+            .With(um => um.Movie, notFavouriteMovie)
+            .Create();
+
+        var userMovies = new List<UserMovie> { favUserMovie, nonFavUserMovie }.AsQueryable();
+        var mockSet = userMovies.BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockSet); 
+
+        // Act
+        var result = await _service.GetLibraryFavouritesByUserIdAsync(UserId);
+
+        // Assert.
+        result.LibraryItems.Should().HaveCount(1);
+        result.LibraryItems.Should().ContainSingle(i => i.MovieId == favouriteMovie.Id);
+        result.LibraryItems.Should().NotContain(i => i.MovieId == notFavouriteMovie.Id);
+    }
+    
+    [Fact]
     public async Task GetLibraryWatchlistByUserIdAsync_ValidId_ReturnsMappedLibrary()
     {
         // Arrange

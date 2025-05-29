@@ -26,4 +26,16 @@ public class MoviesControllerTests : BaseTestController
         var movies = await response.Content.ReadFromJsonAsync<List<MovieResponse>>();
         movies.Should().HaveCountGreaterThanOrEqualTo(2);
     }
+    
+    [Fact]
+    public async Task GetMovieById_ReturnsCorrectMovies()
+    {
+        var singleMovieResponse = await _client.GetAsync($"/movies/1");
+        singleMovieResponse.EnsureSuccessStatusCode();
+
+        var movie = await singleMovieResponse.Content.ReadFromJsonAsync<MovieResponse>();
+        movie.Should().NotBeNull();
+        movie!.Id.Should().Be(1);
+        movie.Title.Should().Be("The Thing");
+    }
 }

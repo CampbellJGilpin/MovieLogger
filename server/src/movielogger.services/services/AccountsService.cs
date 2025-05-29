@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using movielogger.dal;
 using movielogger.services.interfaces;
 
@@ -15,8 +16,12 @@ public class AccountsService : IAccountsService
         _mapper = mapper;
     }
     
-    public Task<bool> AuthenticateUserAsync(string username, string password)
+    public async Task<bool> AuthenticateUserAsync(string username, string password)
     {
-        throw new NotImplementedException();
+        var user = await _db.Users.FirstOrDefaultAsync(x => x.UserName == username);
+        if (user == null) return false;
+
+        // TODO check hashed password
+        return true;
     }
 }

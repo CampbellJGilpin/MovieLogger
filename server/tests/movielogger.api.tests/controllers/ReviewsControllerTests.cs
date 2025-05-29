@@ -15,11 +15,62 @@ public class ReviewsControllerTests  : BaseTestController
     [Fact]
     public async Task GetUserReviews_ReturnsSeededReviews()
     {
+        // Act
         var response = await _client.GetAsync("/users/1/reviews");
         
+        // Assert
         response.EnsureSuccessStatusCode();
         
         var reviews = await response.Content.ReadFromJsonAsync<List<ReviewResponse>>();
         reviews.Should().HaveCountGreaterThanOrEqualTo(2);
+    }
+    
+    [Fact]
+    public async Task CreateReview_ReturnsCreatedReview()
+    {
+        // Arrange
+        const int viewingId = 1;
+        
+        var request = new CreateReviewRequest
+        {
+            Score = 4,
+            ReviewText = "Really good movie!"
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync($"/viewings/{viewingId}/reviews", request);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var createdReview = await response.Content.ReadFromJsonAsync<ReviewResponse>();
+
+        createdReview.Should().NotBeNull();
+        createdReview!.Score.Should().Be(request.Score);
+        createdReview.ReviewText.Should().Be(request.ReviewText);
+        createdReview.Id.Should().BeGreaterThan(0);
+    }
+    
+    [Fact]
+    public async Task UpdateReview_ReturnsUpdatedReview()
+    {
+        // Arrange
+        const int reviewId = 1;
+        var updateRequest = new UpdateReviewRequest
+        {
+            Score = 5,
+            ReviewText = "Actually, it was amazing!"
+        };
+
+        // Act
+        var response = await _client.PutAsJsonAsync($"/reviews/{reviewId}", updateRequest);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var updatedReview = await response.Content.ReadFromJsonAsync<ReviewResponse>();
+
+        updatedReview.Should().NotBeNull();
+        updatedReview!.Id.Should().Be(reviewId);
+        updatedReview!.Score.Should().Be(updatedReview.Score);
+        updatedReview.ReviewText.Should().Be(updatedReview.ReviewText);
     }
 }
