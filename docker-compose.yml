@@ -12,7 +12,7 @@ services:
       - db:/var/lib/postgresql/data
   flyway:
     image: flyway/flyway
-    command: -url=jdbc:postgresql://db/movielogger -schemas=master -user=movieuser -password=hotrod1 -outOfOrder=true -connectRetries=5 migrate
+    command: -url=jdbc:postgresql://db/movielogger -schemas=public -user=movieuser -password=hotrod1 -outOfOrder=true -connectRetries=5 migrate
     volumes:
       - ./database/migrations:/flyway/sql
     depends_on:

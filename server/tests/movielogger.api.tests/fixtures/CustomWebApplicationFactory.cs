@@ -1,19 +1,22 @@
-using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using movielogger.dal;
+using movielogger.api.tests.helpers;
 
 namespace movielogger.api.tests.fixtures;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly string _databaseName = Guid.NewGuid().ToString();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
         
-        builder.ConfigureServices(services =>
+        builder.ConfigureTestServices(services =>
         {
             var dbContextDescriptor = services.SingleOrDefault(
                 d => d.ServiceType == typeof(DbContextOptions<AssessmentDbContext>));
@@ -31,8 +34,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             
             services.AddDbContext<AssessmentDbContext>(options =>
             {
-                // TODO - Temp fix to stop running into ID conflicts. Check for better fix.
-                options.UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}");
+                options.UseInMemoryDatabase(_databaseName);
             });
 
             services.AddScoped<IAssessmentDbContext>(provider =>
@@ -47,8 +49,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         });
     }
 
-    private static void SeedTestData(AssessmentDbContext db)
+    public void ResetDatabase()
     {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AssessmentDbContext>();
+        
+        // Clear all data
         db.Reviews.RemoveRange(db.Reviews);
         db.Viewings.RemoveRange(db.Viewings);
         db.UserMovies.RemoveRange(db.UserMovies);
@@ -57,120 +63,57 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         db.Genres.RemoveRange(db.Genres);
         db.SaveChanges();
         
-        db.Users.AddRange(
-            new dal.entities.User
-            {
-                Id = 1, 
-                UserName = "John Doe", 
-                Email = "johndoe@gmail.com", 
-                Password = "password123"
-            },    
-            new dal.entities.User
-            {
-                Id = 2, 
-                UserName = "Jane Doe", 
-                Email = "janedoe@gmail.com", 
-                Password = "password456"
-            }
-        );
-        
-        db.Genres.AddRange(
-            new dal.entities.Genre { Id = 1, Title = "Horror" },
-            new dal.entities.Genre { Id = 2, Title = "Comedy" }
-        );
+        // Reseed data
+        SeedTestData(db);
+    }
 
-        db.Movies.AddRange(
-            new dal.entities.Movie
-            {
-                Id = 1, 
-                Title = "The Thing", 
-                GenreId = 1, 
-                Description = "Scary movie", 
-                IsDeleted = false, 
-                ReleaseDate = DateTime.Now.AddYears(-1)
-            },
-            new dal.entities.Movie
-            {
-                Id = 2, 
-                Title = "Dumb and Dumber", 
-                GenreId = 2, 
-                Description = "Funny movie", 
-                IsDeleted = false, 
-                ReleaseDate = DateTime.Now.AddYears(-2)
-            }
-        );
-        
-        db.UserMovies.AddRange(
-            new dal.entities.UserMovie
-            {
-                Id = 1,
-                UserId = 1,
-                MovieId = 1
-            },
-            new dal.entities.UserMovie
-            {
-                Id = 2,
-                UserId = 1,
-                MovieId = 2
-            },
-            new dal.entities.UserMovie
-            {
-                Id = 3,
-                UserId = 2,
-                MovieId = 1
-            },
-            new dal.entities.UserMovie
-            {
-                Id = 4,
-                UserId = 2,
-                MovieId = 2
-            }
-        );
-        
-        db.Viewings.AddRange(
-            new dal.entities.Viewing
-            {
-                Id = 1,
-                DateViewed = DateTime.Now.AddDays(-1),
-                UserMovieId = 1
-            },   
-            new dal.entities.Viewing
-            {
-                Id = 2,
-                DateViewed = DateTime.Now.AddDays(-2),
-                UserMovieId = 2
-            },
-            new dal.entities.Viewing
-            {
-                Id = 3,
-                DateViewed = DateTime.Now.AddDays(-3),
-                UserMovieId = 3
-            },   
-            new dal.entities.Viewing
-            {
-                Id = 4,
-                DateViewed = DateTime.Now.AddDays(-4),
-                UserMovieId = 4
-            }
-        );
-        
-        db.Reviews.AddRange(
-            new dal.entities.Review
-            {
-                Id = 1,
-                ReviewText = "Review Text 1",
-                Score = 4,
-                ViewingId = 1
-            },
-            new dal.entities.Review
-            {
-                Id = 2,
-                ReviewText = "Review Text 2",
-                Score = 5,
-                ViewingId = 2
-            }
-        );
-        
-        db.SaveChanges();
+    private static void SeedTestData(AssessmentDbContext db)
+    {
+        try
+        {
+            // Add users
+            var user1 = TestDataBuilder.CreateTestUser(1, "John Doe", "johndoe@example.com");
+            var user2 = TestDataBuilder.CreateTestUser(2, "Jane Doe", "janedoe@example.com");
+            db.Users.AddRange(user1, user2);
+            db.SaveChanges();
+            
+            // Add genres
+            var genre1 = TestDataBuilder.CreateTestGenre(1, "Horror");
+            var genre2 = TestDataBuilder.CreateTestGenre(2, "Comedy");
+            db.Genres.AddRange(genre1, genre2);
+            db.SaveChanges();
+
+            // Add movies
+            var movie1 = TestDataBuilder.CreateTestMovie(1, genre1.Id, "The Thing");
+            var movie2 = TestDataBuilder.CreateTestMovie(2, genre2.Id, "Dumb and Dumber");
+            db.Movies.AddRange(movie1, movie2);
+            db.SaveChanges();
+            
+            // Add user movies
+            var userMovie1 = TestDataBuilder.CreateTestUserMovie(1, user1.Id, movie1.Id);
+            var userMovie2 = TestDataBuilder.CreateTestUserMovie(2, user1.Id, movie2.Id);
+            var userMovie3 = TestDataBuilder.CreateTestUserMovie(3, user2.Id, movie1.Id);
+            var userMovie4 = TestDataBuilder.CreateTestUserMovie(4, user2.Id, movie2.Id);
+            db.UserMovies.AddRange(userMovie1, userMovie2, userMovie3, userMovie4);
+            db.SaveChanges();
+            
+            // Add viewings
+            var viewing1 = TestDataBuilder.CreateTestViewing(1, userMovie1.Id);
+            var viewing2 = TestDataBuilder.CreateTestViewing(2, userMovie2.Id);
+            var viewing3 = TestDataBuilder.CreateTestViewing(3, userMovie3.Id);
+            var viewing4 = TestDataBuilder.CreateTestViewing(4, userMovie4.Id);
+            db.Viewings.AddRange(viewing1, viewing2, viewing3, viewing4);
+            db.SaveChanges();
+            
+            // Add reviews
+            var review1 = TestDataBuilder.CreateTestReview(1, viewing1.Id);
+            var review2 = TestDataBuilder.CreateTestReview(2, viewing2.Id);
+            db.Reviews.AddRange(review1, review2);
+            db.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error seeding test data", ex);
+        }
     }
 }

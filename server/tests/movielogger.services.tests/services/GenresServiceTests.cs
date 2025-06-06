@@ -45,7 +45,7 @@ public class GenresServiceTests : BaseServiceTest
     {
         // Arrange
         var genre = Fixture.Create<Genre>();
-        _dbContext.Genres.FindAsync(genre.Id).Returns(new ValueTask<Genre>(genre));
+        _dbContext.Genres.FindAsync(genre.Id)!.Returns(new ValueTask<Genre>(genre));
 
         // Act 
         var result = await _service.GetGenreByIdAsync(genre.Id);
@@ -106,7 +106,7 @@ public class GenresServiceTests : BaseServiceTest
         var genreDto = Fixture.Create<GenreDto>();
         var existingGenre = Fixture.Build<Genre>().With(g => g.Id, genreDto.Id).Create();
 
-        _dbContext.Genres.FindAsync(existingGenre.Id).Returns(new ValueTask<Genre>(existingGenre));
+        _dbContext.Genres.FindAsync(existingGenre.Id)!.Returns(new ValueTask<Genre>(existingGenre));
         _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act 
@@ -138,7 +138,7 @@ public class GenresServiceTests : BaseServiceTest
     {
         // Arrange
         var genre = Fixture.Create<Genre>();
-        _dbContext.Genres.FindAsync(genre.Id).Returns(new ValueTask<Genre>(genre));
+        _dbContext.Genres.FindAsync(genre.Id)!.Returns(new ValueTask<Genre>(genre));
 
         // Act 
         await _service.DeleteGenreAsync(genre.Id);

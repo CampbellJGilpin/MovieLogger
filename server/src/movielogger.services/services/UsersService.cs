@@ -18,10 +18,12 @@ public class UsersService : IUsersService
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+    public async Task<IList<UserDto>> GetAllUsersAsync()
     {
-        var users = await _db.Users.Where(u => !u.IsDeleted).ToListAsync();
-        return _mapper.Map<IEnumerable<UserDto>>(users);
+        var users = await _db.Users
+            .Where(u => !u.IsDeleted)
+            .ToListAsync();
+        return _mapper.Map<IList<UserDto>>(users);
     }
 
     public async Task<UserDto> GetUserByIdAsync(int userId)
@@ -37,6 +39,12 @@ public class UsersService : IUsersService
 
     public async Task<UserDto> CreateUserAsync(UserDto userDto)
     {
+        var existingUser = await _db.Users
+            .FirstOrDefaultAsync(u => u.Email == userDto.Email);
+            
+        if (existingUser != null)
+            throw new InvalidOperationException("Email already exists");
+
         var user = _mapper.Map<User>(userDto);
         user.Id = 0;
 
@@ -60,5 +68,17 @@ public class UsersService : IUsersService
         await _db.SaveChangesAsync();
 
         return _mapper.Map<UserDto>(user);
+    }
+
+    public async Task DeleteUserAsync(int userId)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        user.IsDeleted = true;
+        await _db.SaveChangesAsync();
     }
 }

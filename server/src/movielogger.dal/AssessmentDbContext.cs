@@ -19,7 +19,7 @@ public class AssessmentDbContext : DbContext, IAssessmentDbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.HasDefaultSchema("master");
+        modelBuilder.HasDefaultSchema("public");
         
         // User
         modelBuilder.Entity<User>(entity =>

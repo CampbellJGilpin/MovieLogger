@@ -6,6 +6,7 @@ using movielogger.dal.entities;
 using movielogger.services.interfaces;
 using movielogger.services.services;
 using NSubstitute;
+using Xunit;
 
 namespace movielogger.services.tests.services;
 
@@ -98,7 +99,7 @@ public class ReviewsServiceTests : BaseServiceTest
         var mockSet = reviews.BuildMockDbSet();
         
         _dbContext.Reviews.Returns(mockSet);
-        _dbContext.Reviews.FindAsync(reviewDto.Id).Returns(new ValueTask<Review>(existingReview));
+        _dbContext.Reviews.FindAsync(reviewDto.Id)!.Returns(new ValueTask<Review>(existingReview));
 
         _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
         

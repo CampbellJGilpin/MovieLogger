@@ -35,37 +35,50 @@ namespace movielogger.api.controllers
                 
                 return Ok(mappedResponse);
             }
-            catch (KeyNotFoundException ex)
+            catch (KeyNotFoundException)
             {
                 return NotFound($"Viewing with ID {viewingId} not found.");
             }
         }
         
-        [HttpPost("users/{userId}/viewings")]
-        public async Task<IActionResult> CreateViewing(int userId, [FromBody] CreateViewingRequest request)
+        [HttpPost]
+        public async Task<IActionResult> CreateViewing([FromBody] CreateViewingRequest request)
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return errorResult;
             
-            var viewingDto = _mapper.Map<ViewingDto>(request);
-            var serviceResponse = await _viewingsService.CreateViewingAsync(userId, viewingDto);
-            var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
+            try
+            {
+                var viewingDto = _mapper.Map<ViewingDto>(request);
+                var serviceResponse = await _viewingsService.CreateViewingAsync(request.UserId, viewingDto);
+                var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
+                
+                return CreatedAtAction(nameof(GetViewing), new { viewingId = mappedResponse.ViewingId }, mappedResponse);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("User or Movie not found");
+            }
         }
         
-        [HttpPut("viewings/{viewingId}")]
+        [HttpPut("{viewingId}")]
         public async Task<IActionResult> UpdateViewing(int viewingId, [FromBody] UpdateViewingRequest request)
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return errorResult;
 
-            var mappedRequest = _mapper.Map<ViewingDto>(request);
-            var serviceResponse = await _viewingsService.UpdateViewingAsync(viewingId, mappedRequest);
-            var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
+            try
+            {
+                var mappedRequest = _mapper.Map<ViewingDto>(request);
+                var serviceResponse = await _viewingsService.UpdateViewingAsync(viewingId, mappedRequest);
+                var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
 
-            return Ok(mappedResponse);
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Viewing with ID {viewingId} not found.");
+            }
         }
-        
     }
 }

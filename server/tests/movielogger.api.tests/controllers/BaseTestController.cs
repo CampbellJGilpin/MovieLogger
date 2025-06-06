@@ -2,7 +2,7 @@ using movielogger.api.tests.fixtures;
 
 namespace movielogger.api.tests.controllers;
 
-public class BaseTestController : IDisposable
+public class BaseTestController : IAsyncLifetime
 {
     protected readonly CustomWebApplicationFactory _factory;
     protected readonly HttpClient _client;
@@ -12,10 +12,16 @@ public class BaseTestController : IDisposable
         _factory = new CustomWebApplicationFactory();
         _client = _factory.CreateClient();
     }
-    
-    public void Dispose()
+
+    public Task InitializeAsync()
     {
-        _factory.Dispose();
+        _factory.ResetDatabase();
+        return Task.CompletedTask;
+    }
+
+    public async Task DisposeAsync()
+    {
         _client.Dispose();
+        await _factory.DisposeAsync();
     }
 }

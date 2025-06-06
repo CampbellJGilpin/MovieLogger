@@ -27,18 +27,24 @@ namespace movielogger.api.controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var serviceResponse = await _usersService.GetAllUsersAsync();
-            var mappedResponse = _mapper.Map<IList<UserDto>>(serviceResponse);
+            var mappedResponse = _mapper.Map<IList<UserResponse>>(serviceResponse);
             
             return Ok(mappedResponse);
         }
 
         [HttpGet("{userId}")]
-        public async Task <IActionResult> GetUserById(int userId)
+        public async Task<IActionResult> GetUserById(int userId)
         {
-            var serviceResponse = await _usersService.GetUserByIdAsync(userId);
-            var mappedResponse = _mapper.Map<UserDto>(serviceResponse);
-            
-            return Ok(mappedResponse);
+            try
+            {
+                var serviceResponse = await _usersService.GetUserByIdAsync(userId);
+                var mappedResponse = _mapper.Map<UserResponse>(serviceResponse);
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
 
         [HttpPost]
@@ -47,11 +53,18 @@ namespace movielogger.api.controllers
             var errorResult = request.Validate();
             if (errorResult is not null) return errorResult;
             
-            var mappedRequest = _mapper.Map<UserDto>(request);
-            var serviceResponse = await _usersService.CreateUserAsync(mappedRequest);
-            var mappedResponse = _mapper.Map<UserResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
+            try
+            {
+                var mappedRequest = _mapper.Map<UserDto>(request);
+                var serviceResponse = await _usersService.CreateUserAsync(mappedRequest);
+                var mappedResponse = _mapper.Map<UserResponse>(serviceResponse);
+                
+                return CreatedAtAction(nameof(GetUserById), new { userId = mappedResponse.Id }, mappedResponse);
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("Email already exists"))
+            {
+                return BadRequest(new { error = "Email already exists" });
+            }
         }
 
         [HttpPut("{userId}")]
@@ -60,11 +73,32 @@ namespace movielogger.api.controllers
             var errorResult = request.Validate();
             if (errorResult is not null) return errorResult;
             
-            var mappedRequest = _mapper.Map<UserDto>(request);
-            var serviceResponse = await _usersService.UpdateUserAsync(userId, mappedRequest);
-            var mappedResponse = _mapper.Map<UserResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
+            try
+            {
+                var mappedRequest = _mapper.Map<UserDto>(request);
+                var serviceResponse = await _usersService.UpdateUserAsync(userId, mappedRequest);
+                var mappedResponse = _mapper.Map<UserResponse>(serviceResponse);
+                
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteUser(int userId)
+        {
+            try
+            {
+                await _usersService.DeleteUserAsync(userId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
 }

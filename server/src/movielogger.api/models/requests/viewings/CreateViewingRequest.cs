@@ -6,6 +6,7 @@ namespace movielogger.api.models.requests.viewings;
 
 public class CreateViewingRequest : IValidatable<CreateViewingRequest>
 {
+    public int UserId { get; set; }
     public int MovieId { get; set; }
     public DateTime DateViewed { get; set; }
 

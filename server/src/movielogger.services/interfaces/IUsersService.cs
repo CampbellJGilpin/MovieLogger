@@ -4,8 +4,9 @@ namespace movielogger.services.interfaces;
 
 public interface IUsersService
 {
-    Task<IEnumerable<UserDto>> GetAllUsersAsync();
+    Task<IList<UserDto>> GetAllUsersAsync();
     Task<UserDto> GetUserByIdAsync(int userId);
-    Task<UserDto> CreateUserAsync(UserDto userDto);
-    Task<UserDto> UpdateUserAsync(int userId, UserDto userDto);
+    Task<UserDto> CreateUserAsync(UserDto user);
+    Task<UserDto> UpdateUserAsync(int userId, UserDto user);
+    Task DeleteUserAsync(int userId);
 }
