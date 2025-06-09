@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using movielogger.dal;
 using movielogger.dal.dtos;
 using movielogger.dal.entities;
+using movielogger.dal.Exceptions;
 using movielogger.services.interfaces;
 
 namespace movielogger.services.services;
@@ -41,9 +42,11 @@ public class UsersService : IUsersService
     {
         var existingUser = await _db.Users
             .FirstOrDefaultAsync(u => u.Email == userDto.Email);
-            
+
         if (existingUser != null)
-            throw new InvalidOperationException("Email already exists");
+        {
+            throw new EmailAlreadyExistsException();
+        }
 
         var user = _mapper.Map<User>(userDto);
         user.Id = 0;

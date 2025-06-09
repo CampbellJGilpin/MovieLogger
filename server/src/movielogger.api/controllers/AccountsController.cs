@@ -1,14 +1,13 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.services.interfaces;
 using AutoMapper;
 using movielogger.api.models.requests.users;
+using movielogger.api.models.responses.users;
 
 namespace movielogger.api.controllers
 {
-    //[Authorize]
-    [Route("Accounts")]
+    [ApiController]
+    [Route("accounts")]
     public class AccountsController : ControllerBase
     {
         private readonly IAccountsService _accountsService;
@@ -20,12 +19,13 @@ namespace movielogger.api.controllers
             _mapper = mapper;
         }
         
-        [HttpPost]
+        [HttpPost("login")]
         public async Task <IActionResult> Login([FromBody] LoginUserRequest request)
         {
-            var response = await _accountsService.AuthenticateUserAsync(request.Email, request.Password);
+            var (token, user) = await _accountsService.AuthenticateUserAsync(request.Email, request.Password);
+            var mappedUser = _mapper.Map<UserResponse>(user);
             
-            return Ok(response);
+            return Ok(new { token, user = mappedUser });
         }
     }
 }

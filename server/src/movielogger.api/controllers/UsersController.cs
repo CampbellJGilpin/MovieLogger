@@ -5,7 +5,9 @@ using movielogger.api.models.requests.users;
 using movielogger.api.models.responses.users;
 using movielogger.api.validation;
 using movielogger.dal.dtos;
+using movielogger.dal.Exceptions;
 using movielogger.services.interfaces;
+using BC = BCrypt.Net.BCrypt;
 
 namespace movielogger.api.controllers
 {
@@ -15,15 +17,18 @@ namespace movielogger.api.controllers
     public class UsersController : ControllerBase
     {
         private readonly IUsersService _usersService;
+        private readonly IAccountsService _accountsService;
         private readonly IMapper _mapper;
 
-        public UsersController(IUsersService usersService, IMapper mapper)
+        public UsersController(IUsersService usersService, IAccountsService accountsService, IMapper mapper)
         {
             _usersService = usersService;
+            _accountsService = accountsService;
             _mapper = mapper;
         }
         
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllUsers()
         {
             var serviceResponse = await _usersService.GetAllUsersAsync();
@@ -33,6 +38,7 @@ namespace movielogger.api.controllers
         }
 
         [HttpGet("{userId}")]
+        [Authorize]
         public async Task<IActionResult> GetUserById(int userId)
         {
             try
@@ -51,23 +57,40 @@ namespace movielogger.api.controllers
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
         {
             var errorResult = request.Validate();
-            if (errorResult is not null) return errorResult;
+            if (errorResult is not null)
+            {
+                return errorResult;
+            }
             
             try
             {
-                var mappedRequest = _mapper.Map<UserDto>(request);
-                var serviceResponse = await _usersService.CreateUserAsync(mappedRequest);
-                var mappedResponse = _mapper.Map<UserResponse>(serviceResponse);
+                var originalPassword = request.Password;
+                request.Password = BC.HashPassword(request.Password);
                 
-                return CreatedAtAction(nameof(GetUserById), new { userId = mappedResponse.Id }, mappedResponse);
+                var mappedRequest = _mapper.Map<UserDto>(request);
+                await _usersService.CreateUserAsync(mappedRequest);
+                
+                // Generate JWT token using the original password
+                var (token, user) = await _accountsService.AuthenticateUserAsync(request.Email, originalPassword);
+                
+                return Ok(new { token, user = _mapper.Map<UserResponse>(user) });
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("Email already exists"))
+            catch (EmailAlreadyExistsException)
             {
                 return BadRequest(new { error = "Email already exists" });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return BadRequest(new { error = "Failed to authenticate after registration" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
 
         [HttpPut("{userId}")]
+        [Authorize]
         public async Task<IActionResult> UpdateUser(int userId, [FromBody] UpdateUserRequest request)
         {
             var errorResult = request.Validate();
@@ -75,6 +98,11 @@ namespace movielogger.api.controllers
             
             try
             {
+                if (!string.IsNullOrEmpty(request.Password))
+                {
+                    request.Password = BC.HashPassword(request.Password);
+                }
+                
                 var mappedRequest = _mapper.Map<UserDto>(request);
                 var serviceResponse = await _usersService.UpdateUserAsync(userId, mappedRequest);
                 var mappedResponse = _mapper.Map<UserResponse>(serviceResponse);
@@ -88,6 +116,7 @@ namespace movielogger.api.controllers
         }
 
         [HttpDelete("{userId}")]
+        [Authorize]
         public async Task<IActionResult> DeleteUser(int userId)
         {
             try

@@ -12,6 +12,7 @@ using movielogger.api.models.responses.reviews;
 using movielogger.api.models.responses.users;
 using movielogger.api.models.responses.viewings;
 using movielogger.dal.dtos;
+using movielogger.dal.entities;
 
 namespace movielogger.api.mappings;
 
@@ -48,5 +49,9 @@ public class ApiMappingProfile : Profile
         CreateMap<ViewingDto, ViewingResponse>()
             .ForMember(dest => dest.ViewingId, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.UpcomingViewDate, opt => opt.MapFrom(src => src.DateViewed));
+
+        // User mappings
+        CreateMap<User, UserResponse>();
+        CreateMap<UserDto, UserResponse>();
     }
 }
