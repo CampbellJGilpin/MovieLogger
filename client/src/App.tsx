@@ -3,7 +3,6 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import AllMovies from './pages/AllMovies';
 import MovieDetails from './pages/MovieDetails';
-import MovieSearch from './pages/MovieSearch';
 import MyLibrary from './pages/MyLibrary';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -37,14 +36,17 @@ function App() {
                 <MovieDetails />
               </PrivateRoute>
             } />
-            <Route path="search" element={
-              <PrivateRoute>
-                <MovieSearch />
-              </PrivateRoute>
-            } />
             <Route path="library" element={
               <PrivateRoute>
                 <MyLibrary />
+              </PrivateRoute>
+            } />
+            <Route path="profile" element={
+              <PrivateRoute>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                  <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
+                  <p className="mt-4 text-gray-500">Coming soon...</p>
+                </div>
               </PrivateRoute>
             } />
           </Route>

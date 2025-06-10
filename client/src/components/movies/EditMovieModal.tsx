@@ -1,13 +1,13 @@
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import type { Movie } from '../../types';
+import type { Movie, MovieCreateRequest } from '../../types';
 import MovieForm from './MovieForm';
 
 interface EditMovieModalProps {
   movie: Movie;
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (movieId: number, movieData: Omit<Movie, 'id'>) => void;
+  onSubmit: (movieId: number, movieData: MovieCreateRequest) => void;
 }
 
 export default function EditMovieModal({ movie, isOpen, onClose, onSubmit }: EditMovieModalProps) {
@@ -44,13 +44,14 @@ export default function EditMovieModal({ movie, isOpen, onClose, onSubmit }: Edi
                 >
                   Edit Movie
                 </Dialog.Title>
-                <div className="mt-4">
-                  <MovieForm
-                    movie={movie}
-                    onSubmit={(movieData) => onSubmit(movie.id, movieData)}
-                    onCancel={onClose}
-                  />
-                </div>
+
+                <MovieForm
+                  movie={movie}
+                  onSubmit={(movieData) => {
+                    onSubmit(movie.id, movieData);
+                  }}
+                  onCancel={onClose}
+                />
               </Dialog.Panel>
             </Transition.Child>
           </div>

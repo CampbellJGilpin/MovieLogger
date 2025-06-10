@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MovieDetail from '../components/movies/MovieDetail';
 import EditMovieModal from '../components/movies/EditMovieModal';
-import type { Movie, MovieInLibrary, Review } from '../types';
+import type { Movie, MovieInLibrary, MovieCreateRequest } from '../types';
 import * as movieService from '../services/movieService';
 
 export default function MovieDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [movie, setMovie] = useState<MovieInLibrary | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -24,12 +23,8 @@ export default function MovieDetails() {
     try {
       setIsLoading(true);
       setError(null);
-      const [movieData, reviewsData] = await Promise.all([
-        movieService.getMovie(movieId),
-        movieService.getMovieReviews(movieId),
-      ]);
+      const movieData = await movieService.getMovie(movieId);
       setMovie(movieData);
-      setReviews(reviewsData);
     } catch (err) {
       setError('Failed to load movie details. Please try again later.');
       console.error('Error loading movie details:', err);
@@ -68,19 +63,15 @@ export default function MovieDetails() {
     }
   };
 
-  const handleAddReview = async (movieId: number, rating: number, comment: string) => {
-    try {
-      const newReview = await movieService.addMovieReview(movieId, { rating, comment });
-      setReviews([...reviews, newReview]);
-    } catch (err) {
-      console.error('Error adding review:', err);
-    }
-  };
-
-  const handleUpdateMovie = async (movieId: number, movieData: Omit<Movie, 'id'>) => {
+  const handleUpdateMovie = async (movieId: number, movieData: MovieCreateRequest) => {
     try {
       const updatedMovie = await movieService.updateMovie(movieId, movieData);
-      setMovie({ ...movie!, ...updatedMovie });
+      setMovie({
+        ...updatedMovie,
+        isWatched: movie!.isWatched,
+        isWatchLater: movie!.isWatchLater,
+        isFavorite: movie!.isFavorite
+      });
       setIsEditModalOpen(false);
     } catch (err) {
       console.error('Error updating movie:', err);
@@ -111,11 +102,9 @@ export default function MovieDetails() {
     <>
       <MovieDetail
         movie={movie}
-        reviews={reviews}
         onToggleWatched={handleToggleWatched}
         onToggleWatchLater={handleToggleWatchLater}
         onToggleFavorite={handleToggleFavorite}
-        onAddReview={handleAddReview}
         onEditMovie={() => setIsEditModalOpen(true)}
       />
 

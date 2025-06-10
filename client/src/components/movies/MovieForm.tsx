@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import type { Movie, MovieCreateRequest } from '../../types';
+import type { Movie, MovieCreateRequest, Genre } from '../../types';
+import * as movieService from '../../services/movieService';
 
 interface MovieFormProps {
   movie?: Movie;
@@ -13,25 +14,40 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
   const [description, setDescription] = useState('');
   const [releaseDate, setReleaseDate] = useState(new Date().toISOString().split('T')[0]);
   const [genreId, setGenreId] = useState(1);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadGenres();
+  }, []);
 
   useEffect(() => {
     if (movie) {
       setTitle(movie.title);
       setDescription(movie.description);
-      // Convert the date to local date string for the input
-      const date = new Date(movie.releaseDate);
-      setReleaseDate(date.toISOString().split('T')[0]);
+      setReleaseDate(new Date(movie.releaseDate).toISOString().split('T')[0]);
       setGenreId(movie.genre.id);
     }
   }, [movie]);
 
+  const loadGenres = async () => {
+    try {
+      const genresData = await movieService.getGenres();
+      setGenres(genresData);
+      if (!movie && genresData.length > 0) {
+        setGenreId(genresData[0].id);
+      }
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error loading genres:', err);
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    
-    // Convert the date to UTC
-    const date = new Date(releaseDate);
-    const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    
+    e.stopPropagation();
+    const utcDate = new Date(releaseDate);
     onSubmit({
       title,
       description,
@@ -41,91 +57,89 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
     });
   };
 
+  if (isLoading) {
+    return <div className="text-center py-4">Loading...</div>;
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-          Title
-        </label>
-        <input
-          type="text"
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="input mt-1"
-          required
-        />
-      </div>
+    <form onSubmit={handleSubmit} className="mt-4">
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+            Title
+          </label>
+          <input
+            type="text"
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            required
+          />
+        </div>
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-          Description
-        </label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={4}
-          className="input mt-1"
-          required
-        />
-      </div>
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            Description
+          </label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            required
+          />
+        </div>
 
-      <div>
-        <label htmlFor="releaseDate" className="block text-sm font-medium text-gray-700">
-          Release Date
-        </label>
-        <input
-          type="date"
-          id="releaseDate"
-          value={releaseDate}
-          onChange={(e) => setReleaseDate(e.target.value)}
-          className="input mt-1"
-          required
-        />
-      </div>
+        <div>
+          <label htmlFor="releaseDate" className="block text-sm font-medium text-gray-700">
+            Release Date
+          </label>
+          <input
+            type="date"
+            id="releaseDate"
+            value={releaseDate}
+            onChange={(e) => setReleaseDate(e.target.value)}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            required
+          />
+        </div>
 
-      <div>
-        <label htmlFor="genre" className="block text-sm font-medium text-gray-700">
-          Genre
-        </label>
-        <select
-          id="genre"
-          value={genreId}
-          onChange={(e) => setGenreId(parseInt(e.target.value))}
-          className="input mt-1"
-          required
-        >
-          <option value={1}>Action</option>
-          <option value={2}>Horror</option>
-          <option value={3}>Drama</option>
-          <option value={4}>Comedy</option>
-          <option value={5}>Thriller</option>
-          <option value={6}>Romance</option>
-          <option value={7}>Science Fiction</option>
-          <option value={8}>Western</option>
-          <option value={9}>Documentary</option>
-          <option value={10}>Family</option>
-          <option value={11}>Musical</option>
-          <option value={12}>Fantasy</option>
-          <option value={13}>War</option>
-        </select>
-      </div>
+        <div>
+          <label htmlFor="genreId" className="block text-sm font-medium text-gray-700">
+            Genre
+          </label>
+          <select
+            id="genreId"
+            value={genreId}
+            onChange={(e) => setGenreId(Number(e.target.value))}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            required
+          >
+            {genres.map(genre => (
+              <option key={genre.id} value={genre.id}>
+                {genre.title}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <div className="flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="btn btn-secondary"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="btn btn-primary"
-        >
-          Save
-        </button>
+        <div className="flex justify-end space-x-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="btn btn-secondary"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="btn btn-primary"
+          >
+            Save
+          </button>
+        </div>
       </div>
     </form>
   );

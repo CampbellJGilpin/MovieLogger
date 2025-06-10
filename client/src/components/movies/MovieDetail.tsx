@@ -1,36 +1,25 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { MovieInLibrary, Review } from '../../types';
+import type { MovieInLibrary } from '../../types';
 import { StarIcon, ClockIcon, HeartIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid, ClockIcon as ClockIconSolid, HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import AddReviewModal from '../reviews/AddReviewModal';
 
 interface MovieDetailProps {
   movie: MovieInLibrary;
-  reviews: Review[];
   onToggleWatched?: (movieId: number) => void;
   onToggleWatchLater?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
-  onAddReview?: (movieId: number, rating: number, comment: string) => void;
   onEditMovie?: (movieId: number) => void;
 }
 
 export default function MovieDetail({
   movie,
-  reviews,
   onToggleWatched,
   onToggleWatchLater,
   onToggleFavorite,
-  onAddReview,
   onEditMovie,
 }: MovieDetailProps) {
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const navigate = useNavigate();
-
-  const averageRating = reviews.length > 0
-    ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
-    : null;
-
   const releaseYear = new Date(movie.releaseDate).getFullYear();
 
   return (
@@ -54,15 +43,6 @@ export default function MovieDetail({
                 <span>{releaseYear}</span>
                 <span className="mx-2">•</span>
                 <span>{movie.genre.title}</span>
-                {averageRating && (
-                  <>
-                    <span className="mx-2">•</span>
-                    <div className="flex items-center">
-                      <StarIconSolid className="w-4 h-4 text-yellow-400" />
-                      <span className="ml-1">{averageRating.toFixed(1)}/5</span>
-                    </div>
-                  </>
-                )}
               </div>
             </div>
 
@@ -135,60 +115,8 @@ export default function MovieDetail({
               </button>
             )}
           </div>
-
-          {/* Reviews Section */}
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Reviews</h2>
-              {onAddReview && (
-                <button
-                  onClick={() => setIsReviewModalOpen(true)}
-                  className="btn btn-primary"
-                >
-                  Add Review
-                </button>
-              )}
-            </div>
-
-            {reviews.length > 0 ? (
-              <div className="space-y-4">
-                {reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="bg-white p-4 rounded-lg shadow"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <StarIconSolid className="w-4 h-4 text-yellow-400" />
-                        <span className="ml-1 text-sm text-gray-600">
-                          {review.rating}/5
-                        </span>
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        {new Date(review.viewDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-gray-600">{review.comment}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500">No reviews yet</p>
-            )}
-          </div>
         </div>
       </div>
-
-      {onAddReview && (
-        <AddReviewModal
-          isOpen={isReviewModalOpen}
-          onClose={() => setIsReviewModalOpen(false)}
-          onSubmit={(rating, comment) => {
-            onAddReview(movie.id, rating, comment);
-            setIsReviewModalOpen(false);
-          }}
-        />
-      )}
     </div>
   );
 } 

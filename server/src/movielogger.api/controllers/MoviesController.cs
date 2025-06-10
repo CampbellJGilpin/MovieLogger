@@ -1,9 +1,7 @@
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models.requests.movies;
 using movielogger.api.models.responses.movies;
-using movielogger.api.validation;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
@@ -89,6 +87,20 @@ namespace movielogger.api.controllers
             catch (KeyNotFoundException)
             {
                 return NotFound();
+            }
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<MovieResponse>>> SearchMovies([FromQuery] string q)
+        {
+            try
+            {
+                var movies = await _moviesService.SearchMoviesAsync(q);
+                return Ok(_mapper.Map<IEnumerable<MovieResponse>>(movies));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
     }

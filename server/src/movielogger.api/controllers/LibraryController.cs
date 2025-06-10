@@ -1,10 +1,8 @@
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models.requests.library;
 using movielogger.api.models.responses.library;
 using movielogger.api.validation;
-using movielogger.api.validation.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
@@ -12,7 +10,7 @@ namespace movielogger.api.controllers
 {
     //[Authorize]
     [ApiController]
-    [Route("api")]
+    [Route("api/users")]
     public class LibraryController : ControllerBase
     {
         private readonly ILibraryService _libraryService;
@@ -24,7 +22,7 @@ namespace movielogger.api.controllers
             _mapper = mapper;
         }
         
-        [HttpGet("users/{userId}/library")]
+        [HttpGet("{userId}/library")]
         public async Task<IActionResult> GetLibrary(int userId)
         {
             var serviceResponse = await _libraryService.GetLibraryByUserIdAsync(userId);
@@ -33,7 +31,7 @@ namespace movielogger.api.controllers
             return Ok(mappedResponse);
         }
 
-        [HttpPost("users/{userId}/library")]
+        [HttpPost("{userId}/library")]
         public async Task<IActionResult> AddToLibrary(int userId, [FromBody] CreateLibraryItemRequest request)
         {
             var errorResult = request.Validate();
@@ -46,7 +44,7 @@ namespace movielogger.api.controllers
             return Ok(mappedResponse);
         }
 
-        [HttpPut("users/{userId}/library")]
+        [HttpPut("{userId}/library")]
         public async Task<IActionResult> UpdateLibraryEntry(int userId, [FromBody] UpdateLibraryItemRequest request)
         {
             var errorResult = request.Validate();

@@ -13,7 +13,7 @@ namespace movielogger.api.controllers
 {
     //[Authorize]
     [ApiController]
-    [Route("users")]
+    [Route("api/users")]
     public class UsersController : ControllerBase
     {
         private readonly IUsersService _usersService;

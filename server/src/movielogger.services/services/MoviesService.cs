@@ -84,4 +84,15 @@ public class MoviesService : IMoviesService
 
         return true;
     }
+
+    public async Task<IEnumerable<MovieDto>> SearchMoviesAsync(string query)
+    {
+        var normalizedQuery = query.ToLower();
+        var movies = await _db.Movies
+            .Include(m => m.Genre)
+            .Where(m => !m.IsDeleted && m.Title.ToLower().Contains(normalizedQuery))
+            .ToListAsync();
+
+        return _mapper.Map<List<MovieDto>>(movies);
+    }
 }

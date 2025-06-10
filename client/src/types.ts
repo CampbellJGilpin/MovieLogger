@@ -16,6 +16,7 @@ export interface Movie {
   description: string;
   releaseDate: string;
   genre: Genre;
+  isDeleted: boolean;
 }
 
 export interface MovieCreateRequest {
@@ -23,7 +24,7 @@ export interface MovieCreateRequest {
   description: string;
   releaseDate: string;
   genreId: number;
-  isDeleted: boolean;
+  isDeleted?: boolean;
 }
 
 export interface MovieInLibrary extends Movie {
@@ -36,9 +37,9 @@ export interface Review {
   id: number;
   rating: number;
   comment: string;
-  dateCreated: string;
-  dateUpdated: string;
-  viewing: Viewing;
+  viewDate: string;
+  userId: number;
+  movieId: number;
 }
 
 export interface Viewing {

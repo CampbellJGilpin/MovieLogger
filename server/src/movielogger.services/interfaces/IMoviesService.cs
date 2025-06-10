@@ -9,4 +9,5 @@ public interface IMoviesService
     Task<MovieDto> CreateMovieAsync(MovieDto dto);
     Task<MovieDto> UpdateMovieAsync(int movieId, MovieDto dto);
     Task<bool> DeleteMovieAsync(int movieId);
+    Task<IEnumerable<MovieDto>> SearchMoviesAsync(string query);
 }

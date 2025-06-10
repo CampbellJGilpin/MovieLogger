@@ -1,11 +1,8 @@
 using AutoMapper;
-using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models.requests.viewings;
 using movielogger.api.models.responses.viewings;
 using movielogger.api.validation;
-using movielogger.api.validation.validators;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 
@@ -13,7 +10,7 @@ namespace movielogger.api.controllers
 {
     //[Authorize]
     [ApiController]
-    [Route("viewings")]
+    [Route("api/viewings")]
     public class ViewingsController : ControllerBase
     {
         private readonly IViewingsService _viewingsService;

@@ -8,7 +8,7 @@ import {
   HomeIcon,
   FilmIcon,
   BookmarkIcon,
-  MagnifyingGlassIcon
+  UserIcon
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
@@ -21,7 +21,7 @@ export default function Navbar() {
     { name: 'Dashboard', href: '/', icon: HomeIcon },
     { name: 'All Movies', href: '/movies', icon: FilmIcon },
     { name: 'My Library', href: '/library', icon: BookmarkIcon },
-    { name: 'Search', href: '/search', icon: MagnifyingGlassIcon },
+    { name: 'Profile', href: '/profile', icon: UserIcon },
   ];
 
   return (

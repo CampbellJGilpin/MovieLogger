@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import type { MovieInLibrary } from '../../types';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
@@ -23,7 +24,9 @@ export default function MovieListRow({
     <>
       <tr className="border-b border-gray-200">
         <td className="py-4 pl-4 pr-3 text-sm sm:pl-6">
-          <div className="font-medium text-gray-900">{movie.title}</div>
+          <Link to={`/movies/${movie.id}`} className="font-medium text-gray-900 hover:text-indigo-600">
+            {movie.title}
+          </Link>
         </td>
         <td className="px-3 py-4 text-sm text-gray-500">{releaseDate}</td>
         <td className="px-3 py-4 text-sm text-center">

@@ -1,9 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import MovieList from '../components/movies/MovieList';
 import AddMovieModal from '../components/movies/AddMovieModal';
 import type { Movie, MovieInLibrary } from '../types';
 import * as movieService from '../services/movieService';
+
+interface MovieCreateRequest {
+  title: string;
+  description: string;
+  releaseDate: string;
+  genreId: number;
+}
 
 export default function AllMovies() {
   const [movies, setMovies] = useState<MovieInLibrary[]>([]);
@@ -11,10 +18,29 @@ export default function AllMovies() {
   const [error, setError] = useState<string | null>(null);
   const [isAddMovieModalOpen, setIsAddMovieModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
   useEffect(() => {
     loadMovies();
   }, []);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500); // Wait for 500ms after the user stops typing
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Perform search when debounced query changes
+  useEffect(() => {
+    if (debouncedSearchQuery) {
+      handleSearch(debouncedSearchQuery);
+    } else {
+      loadMovies();
+    }
+  }, [debouncedSearchQuery]);
 
   const loadMovies = async () => {
     try {
@@ -31,12 +57,6 @@ export default function AllMovies() {
   };
 
   const handleSearch = async (query: string) => {
-    setSearchQuery(query);
-    if (!query.trim()) {
-      loadMovies();
-      return;
-    }
-
     try {
       setIsLoading(true);
       setError(null);
@@ -50,7 +70,7 @@ export default function AllMovies() {
     }
   };
 
-  const handleAddMovie = async (movieData: Omit<Movie, 'id'>) => {
+  const handleAddMovie = async (movieData: MovieCreateRequest) => {
     try {
       await movieService.createMovie(movieData);
       await loadMovies();
@@ -126,7 +146,7 @@ export default function AllMovies() {
           type="text"
           placeholder="Search movies..."
           value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="input w-full max-w-md"
         />
       </div>

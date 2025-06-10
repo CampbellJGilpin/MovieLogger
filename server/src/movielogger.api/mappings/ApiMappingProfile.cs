@@ -23,8 +23,10 @@ public class ApiMappingProfile : Profile
         // Request to DTO
         CreateMap<CreateGenreRequest, GenreDto>();
         CreateMap<UpdateGenreRequest, GenreDto>();
-        CreateMap<CreateLibraryItemRequest, LibraryItemDto>();
-        CreateMap<UpdateLibraryItemRequest, LibraryItemDto>();
+        CreateMap<CreateLibraryItemRequest, LibraryItemDto>()
+            .ForMember(dest => dest.Favourite, opt => opt.MapFrom(src => src.IsFavorite));
+        CreateMap<UpdateLibraryItemRequest, LibraryItemDto>()
+            .ForMember(dest => dest.Favourite, opt => opt.MapFrom(src => src.IsFavorite));
         CreateMap<CreateMovieRequest, MovieDto>();
         CreateMap<UpdateMovieRequest, MovieDto>();
         CreateMap<CreateReviewRequest, ReviewDto>();

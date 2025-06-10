@@ -1,6 +1,5 @@
 import api from '../api/config';
-import type { Movie, MovieInLibrary, Review } from '../types';
-import type { Genre } from '../types';
+import type { Movie, MovieInLibrary, Review, Genre } from '../types';
 
 interface MovieCreateRequest {
   title: string;
@@ -55,12 +54,12 @@ export async function getMovie(id: number): Promise<MovieInLibrary> {
   return response.data;
 }
 
-export async function createMovie(movie: Omit<Movie, 'id'>): Promise<MovieInLibrary> {
+export async function createMovie(movie: MovieCreateRequest): Promise<MovieInLibrary> {
   const response = await api.post<MovieInLibrary>('/movies', movie);
   return response.data;
 }
 
-export async function updateMovie(id: number, movie: Partial<Movie>): Promise<MovieInLibrary> {
+export async function updateMovie(id: number, movie: MovieUpdateRequest): Promise<MovieInLibrary> {
   const response = await api.put<MovieInLibrary>(`/movies/${id}`, movie);
   return response.data;
 }
@@ -75,50 +74,34 @@ export async function getMovieReviews(movieId: number): Promise<Review[]> {
 }
 
 export async function addMovieReview(movieId: number, review: { rating: number; comment: string }): Promise<Review> {
-  const response = await api.post<Review>(`/movies/${movieId}/reviews`, review);
+  const response = await api.post<Review>(`/reviews/viewings/${movieId}/reviews`, review);
   return response.data;
 }
 
 export async function toggleWatched(movieId: number): Promise<void> {
   const response = await api.get('/accounts/me');
   const userId = response.data.id;
-  
-  // First, get the current library status
-  const movieResponse = await api.get<LibraryItemDto>(`/users/${userId}/library/${movieId}`);
-  const currentWatched = movieResponse.data.inLibrary === "true";
-  
   await api.put(`/users/${userId}/library`, {
     movieId,
-    OwnsMovie: !currentWatched // Toggle the current state
+    isWatched: true
   });
 }
 
 export async function toggleWatchLater(movieId: number): Promise<void> {
   const response = await api.get('/accounts/me');
   const userId = response.data.id;
-  
-  // First, get the current library status
-  const movieResponse = await api.get<LibraryItemDto>(`/users/${userId}/library/${movieId}`);
-  const currentWatchLater = movieResponse.data.watchLater === "true";
-  
   await api.put(`/users/${userId}/library`, {
     movieId,
-    WatchLater: !currentWatchLater // Toggle the current state
+    isWatchLater: true
   });
 }
 
 export async function toggleFavorite(movieId: number): Promise<void> {
   const response = await api.get('/accounts/me');
   const userId = response.data.id;
-  
-  // First, get the current library status
-  const movieResponse = await api.get<LibraryItemDto>(`/users/${userId}/library/${movieId}`);
-  const currentFavorite = movieResponse.data.favourite === "true";
-  
   await api.put(`/users/${userId}/library`, {
     movieId,
-    Favourite: !currentFavorite, // Toggle the current state
-    OwnsMovie: true // We need to set this when adding to favorites
+    isFavorite: true
   });
 }
 
@@ -131,5 +114,10 @@ export async function getMyLibrary(): Promise<MovieInLibrary[]> {
 
 export async function searchMovies(query: string): Promise<MovieInLibrary[]> {
   const response = await api.get<MovieInLibrary[]>(`/movies/search?q=${encodeURIComponent(query)}`);
+  return response.data;
+}
+
+export async function getGenres(): Promise<Genre[]> {
+  const response = await api.get('/genres');
   return response.data;
 } 
