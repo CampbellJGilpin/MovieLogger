@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import type { Movie, MovieInLibrary } from '../types';
+import type { MovieInLibrary, MovieCreateRequest } from '../types';
 import * as movieService from '../services/movieService';
 import AddMovieModal from '../components/movies/AddMovieModal';
 
@@ -119,14 +119,10 @@ export default function Dashboard() {
     }
   };
 
-  const handleAddMovie = async (movieData: Omit<Movie, 'id'>) => {
+  const handleAddMovie = async (movieData: MovieCreateRequest) => {
     try {
-      const newMovie = {
-        ...movieData,
-        isDeleted: false
-      };
-      await movieService.createMovie(newMovie);
-      await loadMovies(); // Reload the movies list
+      await movieService.createMovie(movieData);
+      await loadMovies();
       setIsAddMovieModalOpen(false);
     } catch (err) {
       console.error('Error adding movie:', err);

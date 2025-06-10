@@ -8,13 +8,6 @@ interface MovieCreateRequest {
   genreId: number;
 }
 
-interface MovieUpdateRequest {
-  title?: string;
-  description?: string;
-  releaseDate?: string;
-  genreId?: number;
-}
-
 interface LibraryDto {
   userId: number;
   libraryItems: LibraryItemDto[];

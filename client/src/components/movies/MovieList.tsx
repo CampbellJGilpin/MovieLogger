@@ -3,7 +3,8 @@ import MovieListRow from './MovieListRow';
 
 interface MovieListProps {
   movies: MovieInLibrary[];
-  onToggleInLibrary?: (movieId: number) => void;
+  onToggleWatched?: (movieId: number) => void;
+  onToggleWatchLater?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
   onDelete?: (movieId: number) => void;
   emptyMessage?: string;
@@ -11,7 +12,8 @@ interface MovieListProps {
 
 export default function MovieList({
   movies,
-  onToggleInLibrary,
+  onToggleWatched,
+  onToggleWatchLater,
   onToggleFavorite,
   onDelete,
   emptyMessage = 'No movies found'
@@ -45,7 +47,8 @@ export default function MovieList({
                 <MovieListRow
                   key={movie.id}
                   movie={movie}
-                  onToggleInLibrary={onToggleInLibrary}
+                  onToggleWatched={onToggleWatched}
+                  onToggleWatchLater={onToggleWatchLater}
                   onToggleFavorite={onToggleFavorite}
                   onDelete={onDelete}
                 />

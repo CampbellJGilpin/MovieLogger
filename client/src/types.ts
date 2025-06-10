@@ -31,6 +31,7 @@ export interface MovieInLibrary extends Movie {
   isWatched: boolean;
   isWatchLater: boolean;
   isFavorite: boolean;
+  userRating?: number;
 }
 
 export interface Review {

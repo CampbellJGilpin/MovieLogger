@@ -135,10 +135,16 @@ export default function MyLibrary() {
       ) : (
         <MovieList
           movies={filteredMovies}
-          onToggleInLibrary={handleToggleInLibrary}
+          onToggleWatched={handleToggleInLibrary}
           onToggleFavorite={handleToggleFavorite}
           onDelete={handleDeleteMovie}
-          emptyMessage={`No ${activeTab} movies found`}
+          emptyMessage={
+            isLoading
+              ? 'Loading your library...'
+              : error
+              ? error
+              : 'No movies in your library'
+          }
         />
       )}
     </div>

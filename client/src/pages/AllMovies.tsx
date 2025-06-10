@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import MovieList from '../components/movies/MovieList';
 import AddMovieModal from '../components/movies/AddMovieModal';
-import type { Movie, MovieInLibrary } from '../types';
+import type { MovieInLibrary } from '../types';
 import * as movieService from '../services/movieService';
 
 interface MovieCreateRequest {
@@ -158,13 +158,15 @@ export default function AllMovies() {
       ) : (
         <MovieList
           movies={movies}
-          onToggleInLibrary={handleToggleInLibrary}
+          onToggleWatched={handleToggleInLibrary}
           onToggleFavorite={handleToggleFavorite}
           onDelete={handleDeleteMovie}
           emptyMessage={
-            searchQuery
-              ? 'No movies found matching your search'
-              : 'No movies added yet'
+            isLoading
+              ? 'Loading movies...'
+              : error
+              ? 'Error loading movies'
+              : 'No movies found'
           }
         />
       )}

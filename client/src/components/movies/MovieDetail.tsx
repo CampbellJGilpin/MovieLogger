@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { MovieInLibrary } from '../../types';
 import { StarIcon, ClockIcon, HeartIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid, ClockIcon as ClockIconSolid, HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import MovieDetail from '../components/movies/MovieDetail';
 import EditMovieModal from '../components/movies/EditMovieModal';
-import type { Movie, MovieInLibrary } from '../types/index';
+import type { MovieInLibrary } from '../types/index';
 import type { MovieCreateRequest } from '../types';
 import * as movieService from '../services/movieService';
 
@@ -67,7 +67,7 @@ export default function MovieDetails() {
   const handleUpdateMovie = async (movieId: number, movieData: MovieCreateRequest) => {
     if (!movie) return;
     try {
-      const updatedMovie = await movieService.updateMovie(movieId, movieData);
+      await movieService.updateMovie(movieId, movieData);
       await loadMovie(movieId);
       setIsEditModalOpen(false);
     } catch (err: any) {
