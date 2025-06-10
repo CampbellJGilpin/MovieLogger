@@ -19,8 +19,19 @@ export default function MovieDetail({
   onToggleFavorite,
   onEditMovie,
 }: MovieDetailProps) {
-  const navigate = useNavigate();
-  const releaseYear = new Date(movie.releaseDate).getFullYear();
+  // Safety check for null/undefined movie
+  if (!movie?.id || !movie?.title) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center text-gray-500">
+          Loading movie details...
+        </div>
+      </div>
+    );
+  }
+
+  // Safely get the release year
+  const releaseYear = movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -40,9 +51,9 @@ export default function MovieDetail({
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{movie.title}</h1>
               <div className="mt-2 flex items-center text-sm text-gray-500">
-                <span>{releaseYear}</span>
-                <span className="mx-2">•</span>
-                <span>{movie.genre.title}</span>
+                {releaseYear && <span>{releaseYear}</span>}
+                {releaseYear && movie.genre?.title && <span className="mx-2">•</span>}
+                {movie.genre?.title && <span>{movie.genre.title}</span>}
               </div>
             </div>
 

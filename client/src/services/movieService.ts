@@ -54,13 +54,13 @@ export async function getMovie(id: number): Promise<MovieInLibrary> {
   return response.data;
 }
 
-export async function createMovie(movie: MovieCreateRequest): Promise<MovieInLibrary> {
-  const response = await api.post<MovieInLibrary>('/movies', movie);
+export async function createMovie(movieData: MovieCreateRequest): Promise<Movie> {
+  const response = await api.post<Movie>('/movies', movieData);
   return response.data;
 }
 
-export async function updateMovie(id: number, movie: MovieUpdateRequest): Promise<MovieInLibrary> {
-  const response = await api.put<MovieInLibrary>(`/movies/${id}`, movie);
+export async function updateMovie(id: number, movieData: MovieCreateRequest): Promise<Movie> {
+  const response = await api.put<Movie>(`/movies/${id}`, movieData);
   return response.data;
 }
 
@@ -78,31 +78,16 @@ export async function addMovieReview(movieId: number, review: { rating: number; 
   return response.data;
 }
 
-export async function toggleWatched(movieId: number): Promise<void> {
-  const response = await api.get('/accounts/me');
-  const userId = response.data.id;
-  await api.put(`/users/${userId}/library`, {
-    movieId,
-    isWatched: true
-  });
+export async function toggleWatched(id: number): Promise<void> {
+  await api.put(`/users/me/library/${id}/watched`);
 }
 
-export async function toggleWatchLater(movieId: number): Promise<void> {
-  const response = await api.get('/accounts/me');
-  const userId = response.data.id;
-  await api.put(`/users/${userId}/library`, {
-    movieId,
-    isWatchLater: true
-  });
+export async function toggleWatchLater(id: number): Promise<void> {
+  await api.put(`/users/me/library/${id}/watch-later`);
 }
 
-export async function toggleFavorite(movieId: number): Promise<void> {
-  const response = await api.get('/accounts/me');
-  const userId = response.data.id;
-  await api.put(`/users/${userId}/library`, {
-    movieId,
-    isFavorite: true
-  });
+export async function toggleFavorite(id: number): Promise<void> {
+  await api.put(`/users/me/library/${id}/favorite`);
 }
 
 export async function getMyLibrary(): Promise<MovieInLibrary[]> {

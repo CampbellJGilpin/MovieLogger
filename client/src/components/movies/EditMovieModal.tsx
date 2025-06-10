@@ -11,6 +11,10 @@ interface EditMovieModalProps {
 }
 
 export default function EditMovieModal({ movie, isOpen, onClose, onSubmit }: EditMovieModalProps) {
+  const handleSubmit = (movieData: MovieCreateRequest) => {
+    onSubmit(movie.id, movieData);
+  };
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={onClose}>
@@ -47,9 +51,7 @@ export default function EditMovieModal({ movie, isOpen, onClose, onSubmit }: Edi
 
                 <MovieForm
                   movie={movie}
-                  onSubmit={(movieData) => {
-                    onSubmit(movie.id, movieData);
-                  }}
+                  onSubmit={handleSubmit}
                   onCancel={onClose}
                 />
               </Dialog.Panel>

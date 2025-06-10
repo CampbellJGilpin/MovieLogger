@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.conventions;
+using movielogger.dal.extensions;
 
 public class Program
 {
@@ -26,7 +27,7 @@ public class Program
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+                policy.SetIsOriginAllowed(origin => true)
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials();
@@ -68,8 +69,10 @@ public class Program
 
         if (!isTesting)
         {
+            var dbConnection = "DATABASE_URL".GetValue();
+            
             builder.Services.AddDbContext<AssessmentDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(dbConnection ?? builder.Configuration.GetConnectionString("DefaultConnection")));
             
             builder.Services.AddScoped<IAssessmentDbContext>(provider => 
                 provider.GetRequiredService<AssessmentDbContext>());

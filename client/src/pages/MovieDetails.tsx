@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import MovieDetail from '../components/movies/MovieDetail';
 import EditMovieModal from '../components/movies/EditMovieModal';
-import type { Movie, MovieInLibrary, MovieCreateRequest } from '../types';
+import type { Movie, MovieInLibrary } from '../types/index';
+import type { MovieCreateRequest } from '../types';
 import * as movieService from '../services/movieService';
 
 export default function MovieDetails() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const [movie, setMovie] = useState<MovieInLibrary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +28,7 @@ export default function MovieDetails() {
     } catch (err) {
       setError('Failed to load movie details. Please try again later.');
       console.error('Error loading movie details:', err);
+      setMovie(null);
     } finally {
       setIsLoading(false);
     }
@@ -64,17 +65,15 @@ export default function MovieDetails() {
   };
 
   const handleUpdateMovie = async (movieId: number, movieData: MovieCreateRequest) => {
+    if (!movie) return;
     try {
       const updatedMovie = await movieService.updateMovie(movieId, movieData);
-      setMovie({
-        ...updatedMovie,
-        isWatched: movie!.isWatched,
-        isWatchLater: movie!.isWatchLater,
-        isFavorite: movie!.isFavorite
-      });
+      await loadMovie(movieId);
       setIsEditModalOpen(false);
-    } catch (err) {
-      console.error('Error updating movie:', err);
+    } catch (err: any) {
+      if (err?.response?.status !== 401) {
+        console.error('Error updating movie:', err);
+      }
     }
   };
 
@@ -98,7 +97,7 @@ export default function MovieDetails() {
     );
   }
 
-  return (
+  const content = (
     <>
       <MovieDetail
         movie={movie}
@@ -108,12 +107,16 @@ export default function MovieDetails() {
         onEditMovie={() => setIsEditModalOpen(true)}
       />
 
-      <EditMovieModal
-        movie={movie}
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSubmit={handleUpdateMovie}
-      />
+      {isEditModalOpen && (
+        <EditMovieModal
+          movie={movie}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleUpdateMovie}
+        />
+      )}
     </>
   );
+
+  return content;
 } 

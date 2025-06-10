@@ -44,17 +44,23 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
     }
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    const utcDate = new Date(releaseDate);
-    onSubmit({
+
+    const movieData: MovieCreateRequest = {
       title,
       description,
-      releaseDate: utcDate.toISOString(),
+      releaseDate: new Date(releaseDate).toISOString(),
       genreId,
       isDeleted: false
-    });
+    };
+
+    try {
+      onSubmit(movieData);
+    } catch (err) {
+      console.error('Error submitting form:', err);
+    }
   };
 
   if (isLoading) {
@@ -128,7 +134,11 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
         <div className="flex justify-end space-x-3">
           <button
             type="button"
-            onClick={onCancel}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onCancel();
+            }}
             className="btn btn-secondary"
           >
             Cancel
