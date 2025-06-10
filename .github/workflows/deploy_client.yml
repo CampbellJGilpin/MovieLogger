@@ -1,0 +1,35 @@
+name: Deploy UI
+
+on:
+  push:
+    branches:
+      - main
+    # paths:
+    #  - "client/**"
+
+defaults:
+ run:
+  working-directory: ./client
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "eu-west-1"
+      - name: Configure Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+      - name: Build UI
+        env:
+          VITE_API_URL: ${{ secrets.API_URL }}
+          CI: false
+        run: npm i && npm run build
+      - name: Deploy UI
+        run: aws s3 sync build s3://movielogger/
