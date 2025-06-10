@@ -15,4 +15,4 @@ VALUES
 (13, 'War');
 
 -- Bump the sequence so inserts won't collide
-ALTER SEQUENCE master.genres_id_seq RESTART WITH 14;
+ALTER SEQUENCE genres_id_seq RESTART WITH 14;
