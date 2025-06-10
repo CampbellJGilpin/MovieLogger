@@ -11,76 +11,85 @@ namespace movielogger.api.controllers
 {
     //[Authorize]
     [ApiController]
-    [Route("movies")]
-    public class MoviesController: ControllerBase
+    [Route("api/movies")]
+    public class MoviesController : ControllerBase
     {
-        private readonly IMoviesService _movieService;
+        private readonly IMoviesService _moviesService;
         private readonly IMapper _mapper;
 
-        public MoviesController(IMoviesService movieService, IMapper mapper)
+        public MoviesController(IMoviesService moviesService, IMapper mapper)
         {
-            _movieService = movieService;
+            _moviesService = moviesService;
             _mapper = mapper;
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetAllMovies()
+        public async Task<ActionResult<IEnumerable<MovieResponse>>> GetAllMovies()
         {
-            var serviceResponse = await _movieService.GetAllMoviesAsync();
-            var mappedResponse = _mapper.Map<List<MovieResponse>>(serviceResponse);
-            
-            return Ok(mappedResponse);
+            var movies = await _moviesService.GetAllMoviesAsync();
+            return Ok(_mapper.Map<IEnumerable<MovieResponse>>(movies));
         }
 
-        [HttpGet("{movieId}")]
-        public async Task<IActionResult> GetMovieById(int movieId)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<MovieResponse>> GetMovieById(int id)
         {
-            var serviceResponse = await _movieService.GetMovieByIdAsync(movieId);
-            var mappedResponse = _mapper.Map<MovieResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
+            try
+            {
+                var movie = await _moviesService.GetMovieByIdAsync(id);
+                return Ok(_mapper.Map<MovieResponse>(movie));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
         
         [HttpPost]
-        public async Task<IActionResult> CreateMovie([FromBody] CreateMovieRequest request)
+        public async Task<ActionResult<MovieResponse>> CreateMovie([FromBody] CreateMovieRequest request)
         {
-            var errorResult = request.Validate();
-            if (errorResult is not null) return errorResult;
-
-            var mappedRequest = _mapper.Map<MovieDto>(request);
-            var serviceResponse = await _movieService.CreateMovieAsync(mappedRequest);
-            var mappedResponse = _mapper.Map<MovieResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
-        }
-
-        [HttpPut("{movieId}")]
-        public async Task<IActionResult> UpdateMovie(int movieId, [FromBody] UpdateMovieRequest request)
-        {
-            var errorResult = request.Validate();
-            if (errorResult is not null) return errorResult;
-            
-            var mappedRequest = _mapper.Map<MovieDto>(request);
-            
             try
             {
-                var serviceResponse = await _movieService.UpdateMovieAsync(movieId, mappedRequest);
-                var mappedResponse = _mapper.Map<MovieResponse>(serviceResponse);
-                return Ok(mappedResponse);
+                var movieDto = _mapper.Map<MovieDto>(request);
+                var createdMovie = await _moviesService.CreateMovieAsync(movieDto);
+                return Ok(_mapper.Map<MovieResponse>(createdMovie));
             }
-            catch (KeyNotFoundException ex)
+            catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return BadRequest(new { error = ex.Message });
             }
-
         }
 
-        [HttpDelete("{movieId}")]
-        public async Task<IActionResult> DeleteMovie(int movieId)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<MovieResponse>> UpdateMovie(int id, [FromBody] UpdateMovieRequest request)
         {
-            var serviceResponse = await _movieService.DeleteMovieAsync(movieId);
-            
-            return Ok(serviceResponse);
+            try
+            {
+                var movieDto = _mapper.Map<MovieDto>(request);
+                var updatedMovie = await _moviesService.UpdateMovieAsync(id, movieDto);
+                return Ok(_mapper.Map<MovieResponse>(updatedMovie));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteMovie(int id)
+        {
+            try
+            {
+                await _moviesService.DeleteMovieAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
 }

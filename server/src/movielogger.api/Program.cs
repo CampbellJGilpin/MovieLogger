@@ -18,12 +18,15 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // Add services to the container.
+        builder.Services.AddControllers();
+
         // Add CORS
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.WithOrigins("http://localhost:5173")
+                policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials();
@@ -34,20 +37,32 @@ public class Program
         var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured"));
 
         // Configure JWT authentication
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                options.TokenValidationParameters = new TokenValidationParameters
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(key)
+            };
+            options.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings["Issuer"],
-                    ValidAudience = jwtSettings["Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(key)
-                };
-            });
+                    Console.WriteLine($"Authentication failed: {context.Exception}");
+                    return Task.CompletedTask;
+                }
+            };
+        });
 
         var isTesting = builder.Environment.EnvironmentName == "Testing";
 
@@ -106,27 +121,24 @@ public class Program
             });
         });
 
-        // Add controllers with API route prefix
-        builder.Services.AddControllers(options =>
-        {
-            options.UseGeneralRoutePrefix("api");
-        });
-
         var app = builder.Build();
 
-        // Enable CORS - must be before other middleware
-        app.UseCors();
-
+        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
         }
 
+        app.UseHttpsRedirection();
+        app.UseCors();
+
+        // Important: UseAuthentication must come before UseAuthorization
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
+        app.MapGet("/", () => "MovieLogger API");
 
         app.Run();
     }

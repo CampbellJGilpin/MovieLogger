@@ -42,11 +42,15 @@ public class ServicesMappingProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.User, opt => opt.Ignore())
             .ForMember(dest => dest.Movie, opt => opt.Ignore())
-            .ForMember(dest => dest.Viewings, opt => opt.Ignore());
+            .ForMember(dest => dest.Viewings, opt => opt.Ignore())
+            .ForMember(dest => dest.OwnsMovie, opt => opt.MapFrom(src => src.InLibrary))
+            .ForMember(dest => dest.Favourite, opt => opt.MapFrom(src => src.Favourite))
+            .ForMember(dest => dest.UpcomingViewDate, opt => opt.MapFrom((src, dest) => src.WatchLater ? DateTime.UtcNow.AddDays(1) : (DateTime?)null));
 
         CreateMap<UserMovie, LibraryItemDto>()
             .ForMember(dest => dest.MovieTitle, opt => opt.MapFrom(src => src.Movie.Title))
             .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => src.Movie.ReleaseDate))
+            .ForMember(dest => dest.Genre, opt => opt.MapFrom(src => src.Movie.Genre.Title))
             .ForMember(dest => dest.Favourite, opt => opt.MapFrom(src => src.Favourite))
             .ForMember(dest => dest.InLibrary, opt => opt.MapFrom(src => src.OwnsMovie))
             .ForMember(dest => dest.WatchLater, opt => opt.MapFrom(src => src.UpcomingViewDate.HasValue));

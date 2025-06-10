@@ -25,7 +25,7 @@ public class AccountsService : IAccountsService
         _configuration = configuration;
     }
     
-    public async Task<(string token, User user)> AuthenticateUserAsync(string email, string password)
+    public async Task<(User user, string token)> AuthenticateUserAsync(string email, string password)
     {
         try
         {
@@ -36,13 +36,37 @@ public class AccountsService : IAccountsService
                 throw new UnauthorizedAccessException("Invalid email or password");
 
             var token = GenerateJwtToken(user);
-            return (token, user);
+            return (user, token);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Authentication error: {ex}");
             throw;
         }
+    }
+
+    public async Task<User> Register(string email, string password, string userName)
+    {
+        var existingUser = await _db.Users.FirstOrDefaultAsync(x => x.Email == email);
+        if (existingUser != null)
+        {
+            throw new InvalidOperationException("Email already exists");
+        }
+
+        var hashedPassword = BC.HashPassword(password);
+        var user = new User
+        {
+            Email = email,
+            Password = hashedPassword,
+            UserName = userName,
+            IsAdmin = false,
+            IsDeleted = false
+        };
+
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
+
+        return user;
     }
 
     private string GenerateJwtToken(User user)

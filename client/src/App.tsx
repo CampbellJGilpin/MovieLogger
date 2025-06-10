@@ -1,77 +1,56 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import AllMovies from './pages/AllMovies';
+import MovieDetails from './pages/MovieDetails';
+import MovieSearch from './pages/MovieSearch';
+import MyLibrary from './pages/MyLibrary';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
-import Dashboard from './components/Dashboard';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
-// Protected route wrapper
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-
-  return children;
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  return user ? <>{children}</> : <Navigate to="/login" />;
 }
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <Layout>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/movies"
-              element={
-                <ProtectedRoute>
-                  <div>All Movies (Coming soon)</div>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/movies/new"
-              element={
-                <ProtectedRoute>
-                  <div>Add New Movie (Coming soon)</div>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/library"
-              element={
-                <ProtectedRoute>
-                  <div>My Library (Coming soon)</div>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <div>Profile (Coming soon)</div>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Layout>
-      </AuthProvider>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route element={<Layout />}>
+            <Route index element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            } />
+            <Route path="movies" element={
+              <PrivateRoute>
+                <AllMovies />
+              </PrivateRoute>
+            } />
+            <Route path="movies/:id" element={
+              <PrivateRoute>
+                <MovieDetails />
+              </PrivateRoute>
+            } />
+            <Route path="search" element={
+              <PrivateRoute>
+                <MovieSearch />
+              </PrivateRoute>
+            } />
+            <Route path="library" element={
+              <PrivateRoute>
+                <MyLibrary />
+              </PrivateRoute>
+            } />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

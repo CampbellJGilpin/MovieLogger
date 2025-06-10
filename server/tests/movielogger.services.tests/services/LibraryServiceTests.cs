@@ -10,6 +10,7 @@ using movielogger.services.interfaces;
 using movielogger.services.services;
 using Xunit;
 using NSubstitute;
+using Microsoft.Extensions.Logging;
 
 namespace movielogger.services.tests.services;
 
@@ -20,7 +21,8 @@ public class LibraryServiceTests : BaseServiceTest
 
     public LibraryServiceTests()
     {
-        _service = new LibraryService(_dbContext, _mapper);
+        var logger = Substitute.For<ILogger<LibraryService>>();
+        _service = new LibraryService(_dbContext, _mapper, logger);
     }
 
     [Fact]
@@ -100,7 +102,7 @@ public class LibraryServiceTests : BaseServiceTest
         // Act
         var result = await _service.GetLibraryFavouritesByUserIdAsync(UserId);
 
-        // Assert.
+        // Assert
         result.LibraryItems.Should().HaveCount(1);
         result.LibraryItems.Should().ContainSingle(i => i.MovieId == favouriteMovie.Id);
         result.LibraryItems.Should().NotContain(i => i.MovieId == notFavouriteMovie.Id);
@@ -134,21 +136,26 @@ public class LibraryServiceTests : BaseServiceTest
     }
 
     [Fact]
-    public async Task CreateLibraryEntryAsync_ValidInput_AddsLibraryEntryAndReturnsDto()
+    public async Task UpdateLibraryEntryAsync_NewEntry_CreatesAndReturnsDto()
     {
         // Arrange
         var movie = Fixture.Build<Movie>().With(m => m.IsDeleted, false).Create();
         var dto = Fixture.Build<LibraryItemDto>().With(d => d.MovieId, movie.Id).Create();
 
+        // Setup empty UserMovies collection
         var existing = new List<UserMovie>().AsQueryable().BuildMockDbSet();
         _dbContext.UserMovies.Returns(existing);
+
+        // Setup Movies collection to return our movie
+        var movies = new List<Movie> { movie }.AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(movies);
 
         var added = new List<UserMovie>();
         _dbContext.UserMovies.When(x => x.Add(Arg.Any<UserMovie>())).Do(x => added.Add(x.Arg<UserMovie>()));
         _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act
-        var result = await _service.CreateLibraryEntryAsync(UserId, dto);
+        var result = await _service.UpdateLibraryEntryAsync(UserId, dto);
 
         // Assert
         result.MovieId.Should().Be(dto.MovieId);
@@ -157,7 +164,7 @@ public class LibraryServiceTests : BaseServiceTest
     }
 
     [Fact]
-    public async Task UpdateLibraryEntryAsync_ExistingLibraryItem_UpdatesAndReturnsDto()
+    public async Task UpdateLibraryEntryAsync_ExistingEntry_UpdatesAndReturnsDto()
     {
         // Arrange
         var movie = Fixture.Build<Movie>().With(m => m.IsDeleted, false).Create();
@@ -168,8 +175,13 @@ public class LibraryServiceTests : BaseServiceTest
             .With(um => um.Movie, movie)
             .Create();
 
+        // Setup UserMovies collection with existing entry
         var mockSet = new List<UserMovie> { userMovie }.AsQueryable().BuildMockDbSet();
         _dbContext.UserMovies.Returns(mockSet);
+
+        // Setup Movies collection
+        var movies = new List<Movie> { movie }.AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(movies);
 
         var dto = _mapper.Map<LibraryItemDto>(userMovie);
         dto.Favourite = true;
@@ -182,5 +194,59 @@ public class LibraryServiceTests : BaseServiceTest
         // Assert
         result.Favourite.Should().BeTrue();
         await _dbContext.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateLibraryEntryAsync_NonExistentMovie_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        var dto = Fixture.Build<LibraryItemDto>().With(d => d.MovieId, 999).Create();
+
+        // Setup empty Movies collection
+        var movies = new List<Movie>().AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(movies);
+
+        // Act
+        var act = () => _service.UpdateLibraryEntryAsync(UserId, dto);
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>()
+            .WithMessage($"Movie with ID {dto.MovieId} not found.");
+    }
+
+    [Fact]
+    public async Task GetLibraryItemAsync_ExistingEntry_ReturnsDto()
+    {
+        // Arrange
+        var movie = Fixture.Build<Movie>().With(m => m.IsDeleted, false).Create();
+        var userMovie = Fixture.Build<UserMovie>()
+            .With(um => um.UserId, UserId)
+            .With(um => um.MovieId, movie.Id)
+            .With(um => um.Movie, movie)
+            .Create();
+
+        var mockSet = new List<UserMovie> { userMovie }.AsQueryable().BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockSet);
+
+        // Act
+        var result = await _service.GetLibraryItemAsync(UserId, movie.Id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.MovieId.Should().Be(movie.Id);
+    }
+
+    [Fact]
+    public async Task GetLibraryItemAsync_NonExistentEntry_ReturnsNull()
+    {
+        // Arrange
+        var mockSet = new List<UserMovie>().AsQueryable().BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockSet);
+
+        // Act
+        var result = await _service.GetLibraryItemAsync(UserId, 999);
+
+        // Assert
+        result.Should().BeNull();
     }
 }

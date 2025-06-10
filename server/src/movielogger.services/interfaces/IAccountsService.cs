@@ -4,5 +4,6 @@ namespace movielogger.services.interfaces;
 
 public interface IAccountsService
 {
-    Task<(string token, User user)> AuthenticateUserAsync(string email, string password);
+    Task<(User user, string token)> AuthenticateUserAsync(string email, string password);
+    Task<User> Register(string email, string password, string userName);
 }

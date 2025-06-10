@@ -6,22 +6,18 @@ export interface User {
   isDeleted: boolean;
 }
 
-export interface Movie {
-  id: string;
+export interface Genre {
+  id: number;
   title: string;
-  description: string;
-  releaseYear: number;
-  genre: string;
-  posterUrl?: string;
 }
 
-export interface Review {
-  id: string;
-  movieId: string;
-  userId: string;
-  rating: number;
-  comment: string;
-  viewDate: string;
+export interface Movie {
+  id: number;
+  title: string;
+  description: string;
+  releaseDate: string;
+  genre: Genre;
+  isDeleted: boolean;
 }
 
 export interface MovieInLibrary extends Movie {
@@ -29,4 +25,13 @@ export interface MovieInLibrary extends Movie {
   isWatchLater: boolean;
   isFavorite: boolean;
   userRating?: number;
+}
+
+export interface Review {
+  id: number;
+  movieId: number;
+  userId: number;
+  rating: number;
+  comment: string;
+  viewDate: string;
 } 

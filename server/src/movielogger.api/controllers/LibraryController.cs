@@ -12,6 +12,7 @@ namespace movielogger.api.controllers
 {
     //[Authorize]
     [ApiController]
+    [Route("api")]
     public class LibraryController : ControllerBase
     {
         private readonly ILibraryService _libraryService;
@@ -39,7 +40,7 @@ namespace movielogger.api.controllers
             if (errorResult is not null) return errorResult;
 
             var mappedRequest = _mapper.Map<LibraryItemDto>(request);
-            var serviceResponse = await _libraryService.CreateLibraryEntryAsync(userId, mappedRequest);
+            var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
             var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
             
             return Ok(mappedResponse);
@@ -50,28 +51,10 @@ namespace movielogger.api.controllers
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return errorResult;
-            
+
             var mappedRequest = _mapper.Map<LibraryItemDto>(request);
             var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
             var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
-        }
-        
-        [HttpGet("users/{userId}/library/favourites")]
-        public async Task<IActionResult> GetFavourites(int userId)
-        {
-            var serviceResponse = await _libraryService.GetLibraryFavouritesByUserIdAsync(userId);
-            var mappedResponse = _mapper.Map<LibraryResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
-        }
-        
-        [HttpGet("users/{userId}/library/watchlist")]
-        public async Task<IActionResult> GetWatchlist(int userId)
-        {
-            var serviceResponse = await _libraryService.GetLibraryWatchlistByUserIdAsync(userId);
-            var mappedResponse = _mapper.Map<LibraryResponse>(serviceResponse);
             
             return Ok(mappedResponse);
         }

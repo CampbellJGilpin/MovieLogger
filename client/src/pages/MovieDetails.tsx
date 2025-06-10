@@ -16,11 +16,11 @@ export default function MovieDetails() {
 
   useEffect(() => {
     if (id) {
-      loadMovie(id);
+      loadMovie(parseInt(id, 10));
     }
   }, [id]);
 
-  const loadMovie = async (movieId: string) => {
+  const loadMovie = async (movieId: number) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -38,7 +38,7 @@ export default function MovieDetails() {
     }
   };
 
-  const handleToggleWatched = async (movieId: string) => {
+  const handleToggleWatched = async (movieId: number) => {
     if (!movie) return;
     try {
       await movieService.toggleWatched(movieId);
@@ -48,7 +48,7 @@ export default function MovieDetails() {
     }
   };
 
-  const handleToggleWatchLater = async (movieId: string) => {
+  const handleToggleWatchLater = async (movieId: number) => {
     if (!movie) return;
     try {
       await movieService.toggleWatchLater(movieId);
@@ -58,7 +58,7 @@ export default function MovieDetails() {
     }
   };
 
-  const handleToggleFavorite = async (movieId: string) => {
+  const handleToggleFavorite = async (movieId: number) => {
     if (!movie) return;
     try {
       await movieService.toggleFavorite(movieId);
@@ -68,7 +68,7 @@ export default function MovieDetails() {
     }
   };
 
-  const handleAddReview = async (movieId: string, rating: number, comment: string) => {
+  const handleAddReview = async (movieId: number, rating: number, comment: string) => {
     try {
       const newReview = await movieService.addMovieReview(movieId, { rating, comment });
       setReviews([...reviews, newReview]);
@@ -77,10 +77,11 @@ export default function MovieDetails() {
     }
   };
 
-  const handleUpdateMovie = async (movieId: string, movieData: Omit<Movie, 'id'>) => {
+  const handleUpdateMovie = async (movieId: number, movieData: Omit<Movie, 'id'>) => {
     try {
       const updatedMovie = await movieService.updateMovie(movieId, movieData);
-      setMovie({ ...movie!, ...updatedMovie, isWatched: movie!.isWatched, isWatchLater: movie!.isWatchLater, isFavorite: movie!.isFavorite });
+      setMovie({ ...movie!, ...updatedMovie });
+      setIsEditModalOpen(false);
     } catch (err) {
       console.error('Error updating movie:', err);
     }

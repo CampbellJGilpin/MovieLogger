@@ -1,22 +1,22 @@
 import type { MovieInLibrary } from '../../types';
-import MovieCard from './MovieCard';
+import MovieListRow from './MovieListRow';
 
 interface MovieListProps {
   movies: MovieInLibrary[];
-  onToggleWatched?: (movieId: string) => void;
-  onToggleWatchLater?: (movieId: string) => void;
-  onToggleFavorite?: (movieId: string) => void;
+  onToggleInLibrary?: (movieId: number) => void;
+  onToggleFavorite?: (movieId: number) => void;
+  onDelete?: (movieId: number) => void;
   emptyMessage?: string;
 }
 
 export default function MovieList({
   movies,
-  onToggleWatched,
-  onToggleWatchLater,
+  onToggleInLibrary,
   onToggleFavorite,
+  onDelete,
   emptyMessage = 'No movies found'
 }: MovieListProps) {
-  if (movies.length === 0) {
+  if (!movies || movies.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">{emptyMessage}</p>
@@ -25,16 +25,35 @@ export default function MovieList({
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-      {movies.map((movie) => (
-        <MovieCard
-          key={movie.id}
-          movie={movie}
-          onToggleWatched={onToggleWatched}
-          onToggleWatchLater={onToggleWatchLater}
-          onToggleFavorite={onToggleFavorite}
-        />
-      ))}
+    <div className="mt-8 flow-root">
+      <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+          <table className="min-w-full divide-y divide-gray-300">
+            <thead>
+              <tr>
+                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Title</th>
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Release Date</th>
+                <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">In Library</th>
+                <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">Favourite</th>
+                <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                  <span className="sr-only">Delete</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {movies.map((movie) => (
+                <MovieListRow
+                  key={movie.id}
+                  movie={movie}
+                  onToggleInLibrary={onToggleInLibrary}
+                  onToggleFavorite={onToggleFavorite}
+                  onDelete={onDelete}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 } 

@@ -1,16 +1,19 @@
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import type { Movie } from '../../types';
-import MovieForm from './MovieForm';
 
-interface EditMovieModalProps {
-  movie: Movie;
+interface DeleteConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (movieId: number, movieData: Omit<Movie, 'id'>) => void;
+  onConfirm: () => void;
+  movieTitle: string;
 }
 
-export default function EditMovieModal({ movie, isOpen, onClose, onSubmit }: EditMovieModalProps) {
+export default function DeleteConfirmationModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  movieTitle,
+}: DeleteConfirmationModalProps) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={onClose}>
@@ -42,14 +45,32 @@ export default function EditMovieModal({ movie, isOpen, onClose, onSubmit }: Edi
                   as="h3"
                   className="text-lg font-medium leading-6 text-gray-900"
                 >
-                  Edit Movie
+                  Delete Movie
                 </Dialog.Title>
-                <div className="mt-4">
-                  <MovieForm
-                    movie={movie}
-                    onSubmit={(movieData) => onSubmit(movie.id, movieData)}
-                    onCancel={onClose}
-                  />
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500">
+                    Are you sure you want to delete "{movieTitle}"? This action cannot be undone.
+                  </p>
+                </div>
+
+                <div className="mt-4 flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={onClose}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => {
+                      onConfirm();
+                      onClose();
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

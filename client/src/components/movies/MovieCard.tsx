@@ -5,9 +5,9 @@ import { StarIcon as StarIconSolid, ClockIcon as ClockIconSolid, HeartIcon as He
 
 interface MovieCardProps {
   movie: MovieInLibrary;
-  onToggleWatched?: (movieId: string) => void;
-  onToggleWatchLater?: (movieId: string) => void;
-  onToggleFavorite?: (movieId: string) => void;
+  onToggleWatched?: (movieId: number) => void;
+  onToggleWatchLater?: (movieId: number) => void;
+  onToggleFavorite?: (movieId: number) => void;
 }
 
 export default function MovieCard({ 
@@ -16,21 +16,19 @@ export default function MovieCard({
   onToggleWatchLater,
   onToggleFavorite 
 }: MovieCardProps) {
+  if (!movie) {
+    return null;
+  }
+
+  const releaseYear = new Date(movie.releaseDate).getFullYear();
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <Link to={`/movies/${movie.id}`}>
         <div className="aspect-[2/3] relative">
-          {movie.posterUrl ? (
-            <img
-              src={movie.posterUrl}
-              alt={movie.title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-400">No poster</span>
-            </div>
-          )}
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-400">No poster</span>
+          </div>
         </div>
       </Link>
 
@@ -41,9 +39,9 @@ export default function MovieCard({
           </h3>
         </Link>
         <div className="mt-1 flex items-center text-sm text-gray-500">
-          <span>{movie.releaseYear}</span>
+          <span>{releaseYear}</span>
           <span className="mx-2">•</span>
-          <span>{movie.genre}</span>
+          <span>{movie.genre.title}</span>
         </div>
 
         <div className="mt-4 flex items-center justify-between">

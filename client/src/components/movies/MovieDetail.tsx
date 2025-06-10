@@ -8,11 +8,11 @@ import AddReviewModal from '../reviews/AddReviewModal';
 interface MovieDetailProps {
   movie: MovieInLibrary;
   reviews: Review[];
-  onToggleWatched?: (movieId: string) => void;
-  onToggleWatchLater?: (movieId: string) => void;
-  onToggleFavorite?: (movieId: string) => void;
-  onAddReview?: (movieId: string, rating: number, comment: string) => void;
-  onEditMovie?: (movieId: string) => void;
+  onToggleWatched?: (movieId: number) => void;
+  onToggleWatchLater?: (movieId: number) => void;
+  onToggleFavorite?: (movieId: number) => void;
+  onAddReview?: (movieId: number, rating: number, comment: string) => void;
+  onEditMovie?: (movieId: number) => void;
 }
 
 export default function MovieDetail({
@@ -31,23 +31,17 @@ export default function MovieDetail({
     ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
     : null;
 
+  const releaseYear = new Date(movie.releaseDate).getFullYear();
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="lg:grid lg:grid-cols-3 lg:gap-8">
         {/* Movie Poster */}
         <div className="lg:col-span-1">
           <div className="aspect-[2/3] relative rounded-lg overflow-hidden shadow-lg">
-            {movie.posterUrl ? (
-              <img
-                src={movie.posterUrl}
-                alt={movie.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-400">No poster</span>
-              </div>
-            )}
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-400">No poster</span>
+            </div>
           </div>
         </div>
 
@@ -57,9 +51,9 @@ export default function MovieDetail({
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{movie.title}</h1>
               <div className="mt-2 flex items-center text-sm text-gray-500">
-                <span>{movie.releaseYear}</span>
+                <span>{releaseYear}</span>
                 <span className="mx-2">•</span>
-                <span>{movie.genre}</span>
+                <span>{movie.genre.title}</span>
                 {averageRating && (
                   <>
                     <span className="mx-2">•</span>

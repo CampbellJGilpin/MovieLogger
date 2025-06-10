@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using movielogger.dal;
 using movielogger.dal.dtos;
 using movielogger.dal.entities;
@@ -11,11 +12,13 @@ public class LibraryService : ILibraryService
 {
     private readonly IAssessmentDbContext _db;
     private readonly IMapper _mapper;
+    private readonly ILogger<LibraryService> _logger;
 
-    public LibraryService(IAssessmentDbContext db, IMapper mapper)
+    public LibraryService(IAssessmentDbContext db, IMapper mapper, ILogger<LibraryService> logger)
     {
         _db = db;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<LibraryDto> GetLibraryByUserIdAsync(int userId)
@@ -54,36 +57,96 @@ public class LibraryService : ILibraryService
         return dto;
     }
 
-    public async Task<LibraryItemDto> CreateLibraryEntryAsync(int userId, LibraryItemDto libraryItemDto)
-    {
-        var exists = await _db.UserMovies.AnyAsync(um => um.UserId == userId && um.MovieId == libraryItemDto.MovieId);
-        if (exists)
-        {
-            throw new InvalidOperationException("Library entry already exists for this user and movie.");
-        }
-
-        var entry = _mapper.Map<UserMovie>(libraryItemDto);
-        entry.UserId = userId;
-
-        _db.UserMovies.Add(entry);
-        await _db.SaveChangesAsync();
-
-        return _mapper.Map<LibraryItemDto>(entry);
-    }
-
     public async Task<LibraryItemDto> UpdateLibraryEntryAsync(int userId, LibraryItemDto libraryItemDto)
     {
-        var entry = await _db.UserMovies.FirstOrDefaultAsync(um => um.MovieId == libraryItemDto.MovieId && um.UserId == userId);
-        if (entry == null)
+        try
         {
-            throw new KeyNotFoundException("Library entry not found for this user.");
+            _logger.LogInformation("Updating library entry for user {UserId} and movie {MovieId}", userId, libraryItemDto.MovieId);
+
+            // Check if the user exists
+            var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+            if (!userExists)
+            {
+                _logger.LogWarning("User {UserId} not found or is deleted", userId);
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+            }
+
+            // Check if the movie exists
+            var movieExists = await _db.Movies.AnyAsync(m => m.Id == libraryItemDto.MovieId && !m.IsDeleted);
+            if (!movieExists)
+            {
+                _logger.LogWarning("Movie {MovieId} not found or is deleted", libraryItemDto.MovieId);
+                throw new KeyNotFoundException($"Movie with ID {libraryItemDto.MovieId} not found.");
+            }
+
+            // Try to find existing entry
+            var entry = await _db.UserMovies
+                .Include(um => um.Movie)
+                .ThenInclude(m => m.Genre)
+                .FirstOrDefaultAsync(um => um.MovieId == libraryItemDto.MovieId && um.UserId == userId);
+
+            if (entry == null)
+            {
+                // Create new entry
+                _logger.LogInformation("Creating new library entry for user {UserId} and movie {MovieId}", userId, libraryItemDto.MovieId);
+                entry = _mapper.Map<UserMovie>(libraryItemDto);
+                entry.UserId = userId;
+                _db.UserMovies.Add(entry);
+            }
+            else
+            {
+                // Update existing entry
+                _logger.LogInformation("Current entry state: Favourite={Favourite}, OwnsMovie={OwnsMovie}", entry.Favourite, entry.OwnsMovie);
+                _mapper.Map(libraryItemDto, entry);
+                entry.UserId = userId;
+            }
+
+            _logger.LogInformation("New entry state: Favourite={Favourite}, OwnsMovie={OwnsMovie}", entry.Favourite, entry.OwnsMovie);
+            await _db.SaveChangesAsync();
+
+            // Reload the entry to get updated navigation properties
+            entry = await _db.UserMovies
+                .Include(um => um.Movie)
+                .ThenInclude(m => m.Genre)
+                .FirstAsync(um => um.Id == entry.Id);
+
+            var result = _mapper.Map<LibraryItemDto>(entry);
+            _logger.LogInformation("Updated library entry for movie {MovieId}", libraryItemDto.MovieId);
+            return result;
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating library entry for user {UserId} and movie {MovieId}", userId, libraryItemDto.MovieId);
+            throw;
+        }
+    }
 
-        _mapper.Map(libraryItemDto, entry);
-        entry.UserId = userId;
+    public async Task<LibraryItemDto?> GetLibraryItemAsync(int userId, int movieId)
+    {
+        try
+        {
+            _logger.LogInformation("Getting library item for user {UserId} and movie {MovieId}", userId, movieId);
+            
+            var entry = await _db.UserMovies
+                .Include(um => um.Movie)
+                .ThenInclude(m => m.Genre)
+                .FirstOrDefaultAsync(um => um.MovieId == movieId && um.UserId == userId);
 
-        await _db.SaveChangesAsync();
+            if (entry != null)
+            {
+                _logger.LogInformation("Found library item. Favourite={Favourite}, OwnsMovie={OwnsMovie}", entry.Favourite, entry.OwnsMovie);
+            }
+            else
+            {
+                _logger.LogInformation("No library item found");
+            }
 
-        return _mapper.Map<LibraryItemDto>(entry);
+            return entry == null ? null : _mapper.Map<LibraryItemDto>(entry);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting library item for user {UserId} and movie {MovieId}", userId, movieId);
+            throw;
+        }
     }
 }

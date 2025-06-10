@@ -40,7 +40,10 @@ public class ApiMappingProfile : Profile
         
         // DTO to Response
         CreateMap<GenreDto, GenreResponse>();
-        CreateMap<LibraryItemDto, LibraryItemResponse>();
+        CreateMap<LibraryItemDto, LibraryItemResponse>()
+            .ForMember(dest => dest.Favourite, opt => opt.MapFrom(src => src.Favourite.ToString().ToLower()))
+            .ForMember(dest => dest.InLibrary, opt => opt.MapFrom(src => src.InLibrary.ToString().ToLower()))
+            .ForMember(dest => dest.WatchLater, opt => opt.MapFrom(src => src.WatchLater.ToString().ToLower()));
         CreateMap<LibraryDto, LibraryResponse>();
         CreateMap<MovieDto, MovieResponse>();
         CreateMap<ReviewDto, ReviewResponse>();

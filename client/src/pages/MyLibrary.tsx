@@ -5,15 +5,15 @@ import * as movieService from '../services/movieService';
 
 export default function MyLibrary() {
   const [movies, setMovies] = useState<MovieInLibrary[]>([]);
-  const [activeTab, setActiveTab] = useState<'watched' | 'watchLater' | 'favorites'>('watched');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'watched' | 'watchLater' | 'favorites'>('watched');
 
   useEffect(() => {
-    loadLibrary();
+    loadMovies();
   }, []);
 
-  const loadLibrary = async () => {
+  const loadMovies = async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -27,7 +27,7 @@ export default function MyLibrary() {
     }
   };
 
-  const handleToggleWatched = async (movieId: string) => {
+  const handleToggleInLibrary = async (movieId: number) => {
     try {
       await movieService.toggleWatched(movieId);
       setMovies(movies.map(movie =>
@@ -36,24 +36,11 @@ export default function MyLibrary() {
           : movie
       ));
     } catch (err) {
-      console.error('Error toggling watched status:', err);
+      console.error('Error toggling library status:', err);
     }
   };
 
-  const handleToggleWatchLater = async (movieId: string) => {
-    try {
-      await movieService.toggleWatchLater(movieId);
-      setMovies(movies.map(movie =>
-        movie.id === movieId
-          ? { ...movie, isWatchLater: !movie.isWatchLater }
-          : movie
-      ));
-    } catch (err) {
-      console.error('Error toggling watch later status:', err);
-    }
-  };
-
-  const handleToggleFavorite = async (movieId: string) => {
+  const handleToggleFavorite = async (movieId: number) => {
     try {
       await movieService.toggleFavorite(movieId);
       setMovies(movies.map(movie =>
@@ -63,6 +50,15 @@ export default function MyLibrary() {
       ));
     } catch (err) {
       console.error('Error toggling favorite status:', err);
+    }
+  };
+
+  const handleDeleteMovie = async (movieId: number) => {
+    try {
+      await movieService.deleteMovie(movieId);
+      setMovies(movies.filter(movie => movie.id !== movieId));
+    } catch (err) {
+      console.error('Error deleting movie:', err);
     }
   };
 
@@ -79,71 +75,72 @@ export default function MyLibrary() {
     }
   });
 
-  const tabs = [
-    { id: 'watched', name: 'Watched', count: movies.filter(m => m.isWatched).length },
-    { id: 'watchLater', name: 'Watch Later', count: movies.filter(m => m.isWatchLater).length },
-    { id: 'favorites', name: 'Favorites', count: movies.filter(m => m.isFavorite).length },
-  ];
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-gray-500">Loading your library...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">My Library</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-2xl font-bold text-gray-900 mb-8">My Library</h1>
 
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`
-                  whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                  ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }
-                `}
-              >
-                {tab.name}
-                <span
-                  className={`ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium
-                    ${
-                      activeTab === tab.id
-                        ? 'bg-blue-100 text-blue-600'
-                        : 'bg-gray-100 text-gray-900'
-                    }
-                  `}
-                >
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        {error && (
-          <div className="rounded-md bg-red-50 p-4 my-6">
-            <div className="text-sm text-red-700">{error}</div>
-          </div>
-        )}
-
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="text-gray-500">Loading your library...</div>
-          </div>
-        ) : (
-          <div className="mt-6">
-            <MovieList
-              movies={filteredMovies}
-              onToggleWatched={handleToggleWatched}
-              onToggleWatchLater={handleToggleWatchLater}
-              onToggleFavorite={handleToggleFavorite}
-              emptyMessage={`No ${activeTab} movies yet`}
-            />
-          </div>
-        )}
+      <div className="border-b border-gray-200 mb-8">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('watched')}
+            className={`
+              pb-4 px-1 border-b-2 font-medium text-sm
+              ${activeTab === 'watched'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }
+            `}
+          >
+            Watched
+          </button>
+          <button
+            onClick={() => setActiveTab('watchLater')}
+            className={`
+              pb-4 px-1 border-b-2 font-medium text-sm
+              ${activeTab === 'watchLater'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }
+            `}
+          >
+            Watch Later
+          </button>
+          <button
+            onClick={() => setActiveTab('favorites')}
+            className={`
+              pb-4 px-1 border-b-2 font-medium text-sm
+              ${activeTab === 'favorites'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }
+            `}
+          >
+            Favorites
+          </button>
+        </nav>
       </div>
+
+      {error ? (
+        <div className="rounded-md bg-red-50 p-4">
+          <div className="text-sm text-red-700">{error}</div>
+        </div>
+      ) : (
+        <MovieList
+          movies={filteredMovies}
+          onToggleInLibrary={handleToggleInLibrary}
+          onToggleFavorite={handleToggleFavorite}
+          onDelete={handleDeleteMovie}
+          emptyMessage={`No ${activeTab} movies found`}
+        />
+      )}
     </div>
   );
 } 

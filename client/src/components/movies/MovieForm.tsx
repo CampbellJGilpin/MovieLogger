@@ -1,38 +1,43 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import type { Movie } from '../../types';
+import type { Movie, MovieCreateRequest } from '../../types';
 
 interface MovieFormProps {
   movie?: Movie;
-  onSubmit: (movieData: Omit<Movie, 'id'>) => void;
+  onSubmit: (movieData: MovieCreateRequest) => void;
   onCancel: () => void;
 }
 
 export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [releaseYear, setReleaseYear] = useState('');
-  const [genre, setGenre] = useState('');
-  const [posterUrl, setPosterUrl] = useState('');
+  const [releaseDate, setReleaseDate] = useState(new Date().toISOString().split('T')[0]);
+  const [genreId, setGenreId] = useState(1);
 
   useEffect(() => {
     if (movie) {
       setTitle(movie.title);
       setDescription(movie.description);
-      setReleaseYear(movie.releaseYear.toString());
-      setGenre(movie.genre);
-      setPosterUrl(movie.posterUrl || '');
+      // Convert the date to local date string for the input
+      const date = new Date(movie.releaseDate);
+      setReleaseDate(date.toISOString().split('T')[0]);
+      setGenreId(movie.genre.id);
     }
   }, [movie]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    
+    // Convert the date to UTC
+    const date = new Date(releaseDate);
+    const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    
     onSubmit({
       title,
       description,
-      releaseYear: parseInt(releaseYear, 10),
-      genre,
-      posterUrl: posterUrl || undefined,
+      releaseDate: utcDate.toISOString(),
+      genreId,
+      isDeleted: false
     });
   };
 
@@ -58,74 +63,53 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
         </label>
         <textarea
           id="description"
-          rows={4}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          rows={4}
           className="input mt-1"
           required
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div>
-          <label htmlFor="releaseYear" className="block text-sm font-medium text-gray-700">
-            Release Year
-          </label>
-          <input
-            type="number"
-            id="releaseYear"
-            min="1888"
-            max={new Date().getFullYear()}
-            value={releaseYear}
-            onChange={(e) => setReleaseYear(e.target.value)}
-            className="input mt-1"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="genre" className="block text-sm font-medium text-gray-700">
-            Genre
-          </label>
-          <select
-            id="genre"
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-            className="input mt-1"
-            required
-          >
-            <option value="">Select a genre</option>
-            <option value="Action">Action</option>
-            <option value="Adventure">Adventure</option>
-            <option value="Animation">Animation</option>
-            <option value="Comedy">Comedy</option>
-            <option value="Crime">Crime</option>
-            <option value="Documentary">Documentary</option>
-            <option value="Drama">Drama</option>
-            <option value="Family">Family</option>
-            <option value="Fantasy">Fantasy</option>
-            <option value="Horror">Horror</option>
-            <option value="Mystery">Mystery</option>
-            <option value="Romance">Romance</option>
-            <option value="Science Fiction">Science Fiction</option>
-            <option value="Thriller">Thriller</option>
-            <option value="Western">Western</option>
-          </select>
-        </div>
+      <div>
+        <label htmlFor="releaseDate" className="block text-sm font-medium text-gray-700">
+          Release Date
+        </label>
+        <input
+          type="date"
+          id="releaseDate"
+          value={releaseDate}
+          onChange={(e) => setReleaseDate(e.target.value)}
+          className="input mt-1"
+          required
+        />
       </div>
 
       <div>
-        <label htmlFor="posterUrl" className="block text-sm font-medium text-gray-700">
-          Poster URL
+        <label htmlFor="genre" className="block text-sm font-medium text-gray-700">
+          Genre
         </label>
-        <input
-          type="url"
-          id="posterUrl"
-          value={posterUrl}
-          onChange={(e) => setPosterUrl(e.target.value)}
+        <select
+          id="genre"
+          value={genreId}
+          onChange={(e) => setGenreId(parseInt(e.target.value))}
           className="input mt-1"
-          placeholder="https://example.com/movie-poster.jpg"
-        />
+          required
+        >
+          <option value={1}>Action</option>
+          <option value={2}>Horror</option>
+          <option value={3}>Drama</option>
+          <option value={4}>Comedy</option>
+          <option value={5}>Thriller</option>
+          <option value={6}>Romance</option>
+          <option value={7}>Science Fiction</option>
+          <option value={8}>Western</option>
+          <option value={9}>Documentary</option>
+          <option value={10}>Family</option>
+          <option value={11}>Musical</option>
+          <option value={12}>Fantasy</option>
+          <option value={13}>War</option>
+        </select>
       </div>
 
       <div className="flex justify-end space-x-3">
@@ -140,7 +124,7 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
           type="submit"
           className="btn btn-primary"
         >
-          {movie ? 'Update Movie' : 'Add Movie'}
+          Save
         </button>
       </div>
     </form>

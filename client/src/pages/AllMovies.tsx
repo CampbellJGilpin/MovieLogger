@@ -30,8 +30,9 @@ export default function AllMovies() {
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (!query.trim()) {
       loadMovies();
       return;
     }
@@ -39,7 +40,7 @@ export default function AllMovies() {
     try {
       setIsLoading(true);
       setError(null);
-      const results = await movieService.searchMovies(searchQuery);
+      const results = await movieService.searchMovies(query);
       setMovies(results);
     } catch (err) {
       setError('Failed to search movies. Please try again later.');
@@ -52,14 +53,14 @@ export default function AllMovies() {
   const handleAddMovie = async (movieData: Omit<Movie, 'id'>) => {
     try {
       await movieService.createMovie(movieData);
-      loadMovies();
+      await loadMovies();
+      setIsAddMovieModalOpen(false);
     } catch (err) {
-      setError('Failed to add movie. Please try again later.');
       console.error('Error adding movie:', err);
     }
   };
 
-  const handleToggleWatched = async (movieId: string) => {
+  const handleToggleInLibrary = async (movieId: number) => {
     try {
       await movieService.toggleWatched(movieId);
       setMovies(movies.map(movie =>
@@ -68,24 +69,11 @@ export default function AllMovies() {
           : movie
       ));
     } catch (err) {
-      console.error('Error toggling watched status:', err);
+      console.error('Error toggling library status:', err);
     }
   };
 
-  const handleToggleWatchLater = async (movieId: string) => {
-    try {
-      await movieService.toggleWatchLater(movieId);
-      setMovies(movies.map(movie =>
-        movie.id === movieId
-          ? { ...movie, isWatchLater: !movie.isWatchLater }
-          : movie
-      ));
-    } catch (err) {
-      console.error('Error toggling watch later status:', err);
-    }
-  };
-
-  const handleToggleFavorite = async (movieId: string) => {
+  const handleToggleFavorite = async (movieId: number) => {
     try {
       await movieService.toggleFavorite(movieId);
       setMovies(movies.map(movie =>
@@ -98,12 +86,32 @@ export default function AllMovies() {
     }
   };
 
+  const handleDeleteMovie = async (movieId: number) => {
+    try {
+      await movieService.deleteMovie(movieId);
+      setMovies(movies.filter(movie => movie.id !== movieId));
+    } catch (err) {
+      console.error('Error deleting movie:', err);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-gray-500">Loading movies...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold text-gray-900">All Movies</h1>
+        </div>
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <button
+            type="button"
             onClick={() => setIsAddMovieModalOpen(true)}
             className="btn btn-primary flex items-center"
           >
@@ -111,48 +119,35 @@ export default function AllMovies() {
             Add Movie
           </button>
         </div>
-
-        <div className="mb-6">
-          <div className="max-w-lg">
-            <div className="mt-1 flex rounded-md shadow-sm">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="Search movies..."
-                className="input flex-1"
-              />
-              <button
-                onClick={handleSearch}
-                className="ml-3 btn btn-secondary"
-              >
-                Search
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {error && (
-          <div className="rounded-md bg-red-50 p-4 mb-6">
-            <div className="text-sm text-red-700">{error}</div>
-          </div>
-        )}
-
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="text-gray-500">Loading movies...</div>
-          </div>
-        ) : (
-          <MovieList
-            movies={movies}
-            onToggleWatched={handleToggleWatched}
-            onToggleWatchLater={handleToggleWatchLater}
-            onToggleFavorite={handleToggleFavorite}
-            emptyMessage="No movies found. Try adding some!"
-          />
-        )}
       </div>
+
+      <div className="mb-8">
+        <input
+          type="text"
+          placeholder="Search movies..."
+          value={searchQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+          className="input w-full max-w-md"
+        />
+      </div>
+
+      {error ? (
+        <div className="rounded-md bg-red-50 p-4">
+          <div className="text-sm text-red-700">{error}</div>
+        </div>
+      ) : (
+        <MovieList
+          movies={movies}
+          onToggleInLibrary={handleToggleInLibrary}
+          onToggleFavorite={handleToggleFavorite}
+          onDelete={handleDeleteMovie}
+          emptyMessage={
+            searchQuery
+              ? 'No movies found matching your search'
+              : 'No movies added yet'
+          }
+        />
+      )}
 
       <AddMovieModal
         isOpen={isAddMovieModalOpen}
