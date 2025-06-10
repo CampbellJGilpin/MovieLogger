@@ -86,4 +86,23 @@ public class ViewingsService : IViewingsService
 
         return _mapper.Map<ViewingDto>(viewing);
     }
+
+    public async Task<List<ViewingDto>> GetViewingsByUserIdAsync(int userId)
+    {
+        // First check if user exists
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        var viewings = await _db.Viewings
+            .Include(v => v.UserMovie)
+                .ThenInclude(um => um.Movie)
+            .Include(v => v.Review)
+            .Where(v => v.UserMovie.UserId == userId)
+            .ToListAsync();
+
+        return viewings.Select(v => _mapper.Map<ViewingDto>(v)).ToList();
+    }
 }

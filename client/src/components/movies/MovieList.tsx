@@ -4,7 +4,6 @@ import MovieListRow from './MovieListRow';
 interface MovieListProps {
   movies: MovieInLibrary[];
   onToggleWatched?: (movieId: number) => void;
-  onToggleWatchLater?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
   onDelete?: (movieId: number) => void;
   emptyMessage?: string;
@@ -13,7 +12,6 @@ interface MovieListProps {
 export default function MovieList({
   movies,
   onToggleWatched,
-  onToggleWatchLater,
   onToggleFavorite,
   onDelete,
   emptyMessage = 'No movies found'
@@ -35,10 +33,11 @@ export default function MovieList({
               <tr>
                 <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Title</th>
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Release Date</th>
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Genre</th>
                 <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">In Library</th>
                 <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">Favourite</th>
                 <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                  <span className="sr-only">Delete</span>
+                  <span className="sr-only">Actions</span>
                 </th>
               </tr>
             </thead>
@@ -48,7 +47,6 @@ export default function MovieList({
                   key={movie.id}
                   movie={movie}
                   onToggleWatched={onToggleWatched}
-                  onToggleWatchLater={onToggleWatchLater}
                   onToggleFavorite={onToggleFavorite}
                   onDelete={onDelete}
                 />

@@ -32,21 +32,22 @@ export interface MovieInLibrary extends Movie {
   isWatchLater: boolean;
   isFavorite: boolean;
   userRating?: number;
+  reviews?: Review[];
 }
 
 export interface Review {
   id: number;
-  rating: number;
-  comment: string;
-  viewDate: string;
-  userId: number;
-  movieId: number;
+  score: number;
+  reviewText: string;
+  dateViewed: string;
+  movieTitle: string;
 }
 
 export interface Viewing {
   id: number;
-  dateWatched: string;
-  userMovie: UserMovie;
+  dateViewed: string;
+  movieId: number;
+  review?: Review;
 }
 
 export interface UserMovie {

@@ -8,6 +8,7 @@ public class CreateReviewRequest : IValidatable<CreateReviewRequest>
 {
     public string ReviewText { get; set; } = string.Empty;
     public int Score { get; set; }
+    public int UserId { get; set; }
 
     public IValidator<CreateReviewRequest> GetValidator()
         => new CreateReviewRequestValidator();

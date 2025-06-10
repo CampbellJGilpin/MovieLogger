@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import MovieDetail from '../components/movies/MovieDetail';
 import EditMovieModal from '../components/movies/EditMovieModal';
+import AddReviewModal from '../components/reviews/AddReviewModal';
 import type { MovieInLibrary } from '../types/index';
 import type { MovieCreateRequest } from '../types';
 import * as movieService from '../services/movieService';
@@ -12,6 +13,7 @@ export default function MovieDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -24,7 +26,11 @@ export default function MovieDetails() {
       setIsLoading(true);
       setError(null);
       const movieData = await movieService.getMovie(movieId);
-      setMovie(movieData);
+      console.log('Movie Data:', movieData);
+      const reviews = await movieService.getMovieReviews(movieId);
+      console.log('Reviews:', reviews);
+      setMovie({ ...movieData, reviews });
+      console.log('Combined Movie with Reviews:', { ...movieData, reviews });
     } catch (err) {
       setError('Failed to load movie details. Please try again later.');
       console.error('Error loading movie details:', err);
@@ -77,6 +83,17 @@ export default function MovieDetails() {
     }
   };
 
+  const handleAddReview = async (review: { score: number; reviewText: string }) => {
+    if (!movie?.id) return;
+    try {
+      await movieService.addMovieReview(movie.id, review);
+      await loadMovie(movie.id);
+      setIsReviewModalOpen(false);
+    } catch (err) {
+      console.error('Error adding review:', err);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="text-center py-12">
@@ -97,7 +114,7 @@ export default function MovieDetails() {
     );
   }
 
-  const content = (
+  return (
     <>
       <MovieDetail
         movie={movie}
@@ -105,6 +122,7 @@ export default function MovieDetails() {
         onToggleWatchLater={handleToggleWatchLater}
         onToggleFavorite={handleToggleFavorite}
         onEditMovie={() => setIsEditModalOpen(true)}
+        onAddReview={() => setIsReviewModalOpen(true)}
       />
 
       {isEditModalOpen && (
@@ -115,8 +133,15 @@ export default function MovieDetails() {
           onSubmit={handleUpdateMovie}
         />
       )}
+
+      {isReviewModalOpen && (
+        <AddReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          onSubmit={handleAddReview}
+          movieTitle={movie.title}
+        />
+      )}
     </>
   );
-
-  return content;
 } 

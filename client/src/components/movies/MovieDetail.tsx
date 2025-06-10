@@ -1,6 +1,7 @@
 import type { MovieInLibrary } from '../../types';
-import { StarIcon, ClockIcon, HeartIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { StarIcon, ClockIcon, HeartIcon, PencilIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid, ClockIcon as ClockIconSolid, HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import ReviewList from '../reviews/ReviewList';
 
 interface MovieDetailProps {
   movie: MovieInLibrary;
@@ -8,6 +9,7 @@ interface MovieDetailProps {
   onToggleWatchLater?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
   onEditMovie?: (movieId: number) => void;
+  onAddReview?: () => void;
 }
 
 export default function MovieDetail({
@@ -16,7 +18,10 @@ export default function MovieDetail({
   onToggleWatchLater,
   onToggleFavorite,
   onEditMovie,
+  onAddReview,
 }: MovieDetailProps) {
+  console.log('MovieDetail - Movie with Reviews:', movie);
+
   // Safety check for null/undefined movie
   if (!movie?.id || !movie?.title) {
     return (
@@ -44,7 +49,7 @@ export default function MovieDetail({
         </div>
 
         {/* Movie Info */}
-        <div className="lg:col-span-2 mt-8 lg:mt-0">
+        <div className="lg:col-span-2">
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{movie.title}</h1>
@@ -55,15 +60,26 @@ export default function MovieDetail({
               </div>
             </div>
 
-            {onEditMovie && (
-              <button
-                onClick={() => onEditMovie(movie.id)}
-                className="btn btn-secondary flex items-center"
-              >
-                <PencilIcon className="w-4 h-4 mr-2" />
-                Edit
-              </button>
-            )}
+            <div className="flex space-x-2">
+              {onEditMovie && (
+                <button
+                  onClick={() => onEditMovie(movie.id)}
+                  className="btn btn-secondary flex items-center"
+                >
+                  <PencilIcon className="w-4 h-4 mr-2" />
+                  Edit
+                </button>
+              )}
+              {onAddReview && (
+                <button
+                  onClick={onAddReview}
+                  className="btn btn-primary flex items-center"
+                >
+                  <ChatBubbleLeftIcon className="w-4 h-4 mr-2" />
+                  Add Review
+                </button>
+              )}
+            </div>
           </div>
 
           <p className="mt-4 text-gray-600">{movie.description}</p>
@@ -124,6 +140,12 @@ export default function MovieDetail({
               </button>
             )}
           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-8 lg:mt-0">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Reviews</h2>
+          <ReviewList reviews={movie.reviews || []} />
         </div>
       </div>
     </div>

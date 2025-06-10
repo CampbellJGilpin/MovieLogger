@@ -6,18 +6,19 @@ import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 interface AddReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (rating: number, comment: string) => void;
+  onSubmit: (review: { score: number; reviewText: string }) => void;
+  movieTitle: string;
 }
 
-export default function AddReviewModal({ isOpen, onClose, onSubmit }: AddReviewModalProps) {
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
+export default function AddReviewModal({ isOpen, onClose, onSubmit, movieTitle }: AddReviewModalProps) {
+  const [score, setScore] = useState(0);
+  const [reviewText, setReviewText] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(rating, comment);
-    setRating(0);
-    setComment('');
+    onSubmit({ score, reviewText });
+    setScore(0);
+    setReviewText('');
   };
 
   return (
@@ -51,46 +52,46 @@ export default function AddReviewModal({ isOpen, onClose, onSubmit }: AddReviewM
                   as="h3"
                   className="text-lg font-medium leading-6 text-gray-900"
                 >
-                  Add Review
+                  Add Review for {movieTitle}
                 </Dialog.Title>
 
                 <form onSubmit={handleSubmit} className="mt-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Rating
                     </label>
-                    <div className="mt-1 flex items-center space-x-1">
-                      {[1, 2, 3, 4, 5].map((value) => (
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((rating) => (
                         <button
-                          key={value}
+                          key={rating}
                           type="button"
-                          onClick={() => setRating(value)}
-                          className="p-1 focus:outline-none"
+                          onClick={() => setScore(rating)}
+                          className="p-1"
                         >
-                          {value <= rating ? (
-                            <StarIconSolid className="w-6 h-6 text-yellow-400" />
+                          {rating <= score ? (
+                            <StarIconSolid className="h-6 w-6 text-yellow-400" />
                           ) : (
-                            <StarIcon className="w-6 h-6 text-gray-300 hover:text-yellow-400" />
+                            <StarIcon className="h-6 w-6 text-gray-300" />
                           )}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mb-4">
                     <label
-                      htmlFor="comment"
-                      className="block text-sm font-medium text-gray-700"
+                      htmlFor="review"
+                      className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                      Comment
+                      Review
                     </label>
                     <textarea
-                      id="comment"
+                      id="review"
                       rows={4}
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      className="input mt-1"
-                      required
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                      placeholder="Write your review here..."
                     />
                   </div>
 
@@ -98,16 +99,16 @@ export default function AddReviewModal({ isOpen, onClose, onSubmit }: AddReviewM
                     <button
                       type="button"
                       onClick={onClose}
-                      className="btn btn-secondary"
+                      className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="btn btn-primary"
-                      disabled={rating === 0 || !comment.trim()}
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      disabled={!score || !reviewText.trim()}
                     >
-                      Submit Review
+                      Submit
                     </button>
                   </div>
                 </form>

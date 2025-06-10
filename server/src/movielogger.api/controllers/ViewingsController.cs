@@ -22,6 +22,23 @@ namespace movielogger.api.controllers
             _mapper = mapper;
         }
         
+        [HttpGet]
+        [Route("~/api/users/{userId}/viewings")]
+        public async Task<IActionResult> GetUserViewings(int userId)
+        {
+            try
+            {
+                var serviceResponse = await _viewingsService.GetViewingsByUserIdAsync(userId);
+                var mappedResponse = _mapper.Map<List<ViewingResponse>>(serviceResponse);
+                
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"User with ID {userId} not found.");
+            }
+        }
+        
         [HttpGet("{viewingId}")]
         public async Task<IActionResult> GetViewing(int viewingId)
         {

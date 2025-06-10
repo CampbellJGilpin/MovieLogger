@@ -21,8 +21,9 @@ namespace movielogger.api.controllers
             _reviewsService = reviewsService;
             _mapper = mapper;
         }
-        
-        [HttpGet("users/{userId}/reviews")]
+
+        [HttpGet]
+        [Route("~/api/users/{userId}/reviews")]
         public async Task<IActionResult> GetUserReviews(int userId)
         {
             var serviceResponse = await _reviewsService.GetAllReviewsByUserIdAsync(userId);
@@ -30,8 +31,47 @@ namespace movielogger.api.controllers
             
             return Ok(mappedResponse);
         }
-        
-        [HttpPost("viewings/{viewingId}/reviews")]
+
+        [HttpGet]
+        [Route("~/api/movies/{movieId}/users/{userId}/reviews")]
+        public async Task<IActionResult> GetMovieReviewsByUser(int movieId, int userId)
+        {
+            try
+            {
+                var serviceResponse = await _reviewsService.GetMovieReviewsByUserIdAsync(movieId, userId);
+                var mappedResponse = _mapper.Map<List<ReviewResponse>>(serviceResponse);
+                
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("~/api/movies/{movieId}/reviews")]
+        public async Task<IActionResult> CreateMovieReview(int movieId, [FromBody] CreateReviewRequest request)
+        {
+            var errorResult = request.Validate();
+            if (errorResult is not null) return errorResult;
+            
+            try 
+            {
+                var reviewRequest = _mapper.Map<ReviewDto>(request);
+                var serviceResponse = await _reviewsService.CreateMovieReviewAsync(movieId, request.UserId, reviewRequest);
+                var mappedResponse = _mapper.Map<ReviewResponse>(serviceResponse);
+                
+                return CreatedAtAction(nameof(GetUserReviews), new { userId = request.UserId }, mappedResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("~/api/viewings/{viewingId}/review")]
         public async Task<IActionResult> CreateReview(int viewingId, [FromBody] CreateReviewRequest request)
         {
             var errorResult = request.Validate();
@@ -44,7 +84,7 @@ namespace movielogger.api.controllers
             return Ok(mappedResponse);
         }
 
-        [HttpPut("reviews/{reviewId}")]
+        [HttpPut("{reviewId}")]
         public async Task<IActionResult> UpdateReview(int reviewId, [FromBody] UpdateReviewRequest request)
         {
             var errorResult = request.Validate();
