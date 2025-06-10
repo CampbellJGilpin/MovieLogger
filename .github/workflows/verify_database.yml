@@ -13,4 +13,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: execute flyway in docker compose 🐳
-        run: docker-compose up --exit-code-from flyway
+        run: docker compose up --exit-code-from flyway
