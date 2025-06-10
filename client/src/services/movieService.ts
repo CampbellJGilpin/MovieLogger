@@ -1,6 +1,5 @@
 import api from '../api/config';
 import type { Movie, MovieInLibrary, Review, Genre } from '../types';
-import * as reviewService from './reviewService';
 
 interface MovieCreateRequest {
   title: string;
@@ -35,23 +34,6 @@ function mapLibraryItemToMovieInLibrary(item: LibraryItemDto): MovieInLibrary {
     isFavorite: item.favourite === "true",
     isDeleted: false // Movies in the library are not deleted
   };
-}
-
-interface ViewingResponse {
-  id: number;
-  userId: number;
-  movieId: number;
-  favourite: boolean;
-  ownsMovie: boolean;
-  upcomingViewDate: string | null;
-  movie: {
-    id: number;
-    title: string;
-    description: string;
-    releaseDate: string;
-    genreId: number;
-  };
-  review?: Review;
 }
 
 export async function getAllMovies(): Promise<MovieInLibrary[]> {
