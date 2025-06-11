@@ -9,6 +9,8 @@ using movielogger.api.models.responses.movies;
 using movielogger.api.models.responses.users;
 using movielogger.dal.dtos;
 using NSubstitute;
+using System.Text.Json;
+using movielogger.dal.entities;
 
 namespace movielogger.api.tests.controllers;
 
@@ -19,7 +21,7 @@ public class UsersControllerTests : BaseTestController
     public async Task GetAllUsers_ReturnAllUsers()
     {
         // Act
-        var response = await _client.GetAsync("/users");
+        var response = await _client.GetAsync("/api/users");
         
         // Assert
         response.EnsureSuccessStatusCode();
@@ -35,7 +37,7 @@ public class UsersControllerTests : BaseTestController
     public async Task GetUserById_WhenUserExists_ReturnsUser()
     {
         // Act
-        var response = await _client.GetAsync("/users/1");
+        var response = await _client.GetAsync("/api/users/1");
         
         // Assert
         response.EnsureSuccessStatusCode();
@@ -51,7 +53,7 @@ public class UsersControllerTests : BaseTestController
     public async Task GetUserById_WhenUserDoesNotExist_ReturnsNotFound()
     {
         // Act
-        var response = await _client.GetAsync("/users/999");
+        var response = await _client.GetAsync("/api/users/999");
         
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -61,26 +63,27 @@ public class UsersControllerTests : BaseTestController
     public async Task CreateUser_WithValidData_ReturnsCreatedUser()
     {
         // Arrange 
-        var request = new CreateUserRequest
+        var request = new RegisterRequest
         {
             UserName = "Jack Burton",
             Email = "jackburton@example.com",
-            Password = "ItsAllInTheReflexes",
-            IsAdmin = false,
-            IsDeleted = false
+            Password = "ItsAllInTheReflexes"
         };
         
         // Act
-        var response = await _client.PostAsJsonAsync("/users", request);
+        var response = await _client.PostAsJsonAsync("api/accounts/register", request);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var createdUser = await response.Content.ReadFromJsonAsync<UserResponse>();
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<JsonElement>(content);
         
-        createdUser.Should().NotBeNull();
-        createdUser!.UserName.Should().Be(request.UserName);
-        createdUser.Email.Should().Be(request.Email);
-        createdUser.Id.Should().BeGreaterThan(0);
+        var user = result.GetProperty("user").Deserialize<UserResponse>();
+        
+        user.Should().NotBeNull();
+        user.UserName.Should().Be(request.UserName);
+        user.Email.Should().Be(request.Email);
+        user.Id.Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -95,7 +98,7 @@ public class UsersControllerTests : BaseTestController
         };
         
         // Act
-        var response = await _client.PostAsJsonAsync("/users", request);
+        var response = await _client.PostAsJsonAsync("/api/users", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -113,7 +116,7 @@ public class UsersControllerTests : BaseTestController
         };
         
         // Act
-        var response = await _client.PostAsJsonAsync("/users", request);
+        var response = await _client.PostAsJsonAsync("/api/users", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -133,7 +136,7 @@ public class UsersControllerTests : BaseTestController
         };
         
         // Act
-        var response = await _client.PutAsJsonAsync("/users/1", request);
+        var response = await _client.PutAsJsonAsync("/api/users/1", request);
         
         // Assert
         response.EnsureSuccessStatusCode();
@@ -159,7 +162,7 @@ public class UsersControllerTests : BaseTestController
         };
         
         // Act
-        var response = await _client.PutAsJsonAsync("/users/999", request);
+        var response = await _client.PutAsJsonAsync("/api/users/999", request);
         
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -169,13 +172,13 @@ public class UsersControllerTests : BaseTestController
     public async Task DeleteUser_WhenUserExists_ReturnsNoContent()
     {
         // Act
-        var response = await _client.DeleteAsync("/users/1");
+        var response = await _client.DeleteAsync("/api/users/1");
         
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         
         // Verify user is deleted
-        var getResponse = await _client.GetAsync("/users/1");
+        var getResponse = await _client.GetAsync("/api/users/1");
         getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -183,7 +186,7 @@ public class UsersControllerTests : BaseTestController
     public async Task DeleteUser_WhenUserDoesNotExist_ReturnsNotFound()
     {
         // Act
-        var response = await _client.DeleteAsync("/users/999");
+        var response = await _client.DeleteAsync("/api/users/999");
         
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

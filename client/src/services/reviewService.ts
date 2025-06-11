@@ -7,7 +7,7 @@ export async function getUserReviews(userId: number): Promise<Review[]> {
 }
 
 export async function createReview(viewingId: number, review: { score: number; reviewText: string }): Promise<Review> {
-  const response = await api.post<Review>(`/api/viewings/${viewingId}/review`, review);
+  const response = await api.post<Review>(`/api/viewings/${viewingId}/reviews`, review);
   return response.data;
 }
 

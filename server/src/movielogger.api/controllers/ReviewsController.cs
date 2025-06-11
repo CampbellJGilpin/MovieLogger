@@ -72,7 +72,7 @@ namespace movielogger.api.controllers
         }
 
         [HttpPost]
-        [Route("~/api/viewings/{viewingId}/review")]
+        [Route("~/api/viewings/{viewingId}/reviews")]
         public async Task<IActionResult> CreateReview(int viewingId, [FromBody] CreateReviewRequest request)
         {
             var errorResult = request.Validate();

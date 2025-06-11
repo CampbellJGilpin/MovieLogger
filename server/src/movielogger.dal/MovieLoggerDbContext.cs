@@ -3,9 +3,9 @@ using movielogger.dal.entities;
 
 namespace movielogger.dal;
 
-public class AssessmentDbContext : DbContext, IAssessmentDbContext
+public class MovieLoggerDbContext : DbContext, IAssessmentDbContext
 {
-    public AssessmentDbContext(DbContextOptions<AssessmentDbContext> options)
+    public MovieLoggerDbContext(DbContextOptions<MovieLoggerDbContext> options)
         : base(options) { }
 
     public virtual DbSet<User> Users => Set<User>();

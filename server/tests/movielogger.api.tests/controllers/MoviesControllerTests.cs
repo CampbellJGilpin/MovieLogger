@@ -17,7 +17,7 @@ public class MoviesControllerTests : BaseTestController
     public async Task GetAllMovies_ReturnsSeededMovies()
     {
         // Arrange 
-        var response = await _client.GetAsync("/movies");
+        var response = await _client.GetAsync("/api/movies");
 
         // Act
         response.EnsureSuccessStatusCode();
@@ -30,7 +30,7 @@ public class MoviesControllerTests : BaseTestController
     [Fact]
     public async Task GetMovieById_ReturnsCorrectMovies()
     {
-        var singleMovieResponse = await _client.GetAsync($"/movies/1");
+        var singleMovieResponse = await _client.GetAsync($"/api/movies/1");
         singleMovieResponse.EnsureSuccessStatusCode();
 
         var movie = await singleMovieResponse.Content.ReadFromJsonAsync<MovieResponse>();

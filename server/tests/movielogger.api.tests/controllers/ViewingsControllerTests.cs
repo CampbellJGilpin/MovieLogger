@@ -13,7 +13,7 @@ public class ViewingsControllerTests : BaseTestController
     public async Task GetViewing_ReturnsViewing()
     {
         // Act
-        var response = await _client.GetAsync($"/viewings/1");
+        var response = await _client.GetAsync($"/api/viewings/1");
         
         // Assert
         response.EnsureSuccessStatusCode();
@@ -33,7 +33,7 @@ public class ViewingsControllerTests : BaseTestController
         };
         
         // Act
-        var response = await _client.PostAsJsonAsync("/viewings", request);
+        var response = await _client.PostAsJsonAsync("/api/viewings", request);
         
         // Assert
         response.EnsureSuccessStatusCode();
@@ -52,7 +52,7 @@ public class ViewingsControllerTests : BaseTestController
         };
         
         // Act
-        var response = await _client.PutAsJsonAsync("/viewings/1", request);
+        var response = await _client.PutAsJsonAsync("/api/viewings/1", request);
         
         // Assert
         response.EnsureSuccessStatusCode();

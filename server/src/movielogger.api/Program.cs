@@ -55,14 +55,6 @@ public class Program
                 ValidAudience = jwtSettings["Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(key)
             };
-            options.Events = new JwtBearerEvents
-            {
-                OnAuthenticationFailed = context =>
-                {
-                    Console.WriteLine($"Authentication failed: {context.Exception}");
-                    return Task.CompletedTask;
-                }
-            };
         });
 
         var isTesting = builder.Environment.EnvironmentName == "Testing";
@@ -71,11 +63,11 @@ public class Program
         {
             var dbConnection = "DATABASE_URL".GetValue();
             
-            builder.Services.AddDbContext<AssessmentDbContext>(options =>
+            builder.Services.AddDbContext<MovieLoggerDbContext>(options =>
                 options.UseNpgsql(dbConnection ?? builder.Configuration.GetConnectionString("DefaultConnection")));
             
             builder.Services.AddScoped<IAssessmentDbContext>(provider => 
-                provider.GetRequiredService<AssessmentDbContext>());
+                provider.GetRequiredService<MovieLoggerDbContext>());
         }
 
         builder.Services
@@ -135,23 +127,11 @@ public class Program
 
         app.UseHttpsRedirection();
         app.UseCors();
-
-        // Important: UseAuthentication must come before UseAuthorization
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
-        app.MapGet("/", () => "MovieLogger API");
 
         app.Run();
     }
 }
-
-public static class MvcOptionsExtensions
-{
-    public static void UseGeneralRoutePrefix(this MvcOptions options, string prefix)
-    {
-        options.Conventions.Add(new RoutePrefixConvention(new RouteAttribute(prefix)));
-    }
-}
-

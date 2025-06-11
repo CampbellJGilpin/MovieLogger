@@ -17,7 +17,7 @@ public class GenresControllerTests : BaseTestController
     public async Task GetAllGenres_ReturnsSeededGenres()
     {
         // Act
-        var response = await _client.GetAsync("/genres");
+        var response = await _client.GetAsync("/api/genres");
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -30,7 +30,7 @@ public class GenresControllerTests : BaseTestController
     public async Task GetGenreById_ReturnsCorrectGenre()
     {
         // Act
-        var singleGenreResponse = await _client.GetAsync($"/genres/1");
+        var singleGenreResponse = await _client.GetAsync($"/api/genres/1");
         
         // Assert
         singleGenreResponse.EnsureSuccessStatusCode();
@@ -48,7 +48,7 @@ public class GenresControllerTests : BaseTestController
         var request = new CreateGenreRequest { Title = "Musical" };
         
         // Act
-        var response = await _client.PostAsJsonAsync("/genres", request);
+        var response = await _client.PostAsJsonAsync("/api/genres", request);
         
         // Assert
         response.EnsureSuccessStatusCode();
@@ -66,7 +66,7 @@ public class GenresControllerTests : BaseTestController
         var request = new UpdateGenreRequest { Title = "Super Horror" };
         
         // Act
-        var response = await _client.PutAsJsonAsync("/genres/1", request);
+        var response = await _client.PutAsJsonAsync("/api/genres/1", request);
         
         // Assert
         response.EnsureSuccessStatusCode();

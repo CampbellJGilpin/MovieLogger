@@ -407,7 +407,7 @@ GET /users/{userId}/reviews
 
 #### Create Review
 ```http
-POST /viewings/{viewingId}/review
+POST /viewings/{viewingId}/reviews
 ```
 **Description:** Create a review and score for an existing viewing.
 

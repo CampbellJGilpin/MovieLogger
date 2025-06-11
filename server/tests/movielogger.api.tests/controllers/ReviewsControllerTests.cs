@@ -16,7 +16,7 @@ public class ReviewsControllerTests  : BaseTestController
     public async Task GetUserReviews_ReturnsSeededReviews()
     {
         // Act
-        var response = await _client.GetAsync("/users/1/reviews");
+        var response = await _client.GetAsync("/api/users/1/reviews");
         
         // Assert
         response.EnsureSuccessStatusCode();
@@ -38,7 +38,7 @@ public class ReviewsControllerTests  : BaseTestController
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync($"/viewings/{viewingId}/reviews", request);
+        var response = await _client.PostAsJsonAsync($"/api/viewings/{viewingId}/reviews", request);
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -62,7 +62,7 @@ public class ReviewsControllerTests  : BaseTestController
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/reviews/{reviewId}", updateRequest);
+        var response = await _client.PutAsJsonAsync($"/api/reviews/{reviewId}", updateRequest);
 
         // Assert
         response.EnsureSuccessStatusCode();

@@ -5,6 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using movielogger.dal;
 using movielogger.api.tests.helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using movielogger.services.interfaces;
+using movielogger.services.services;
+using movielogger.api.mappings;
+using movielogger.services.mapping;
+using FluentValidation;
 
 namespace movielogger.api.tests.fixtures;
 
@@ -18,31 +26,78 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         
         builder.ConfigureTestServices(services =>
         {
+            // Remove existing DbContext configuration
             var dbContextDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(DbContextOptions<AssessmentDbContext>));
+                d => d.ServiceType == typeof(DbContextOptions<MovieLoggerDbContext>));
             if (dbContextDescriptor != null)
             {
                 services.Remove(dbContextDescriptor);
             }
 
             var contextDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(AssessmentDbContext));
+                d => d.ServiceType == typeof(MovieLoggerDbContext));
             if (contextDescriptor != null)
             {
                 services.Remove(contextDescriptor);
             }
             
-            services.AddDbContext<AssessmentDbContext>(options =>
+            // Configure in-memory database
+            services.AddDbContext<MovieLoggerDbContext>(options =>
             {
                 options.UseInMemoryDatabase(_databaseName);
             });
 
             services.AddScoped<IAssessmentDbContext>(provider =>
-                provider.GetRequiredService<AssessmentDbContext>());
+                provider.GetRequiredService<MovieLoggerDbContext>());
+
+            // Remove existing authentication configuration
+            var authenticationDescriptor = services.SingleOrDefault(
+                d => d.ServiceType == typeof(JwtBearerHandler));
+            if (authenticationDescriptor != null)
+            {
+                services.Remove(authenticationDescriptor);
+            }
+
+            // Configure JWT authentication for testing
+            services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "MovieLoggerAPI",
+                    ValidAudience = "MovieLoggerUsers",
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes("8a6b89da22b854f58f57f15bb675d2692255801f989b24098d6266fc1f4857f13fdace450ac0503fd68db511a8520ff106a16ce31f1402a6ae4ffc3e1849b531"))
+                };
+            });
+
+            // Configure services
+            services.AddScoped<IUsersService, UsersService>();
+            services.AddScoped<IAccountsService, AccountsService>();
+            services.AddScoped<IGenresService, GenresService>();
+            services.AddScoped<ILibraryService, LibraryService>();
+            services.AddScoped<IMoviesService, MoviesService>();
+            services.AddScoped<IReviewsService, ReviewsService>();
+            services.AddScoped<IViewingsService, ViewingsService>();
+
+            // Configure AutoMapper
+            services.AddAutoMapper(
+                typeof(ApiMappingProfile).Assembly,
+                typeof(ServicesMappingProfile).Assembly);
+
+            // Configure Validation
+            services.AddValidatorsFromAssemblyContaining<Program>();
+
+            // Configure Controllers
+            services.AddControllers()
+                .AddApplicationPart(typeof(Program).Assembly);
             
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AssessmentDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<MovieLoggerDbContext>();
             db.Database.EnsureCreated();
             
             SeedTestData(db);
@@ -52,9 +107,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     public void ResetDatabase()
     {
         using var scope = Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<AssessmentDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<MovieLoggerDbContext>();
         
-        // Clear all data
         db.Reviews.RemoveRange(db.Reviews);
         db.Viewings.RemoveRange(db.Viewings);
         db.UserMovies.RemoveRange(db.UserMovies);
@@ -67,7 +121,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         SeedTestData(db);
     }
 
-    private static void SeedTestData(AssessmentDbContext db)
+    private static void SeedTestData(MovieLoggerDbContext db)
     {
         try
         {

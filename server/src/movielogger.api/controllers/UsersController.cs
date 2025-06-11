@@ -11,7 +11,6 @@ using BC = BCrypt.Net.BCrypt;
 
 namespace movielogger.api.controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/users")]
     public class UsersController : ControllerBase
