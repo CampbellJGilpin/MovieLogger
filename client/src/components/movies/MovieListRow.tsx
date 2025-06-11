@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import { HeartIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, TrashIcon, CheckIcon } from '@heroicons/react/24/outline';
 import type { MovieInLibrary } from '../../types';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 interface MovieListRowProps {
   movie: MovieInLibrary;
+  onToggleWatched?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
   onDelete?: (movieId: number) => void;
 }
 
 export default function MovieListRow({ 
   movie, 
+  onToggleWatched,
   onToggleFavorite,
   onDelete 
 }: MovieListRowProps) {
@@ -30,6 +32,19 @@ export default function MovieListRow({
         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{releaseYear}</td>
         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{movie.genre.title}</td>
         <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
+          {onToggleWatched && (
+            <button
+              onClick={() => onToggleWatched(movie.id)}
+              className={`p-1.5 rounded-full mr-2 ${
+                movie.isWatched
+                  ? 'bg-green-100 text-green-600'
+                  : 'bg-gray-100 text-gray-400 hover:text-gray-500'
+              }`}
+              title={movie.isWatched ? "Watched" : "Mark as watched"}
+            >
+              <CheckIcon className="w-5 h-5" />
+            </button>
+          )}
           {onToggleFavorite && (
             <button
               onClick={() => onToggleFavorite(movie.id)}
