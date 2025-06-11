@@ -6,7 +6,6 @@ import MovieDetails from './pages/MovieDetails';
 import MyLibrary from './pages/MyLibrary';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
-import NotFound from './pages/NotFound';
 import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './contexts/useAuth';
 
@@ -83,7 +82,7 @@ function App() {
               </PrivateRoute>
             } />
           </Route>
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
