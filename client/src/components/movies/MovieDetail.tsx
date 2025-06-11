@@ -1,7 +1,7 @@
 import type { MovieInLibrary } from '../../types';
-import { StarIcon, ClockIcon, HeartIcon, PencilIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid, ClockIcon as ClockIconSolid, HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import ReviewList from '../reviews/ReviewList';
+import { PencilIcon, ClockIcon } from '@heroicons/react/24/outline';
+import Toggle from '../common/Toggle';
+import StarRating from '../common/StarRating';
 
 interface MovieDetailProps {
   movie: MovieInLibrary;
@@ -20,132 +20,105 @@ export default function MovieDetail({
   onEditMovie,
   onAddReview,
 }: MovieDetailProps) {
-  console.log('MovieDetail - Movie with Reviews:', movie);
-
-  // Safety check for null/undefined movie
   if (!movie?.id || !movie?.title) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center text-gray-500">
-          Loading movie details...
+        <div className="text-gray-500">
+          <p>Movie not found</p>
         </div>
       </div>
     );
   }
 
-  // Safely get the release year
-  const releaseYear = movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : null;
+  // Get the 5 most recent reviews
+  const recentReviews = movie.reviews?.slice(0, 5) || [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-        {/* Movie Poster */}
-        <div className="lg:col-span-1">
-          <div className="aspect-[2/3] relative rounded-lg overflow-hidden shadow-lg">
-            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-400">No poster</span>
+      <div className="grid grid-cols-12 gap-8">
+        {/* Left Column - Movie Details */}
+        <div className="col-span-5">
+          {/* Title Section */}
+          <div className="mb-6">
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">{movie.title}</h1>
+            <div className="flex items-center gap-3">
+              <span className="text-xl text-gray-600">{new Date(movie.releaseDate).getFullYear()}</span>
+              <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                {movie.genre.title}
+              </span>
+            </div>
+          </div>
+
+          {/* Description */}
+          <p className="text-gray-600 mb-6">{movie.description}</p>
+
+          {/* Actions Row */}
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex gap-3">
+              <button
+                onClick={() => onEditMovie?.(movie.id)}
+                className="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+              >
+                <PencilIcon className="h-4 w-4 mr-1.5" />
+                Edit Movie
+              </button>
+              <button
+                onClick={onAddReview}
+                className="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+              >
+                <ClockIcon className="h-4 w-4 mr-1.5" />
+                Log Viewing
+              </button>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Toggle
+                enabled={movie.isWatched}
+                onChange={() => onToggleWatched?.(movie.id)}
+                label="Owned"
+              />
+              <Toggle
+                enabled={!!movie.isWatchLater}
+                onChange={() => onToggleWatchLater?.(movie.id)}
+                label="Watch Later"
+              />
+              <Toggle
+                enabled={false}
+                onChange={() => onToggleFavorite?.(movie.id)}
+                label="Favorite"
+              />
             </div>
           </div>
         </div>
 
-        {/* Movie Info */}
-        <div className="lg:col-span-2">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{movie.title}</h1>
-              <div className="mt-2 flex items-center text-sm text-gray-500">
-                {releaseYear && <span>{releaseYear}</span>}
-                {releaseYear && movie.genre?.title && <span className="mx-2">•</span>}
-                {movie.genre?.title && <span>{movie.genre.title}</span>}
+        {/* Middle Column - Poster */}
+        <div className="col-span-3 -mx-4">
+          <div className="aspect-[2/3] bg-gray-100 rounded-lg overflow-hidden shadow-lg">
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              No poster
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - View History */}
+        <div className="col-span-4">
+          <h2 className="text-xl font-semibold mb-4">View History</h2>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+            {recentReviews.map((review) => (
+              <div key={review.id} className="border-b pb-2.5">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="text-sm text-gray-500">
+                    {new Date(review.dateViewed).toLocaleDateString()}
+                  </div>
+                  <StarRating rating={review.score} className="ml-2" />
+                </div>
+                <div className="text-sm">{review.reviewText}</div>
               </div>
-            </div>
-
-            <div className="flex space-x-2">
-              {onEditMovie && (
-                <button
-                  onClick={() => onEditMovie(movie.id)}
-                  className="btn btn-secondary flex items-center"
-                >
-                  <PencilIcon className="w-4 h-4 mr-2" />
-                  Edit
-                </button>
-              )}
-              {onAddReview && (
-                <button
-                  onClick={onAddReview}
-                  className="btn btn-primary flex items-center"
-                >
-                  <ChatBubbleLeftIcon className="w-4 h-4 mr-2" />
-                  Add Review
-                </button>
-              )}
-            </div>
-          </div>
-
-          <p className="mt-4 text-gray-600">{movie.description}</p>
-
-          {/* Action Buttons */}
-          <div className="mt-6 flex items-center space-x-4">
-            {onToggleWatched && (
-              <button
-                onClick={() => onToggleWatched(movie.id)}
-                className={`btn ${
-                  movie.isWatched
-                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                } flex items-center`}
-              >
-                {movie.isWatched ? (
-                  <StarIconSolid className="w-5 h-5 mr-2" />
-                ) : (
-                  <StarIcon className="w-5 h-5 mr-2" />
-                )}
-                {movie.isWatched ? 'Watched' : 'Mark as Watched'}
-              </button>
-            )}
-
-            {onToggleWatchLater && (
-              <button
-                onClick={() => onToggleWatchLater(movie.id)}
-                className={`btn ${
-                  movie.isWatchLater
-                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                } flex items-center`}
-              >
-                {movie.isWatchLater ? (
-                  <ClockIconSolid className="w-5 h-5 mr-2" />
-                ) : (
-                  <ClockIcon className="w-5 h-5 mr-2" />
-                )}
-                {movie.isWatchLater ? 'In Watch Later' : 'Add to Watch Later'}
-              </button>
-            )}
-
-            {onToggleFavorite && (
-              <button
-                onClick={() => onToggleFavorite(movie.id)}
-                className={`btn ${
-                  movie.isFavorite
-                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                } flex items-center`}
-              >
-                {movie.isFavorite ? (
-                  <HeartIconSolid className="w-5 h-5 mr-2" />
-                ) : (
-                  <HeartIcon className="w-5 h-5 mr-2" />
-                )}
-                {movie.isFavorite ? 'Favorited' : 'Add to Favorites'}
-              </button>
+            ))}
+            {recentReviews.length === 0 && (
+              <div className="text-gray-500 text-sm">No viewing history</div>
             )}
           </div>
-        </div>
-
-        {/* Reviews Section */}
-        <div className="mt-8 lg:mt-0">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Reviews</h2>
-          <ReviewList reviews={movie.reviews || []} />
         </div>
       </div>
     </div>
