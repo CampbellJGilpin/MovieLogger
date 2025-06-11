@@ -4,6 +4,7 @@ import MovieList from '../components/movies/MovieList';
 import AddMovieModal from '../components/movies/AddMovieModal';
 import type { MovieInLibrary } from '../types';
 import * as movieService from '../services/movieService';
+import api from '../api/config';
 
 interface MovieCreateRequest {
   title: string;
@@ -46,7 +47,9 @@ export default function AllMovies() {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await movieService.getAllMovies();
+      const userResponse = await api.get('/accounts/me');
+      const userId = userResponse.data.id;
+      const data = await movieService.getAllMovies(userId);
       setMovies(data);
     } catch (err) {
       setError('Failed to load movies. Please try again later.');
@@ -60,7 +63,9 @@ export default function AllMovies() {
     try {
       setIsLoading(true);
       setError(null);
-      const results = await movieService.searchMovies(query);
+      const userResponse = await api.get('/accounts/me');
+      const userId = userResponse.data.id;
+      const results = await movieService.searchMovies(query, userId);
       setMovies(results);
     } catch (err) {
       setError('Failed to search movies. Please try again later.');

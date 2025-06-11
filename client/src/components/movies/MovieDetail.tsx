@@ -83,9 +83,9 @@ export default function MovieDetail({
                 label="Watch Later"
               />
               <Toggle
-                enabled={false}
+                enabled={movie.isFavorite}
                 onChange={() => onToggleFavorite?.(movie.id)}
-                label="Favorite"
+                label="Favourite"
               />
             </div>
           </div>

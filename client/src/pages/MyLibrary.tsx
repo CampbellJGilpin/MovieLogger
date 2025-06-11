@@ -7,7 +7,7 @@ export default function MyLibrary() {
   const [movies, setMovies] = useState<MovieInLibrary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'watched' | 'watchLater' | 'favorites'>('watched');
+  const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
 
   useEffect(() => {
     loadMovies();
@@ -27,25 +27,12 @@ export default function MyLibrary() {
     }
   };
 
-  const handleToggleInLibrary = async (movieId: number) => {
-    try {
-      await movieService.toggleWatched(movieId);
-      setMovies(movies.map(movie =>
-        movie.id === movieId
-          ? { ...movie, isWatched: !movie.isWatched }
-          : movie
-      ));
-    } catch (err) {
-      console.error('Error toggling library status:', err);
-    }
-  };
-
   const handleToggleFavorite = async (movieId: number) => {
     try {
-      await movieService.toggleFavorite(movieId);
+      const updatedMovie = await movieService.toggleFavorite(movieId);
       setMovies(movies.map(movie =>
         movie.id === movieId
-          ? { ...movie, isFavorite: !movie.isFavorite }
+          ? updatedMovie
           : movie
       ));
     } catch (err) {
@@ -53,70 +40,34 @@ export default function MyLibrary() {
     }
   };
 
-  const handleDeleteMovie = async (movieId: number) => {
-    try {
-      await movieService.deleteMovie(movieId);
-      setMovies(movies.filter(movie => movie.id !== movieId));
-    } catch (err) {
-      console.error('Error deleting movie:', err);
-    }
-  };
-
-  const filteredMovies = movies.filter(movie => {
-    switch (activeTab) {
-      case 'watched':
-        return movie.isWatched;
-      case 'watchLater':
-        return movie.isWatchLater;
-      case 'favorites':
-        return movie.isFavorite;
-      default:
-        return false;
-    }
-  });
-
-  if (isLoading) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-gray-500">Loading your library...</div>
-      </div>
-    );
-  }
+  const filteredMovies = activeTab === 'favorites' 
+    ? movies.filter(m => m.isFavorite)
+    : movies;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">My Library</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">My Library</h1>
+      </div>
 
       <div className="border-b border-gray-200 mb-8">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           <button
-            onClick={() => setActiveTab('watched')}
+            onClick={() => setActiveTab('all')}
             className={`
-              pb-4 px-1 border-b-2 font-medium text-sm
-              ${activeTab === 'watched'
+              whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+              ${activeTab === 'all'
                 ? 'border-indigo-500 text-indigo-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }
             `}
           >
-            Watched
-          </button>
-          <button
-            onClick={() => setActiveTab('watchLater')}
-            className={`
-              pb-4 px-1 border-b-2 font-medium text-sm
-              ${activeTab === 'watchLater'
-                ? 'border-indigo-500 text-indigo-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }
-            `}
-          >
-            Watch Later
+            All Movies
           </button>
           <button
             onClick={() => setActiveTab('favorites')}
             className={`
-              pb-4 px-1 border-b-2 font-medium text-sm
+              whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
               ${activeTab === 'favorites'
                 ? 'border-indigo-500 text-indigo-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -135,9 +86,7 @@ export default function MyLibrary() {
       ) : (
         <MovieList
           movies={filteredMovies}
-          onToggleWatched={handleToggleInLibrary}
           onToggleFavorite={handleToggleFavorite}
-          onDelete={handleDeleteMovie}
           emptyMessage={
             isLoading
               ? 'Loading your library...'

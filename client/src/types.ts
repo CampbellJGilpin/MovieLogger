@@ -17,6 +17,7 @@ export interface Movie {
   releaseDate: string;
   genre: Genre;
   isDeleted: boolean;
+  userRating?: number;
 }
 
 export interface MovieCreateRequest {
@@ -28,19 +29,16 @@ export interface MovieCreateRequest {
 }
 
 export interface MovieInLibrary extends Movie {
-  isWatched: boolean;
-  isWatchLater: boolean;
   isFavorite: boolean;
-  userRating?: number;
-  reviews?: Review[];
 }
 
 export interface Review {
   id: number;
-  score: number;
-  reviewText: string;
-  dateViewed: string;
-  movieTitle: string;
+  movieId: number;
+  userId: number;
+  rating: number;
+  comment: string;
+  dateReviewed: string;
 }
 
 export interface Viewing {

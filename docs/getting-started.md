@@ -22,8 +22,6 @@ cd movielogger
 ```
 
 ### 2. Database Setup
-
-#### Option A: Using Docker
 ```bash
 # Start PostgreSQL container
 docker-compose up -d database
@@ -32,19 +30,8 @@ docker-compose up -d database
 # Host: localhost
 # Port: 5432
 # Database: movielogger
-# Username: postgres
-# Password: postgres
-```
-
-#### Option B: Using Existing PostgreSQL Instance
-1. Create a new database named `movielogger`
-2. Update the connection string in `server/src/movielogger.api/appsettings.json`:
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=movielogger;Username=your_username;Password=your_password"
-  }
-}
+# Username: movieuser
+# Password: hotrod1
 ```
 
 ### 3. Backend Setup
@@ -76,7 +63,7 @@ npm install
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:3000`
+The frontend will be available at `http://localhost:5173`
 
 ## Verifying the Setup
 
@@ -85,7 +72,7 @@ The frontend will be available at `http://localhost:3000`
 - You should see the Swagger UI with all available endpoints
 
 ### 2. Check Frontend
-- Open `http://localhost:3000` in your browser
+- Open `http://localhost:5173` in your browser
 - You should see the MovieLogger landing page
 
 ### 3. Create a Test Account

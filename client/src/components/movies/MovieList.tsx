@@ -9,17 +9,17 @@ interface MovieListProps {
   emptyMessage?: string;
 }
 
-export default function MovieList({
-  movies,
+export default function MovieList({ 
+  movies, 
   onToggleWatched,
   onToggleFavorite,
   onDelete,
   emptyMessage = 'No movies found'
 }: MovieListProps) {
-  if (!movies || movies.length === 0) {
+  if (!movies.length) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">{emptyMessage}</p>
+        <div className="text-gray-500">{emptyMessage}</div>
       </div>
     );
   }
@@ -34,7 +34,6 @@ export default function MovieList({
                 <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Title</th>
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Release Date</th>
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Genre</th>
-                <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">In Library</th>
                 <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">Favourite</th>
                 <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                   <span className="sr-only">Actions</span>
