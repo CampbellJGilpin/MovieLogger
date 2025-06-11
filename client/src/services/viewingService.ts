@@ -1,5 +1,5 @@
 import api from '../api/config';
-import type { Viewing } from '../types';
+import type { Viewing } from '../types/index';
 
 interface ViewingCreateRequest {
   userId: number;

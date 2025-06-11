@@ -11,6 +11,14 @@ export interface Genre {
   title: string;
 }
 
+export interface MovieCreateRequest {
+  title: string;
+  description: string;
+  releaseDate: string;
+  genreId: number;
+  isDeleted?: boolean;
+}
+
 export interface Movie {
   id: number;
   title: string;

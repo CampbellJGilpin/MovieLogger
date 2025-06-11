@@ -1,4 +1,4 @@
-import type { MovieInLibrary } from '../../types';
+import type { MovieInLibrary } from '../../types/index';
 import { HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 

@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import type { MovieInLibrary, MovieCreateRequest } from '../types';
+import type { MovieInLibrary, MovieCreateRequest } from '../types/index';
 import * as movieService from '../services/movieService';
 import AddMovieModal from '../components/movies/AddMovieModal';
 
 interface MovieListSectionProps {
   title: string;
   movies: MovieInLibrary[];
-  onToggleWatched?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
   emptyMessage?: string;
 }
 
-function MovieListSection({ title, movies, onToggleWatched, onToggleFavorite, emptyMessage = 'No movies found' }: MovieListSectionProps) {
+function MovieListSection({ title, movies, onToggleFavorite, emptyMessage = 'No movies found' }: MovieListSectionProps) {
   return (
     <div>
       <h2 className="text-lg font-semibold text-gray-900 mb-4">{title}</h2>
@@ -32,20 +31,6 @@ function MovieListSection({ title, movies, onToggleWatched, onToggleFavorite, em
                 </p>
               </div>
               <div className="flex space-x-2">
-                {onToggleWatched && (
-                  <button
-                    onClick={() => onToggleWatched(movie.id)}
-                    className={`p-1 rounded ${
-                      movie.isWatched
-                        ? 'text-green-600 bg-green-100'
-                        : 'text-gray-400 hover:text-gray-500'
-                    }`}
-                  >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </button>
-                )}
                 {onToggleFavorite && (
                   <button
                     onClick={() => onToggleFavorite(movie.id)}
@@ -93,19 +78,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleToggleWatched = async (movieId: number) => {
-    try {
-      await movieService.toggleWatched(movieId);
-      setMovies(movies.map(movie =>
-        movie.id === movieId
-          ? { ...movie, isWatched: !movie.isWatched }
-          : movie
-      ));
-    } catch (err) {
-      console.error('Error toggling watched status:', err);
-    }
-  };
-
   const handleToggleFavorite = async (movieId: number) => {
     try {
       await movieService.toggleFavorite(movieId);
@@ -137,26 +109,23 @@ export default function Dashboard() {
     );
   }
 
-  const watchedMovies = movies.filter(m => m.isWatched);
-  const watchLaterMovies = movies.filter(m => m.isWatchLater);
   const favoriteMovies = movies.filter(m => m.isFavorite);
-  const personalLibrary = movies.filter(m => !m.isWatched && !m.isWatchLater);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <div className="flex space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        </div>
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <button
+            type="button"
             onClick={() => setIsAddMovieModalOpen(true)}
             className="btn btn-primary flex items-center"
           >
             <PlusIcon className="w-5 h-5 mr-2" />
-            Add New Movie
+            Add Movie
           </button>
-          <Link to="/movies" className="btn btn-secondary">
-            View All Movies
-          </Link>
         </div>
       </div>
 
@@ -165,32 +134,22 @@ export default function Dashboard() {
           <div className="text-sm text-red-700">{error}</div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <MovieListSection
-            title="Watched"
-            movies={watchedMovies.slice(0, 5)}
-            onToggleWatched={handleToggleWatched}
+            title="Recent Movies"
+            movies={movies.slice(0, 5)}
             onToggleFavorite={handleToggleFavorite}
-            emptyMessage="No watched movies yet"
+            emptyMessage="No recent movies"
           />
           <MovieListSection
             title="Personal Library"
-            movies={personalLibrary.slice(0, 5)}
-            onToggleWatched={handleToggleWatched}
+            movies={movies.slice(0, 5)}
             onToggleFavorite={handleToggleFavorite}
             emptyMessage="Your personal library is empty"
           />
           <MovieListSection
-            title="Watch Later"
-            movies={watchLaterMovies.slice(0, 5)}
-            onToggleWatched={handleToggleWatched}
-            onToggleFavorite={handleToggleFavorite}
-            emptyMessage="No movies in watch later"
-          />
-          <MovieListSection
             title="Favourites"
             movies={favoriteMovies.slice(0, 5)}
-            onToggleWatched={handleToggleWatched}
             onToggleFavorite={handleToggleFavorite}
             emptyMessage="No favorite movies yet"
           />

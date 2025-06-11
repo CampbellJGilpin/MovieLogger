@@ -1,4 +1,4 @@
-import type { MovieInLibrary } from '../../types';
+import type { MovieInLibrary } from '../../types/index';
 import MovieListRow from './MovieListRow';
 
 interface MovieListProps {

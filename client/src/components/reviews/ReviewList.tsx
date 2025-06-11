@@ -1,5 +1,5 @@
 import { StarIcon } from '@heroicons/react/24/solid';
-import type { Review } from '../../types';
+import type { Review } from '../../types/index';
 
 interface ReviewListProps {
   reviews: Review[];

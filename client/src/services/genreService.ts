@@ -1,5 +1,5 @@
 import api from '../api/config';
-import type { Genre } from '../types';
+import type { Genre } from '../types/index';
 
 export async function getAllGenres(): Promise<Genre[]> {
   const response = await api.get<Genre[]>('/genres');

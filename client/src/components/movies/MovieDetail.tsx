@@ -1,4 +1,4 @@
-import type { MovieInLibrary } from '../../types';
+import type { MovieInLibrary } from '../../types/index';
 import { PencilIcon, ClockIcon } from '@heroicons/react/24/outline';
 import Toggle from '../common/Toggle';
 import StarRating from '../common/StarRating';

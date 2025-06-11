@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { HeartIcon, TrashIcon, CheckIcon } from '@heroicons/react/24/outline';
-import type { MovieInLibrary } from '../../types';
+import type { MovieInLibrary } from '../../types/index';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 interface MovieListRowProps {

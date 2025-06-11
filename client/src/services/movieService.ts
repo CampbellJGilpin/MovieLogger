@@ -1,5 +1,5 @@
 import api from '../api/config';
-import type { Movie, MovieInLibrary, Review, Genre } from '../types';
+import type { Movie, MovieInLibrary, Review, Genre } from '../types/index';
 
 interface MovieCreateRequest {
   title: string;
@@ -54,7 +54,7 @@ export async function getAllMovies(userId?: number): Promise<MovieInLibrary[]> {
 
   const libraryItems = libraryResponse.data.libraryItems || [];
   
-  return moviesResponse.data.map(movie => {
+  const movies = moviesResponse.data.map(movie => {
     const libraryItem = libraryItems.find(item => item.movieId === movie.id);
     return {
       ...movie,
@@ -63,6 +63,9 @@ export async function getAllMovies(userId?: number): Promise<MovieInLibrary[]> {
       isWatchLater: libraryItem ? libraryItem.watchLater === "true" : false
     };
   });
+
+  // Sort movies by title
+  return movies.sort((a, b) => a.title.localeCompare(b.title));
 }
 
 export async function getMovie(id: number): Promise<MovieInLibrary> {
@@ -173,7 +176,7 @@ export async function searchMovies(query: string, userId?: number): Promise<Movi
 
   const libraryItems = libraryResponse.data.libraryItems || [];
   
-  return searchResponse.data.map(movie => {
+  const movies = searchResponse.data.map(movie => {
     const libraryItem = libraryItems.find(item => item.movieId === movie.id);
     return {
       ...movie,
@@ -182,6 +185,9 @@ export async function searchMovies(query: string, userId?: number): Promise<Movi
       isWatchLater: libraryItem ? libraryItem.watchLater === "true" : false
     };
   });
+
+  // Sort movies by title
+  return movies.sort((a, b) => a.title.localeCompare(b.title));
 }
 
 export async function getGenres(): Promise<Genre[]> {

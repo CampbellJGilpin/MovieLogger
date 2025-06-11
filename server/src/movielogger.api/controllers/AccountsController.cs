@@ -24,10 +24,15 @@ namespace movielogger.api.controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<UserResponse>> Register([FromBody] RegisterRequest request)
+        public async Task<ActionResult<LoginResponse>> Register([FromBody] RegisterRequest request)
         {
             var user = await _accountsService.Register(request.Email, request.Password, request.UserName);
-            return Ok(_mapper.Map<UserResponse>(user));
+            var (_, token) = await _accountsService.AuthenticateUserAsync(request.Email, request.Password);
+            return Ok(new LoginResponse
+            {
+                User = _mapper.Map<UserResponse>(user),
+                Token = token
+            });
         }
 
         [HttpPost("login")]

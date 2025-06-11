@@ -1,5 +1,5 @@
 import api from '../api/config';
-import type { Review } from '../types';
+import type { Review } from '../types/index';
 
 export async function getUserReviews(userId: number): Promise<Review[]> {
   const response = await api.get<Review[]>(`/users/${userId}/reviews`);

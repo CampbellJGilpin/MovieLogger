@@ -26,8 +26,8 @@ api.interceptors.response.use(
     // Log the error for debugging
     console.error('API Error:', error.response?.status, error.response?.data);
     
-    // Only remove token if it's explicitly an authentication error
-    if (error.response?.status === 401 && error.response?.data?.message?.includes('invalid token')) {
+    // Remove token on any 401 error
+    if (error.response?.status === 401) {
       localStorage.removeItem('token');
     }
     return Promise.reject(error);

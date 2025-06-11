@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import MovieList from '../components/movies/MovieList';
-import type { MovieInLibrary } from '../types';
+import type { MovieInLibrary } from '../types/index';
 import * as movieService from '../services/movieService';
 
 export default function MyLibrary() {

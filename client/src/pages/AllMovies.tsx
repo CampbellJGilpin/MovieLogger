@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import MovieList from '../components/movies/MovieList';
 import AddMovieModal from '../components/movies/AddMovieModal';
-import type { MovieInLibrary } from '../types';
+import type { MovieInLibrary } from '../types/index';
 import * as movieService from '../services/movieService';
 import api from '../api/config';
 
