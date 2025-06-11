@@ -1,26 +1,19 @@
-import { Link } from 'react-router-dom';
 import type { MovieInLibrary } from '../../types';
-import { StarIcon, ClockIcon, HeartIcon } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid, ClockIcon as ClockIconSolid, HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import { HeartIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 
 interface MovieCardProps {
   movie: MovieInLibrary;
-  onToggleWatched?: (movieId: number) => void;
-  onToggleWatchLater?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
 }
 
 export default function MovieCard({ 
   movie, 
-  onToggleWatched,
-  onToggleWatchLater,
   onToggleFavorite 
 }: MovieCardProps) {
   if (!movie) {
     return null;
   }
-
-  const releaseYear = new Date(movie.releaseDate).getFullYear();
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -63,8 +56,7 @@ export default function MovieCard({
 
         {movie.userRating && (
           <div className="flex items-center">
-            <StarIconSolid className="w-4 h-4 text-yellow-400" />
-            <span className="ml-1 text-sm text-gray-600">{movie.userRating}/5</span>
+            <span className="text-sm text-gray-600">{movie.userRating}/5</span>
           </div>
         )}
       </div>

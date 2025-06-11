@@ -13,7 +13,7 @@ export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
@@ -22,13 +22,17 @@ export default function Register() {
       return;
     }
 
-    setIsLoading(true);
-
     try {
+      setIsLoading(true);
       await register(email, password, userName);
       navigate('/');
-    } catch (err: any) {
-      setError(err.message || 'Failed to create an account. Please try again.');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Failed to register. Please try again.');
+      }
+      console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
     }

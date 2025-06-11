@@ -76,9 +76,9 @@ export default function MovieDetails() {
       await movieService.updateMovie(movieId, movieData);
       await loadMovie(movieId);
       setIsEditModalOpen(false);
-    } catch (err: any) {
-      if (err?.response?.status !== 401) {
-        console.error('Error updating movie:', err);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error updating movie:', error.message);
       }
     }
   };

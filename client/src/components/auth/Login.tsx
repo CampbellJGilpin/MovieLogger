@@ -11,7 +11,7 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
@@ -19,8 +19,9 @@ export default function Login() {
     try {
       await login(email, password);
       navigate('/');
-    } catch (err) {
-      setError('Failed to login. Please check your credentials.');
+    } catch (error) {
+      setError('Invalid email or password');
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }

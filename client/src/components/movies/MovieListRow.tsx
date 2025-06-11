@@ -7,14 +7,12 @@ import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 interface MovieListRowProps {
   movie: MovieInLibrary;
-  onToggleWatched?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
   onDelete?: (movieId: number) => void;
 }
 
 export default function MovieListRow({ 
   movie, 
-  onToggleWatched,
   onToggleFavorite,
   onDelete 
 }: MovieListRowProps) {
