@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models.requests.movies;
 using movielogger.api.models.responses.movies;
@@ -7,7 +8,7 @@ using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/movies")]
     public class MoviesController : ControllerBase
