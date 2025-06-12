@@ -18,14 +18,24 @@ public class MoviesService : IMoviesService
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<MovieDto>> GetAllMoviesAsync()
+    public async Task<(IEnumerable<MovieDto> Movies, int TotalCount)> GetAllMoviesAsync(int page = 1, int pageSize = 10)
     {
-        var movies = await _db.Movies
+        var query = _db.Movies
             .Include(m => m.Genre)
-            .Where(m => !m.IsDeleted)
+            .Where(m => !m.IsDeleted);
+
+        var totalCount = await query.CountAsync();
+
+        var movies = await query
+            .OrderBy(m => m.Title)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
-        return _mapper.Map<List<MovieDto>>(movies);
+        return (
+            Movies: _mapper.Map<List<MovieDto>>(movies),
+            TotalCount: totalCount
+        );
     }
 
     public async Task<MovieDto> GetMovieByIdAsync(int movieId)

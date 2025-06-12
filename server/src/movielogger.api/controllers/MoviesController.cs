@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models.requests.movies;
+using movielogger.api.models.responses;
 using movielogger.api.models.responses.movies;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
@@ -23,10 +24,20 @@ namespace movielogger.api.controllers
         }
         
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MovieResponse>>> GetAllMovies()
+        public async Task<ActionResult<PaginatedResponse<MovieResponse>>> GetAllMovies([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var movies = await _moviesService.GetAllMoviesAsync();
-            return Ok(_mapper.Map<IEnumerable<MovieResponse>>(movies));
+            var (movies, totalCount) = await _moviesService.GetAllMoviesAsync(page, pageSize);
+            
+            var response = new PaginatedResponse<MovieResponse>
+            {
+                Items = _mapper.Map<IEnumerable<MovieResponse>>(movies),
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+            
+            return Ok(response);
         }
 
         [HttpGet("{id}")]

@@ -42,43 +42,50 @@ public class MoviesServiceTests : BaseServiceTest
         _dbContext.Movies.Returns(mockSet);
 
         // Act 
-        var result = (await _service.GetAllMoviesAsync()).ToList();
+        var result = (await _service.GetAllMoviesAsync());
 
         // Assert
-        result.Should().HaveCount(2);
-        result.All(m => m.Genre.Title == genre.Title).Should().BeTrue();
+        result.Movies.Should().HaveCount(2);
+        result.Movies.All(m => m.Genre.Title == genre.Title).Should().BeTrue();
     }
 
     [Fact]
-    public async Task GetAllMoviesAsync_ReturnsNonDeletedMovies()
+    public async Task GetAllMoviesAsync_RequestTenMovies_ReturnsTenNonDeletedMovies()
     {
         // Arrange
+        const int pageNumber = 1;
+        const int movieCount = 10;
+        
         var genre = Fixture.Create<Genre>();
 
-        var deletedMovie = Fixture.Build<Movie>()
+        var deletedMovies = Fixture.Build<Movie>()
             .With(m => m.Genre, genre)
             .With(m => m.GenreId, genre.Id)
             .With(m => m.IsDeleted, true)
-            .Create();
+            .CreateMany(12).ToList();
 
-        var activeMovie = Fixture.Build<Movie>()
+        var activeMovies = Fixture.Build<Movie>()
             .With(m => m.Genre, genre)
             .With(m => m.GenreId, genre.Id)
             .With(m => m.IsDeleted, false)
-            .Create();
+            .CreateMany(12).ToList();
 
-        var movieEntities = new[] { deletedMovie, activeMovie }.AsQueryable();
+        var allMovies = new List<Movie>();
+        allMovies.AddRange(deletedMovies);
+        allMovies.AddRange(activeMovies);
+        
+        var movieEntities = allMovies.AsQueryable();
         var mockSet = movieEntities.BuildMockDbSet();
 
         _dbContext.Movies.Returns(mockSet);
 
         // Act 
-        var result = (await _service.GetAllMoviesAsync()).ToList();
+        var result = (await _service.GetAllMoviesAsync(pageNumber, movieCount));
 
         // Assert
-        result.Should().HaveCount(1);
-        result.Should().ContainSingle(m => m.Title == activeMovie.Title);
-        result.Should().NotContain(m => m.Title == deletedMovie.Title);
+        result.Movies.Should().HaveCount(movieCount);
+        result.TotalCount.Should().Be(activeMovies.Count);
+        result.Movies.All(m => m.IsDeleted == false).Should().BeTrue();
     }
 
     [Fact]

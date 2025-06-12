@@ -4,7 +4,7 @@ namespace movielogger.services.interfaces;
 
 public interface IMoviesService
 {
-    Task<IEnumerable<MovieDto>> GetAllMoviesAsync();
+    Task<(IEnumerable<MovieDto> Movies, int TotalCount)> GetAllMoviesAsync(int page = 1, int pageSize = 10);
     Task<MovieDto> GetMovieByIdAsync(int movieId);
     Task<MovieDto> CreateMovieAsync(MovieDto dto);
     Task<MovieDto> UpdateMovieAsync(int movieId, MovieDto dto);
