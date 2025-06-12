@@ -1,34 +1,5 @@
 # MovieLogger API Documentation
 
-## Domain Model
-
-```mermaid
-erDiagram
-    USERS ||--o{ LIBRARY : tracks
-    LIBRARY ||--o{ FAVOURITES : toggles
-    LIBRARY ||--o{ OWNERSHIP : toggles
-    LIBRARY ||--o{ WATCHLIST : schedules
-    LIBRARY ||--o{ VIEWINGS : logs
-
-    VIEWINGS ||--o{ REVIEWS : writes
-    VIEWINGS ||--o{ RATINGS : gives
-
-    MOVIES ||--o{ LIBRARY : appears_in
-    MOVIES ||--o{ VIEWINGS : watched_in
-```
-
-### Glossary of Resources
-
-- **Users**: An individual who uses the MovieLogger app. Users can log movies, rate them, write reviews, and add favourites. All users must authenticate to use core features.
-- **Movies**: A film entry in the database, containing title, description, release date, and genre. Users interact with movies by logging, rating, reviewing, or favouriting them.
-- **Library**: A movie that is tied to a user in any way is a part of their library. This includes if a movie has been favourited, reviewed, watched, or has been added to their watch later list.
-- **Viewings**: A snapshot of an individual movie viewing. This holds the date the user viewed a specific movie, as well as an optional review and score associated with it.
-- **Reviews**: A written user review that is associated with a viewing. There is one review per viewing, and a new review would require a new and unique viewing to be logged.
-- **Ratings**: A numerical score (e.g., 1-5) that a user assigns to a movie they've logged. This is associated with a review.
-- **Favourites**: A toggle which a user can apply to a movie to mark it as a personal favourite. This is independent from viewings and is tied directly to a movie.
-- **Watchlist**: Movies that have a view date set.
-- **Ownership**: A toggle that indicates if a user owns a specific movie. This is independent from viewings and is tied directly to a movie.
-
 ## Base URL
 ```
 http://localhost:5049/api
