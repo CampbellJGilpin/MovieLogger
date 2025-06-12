@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc;
-using movielogger.api.conventions;
 using movielogger.dal.extensions;
 
 public class Program

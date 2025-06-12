@@ -68,8 +68,7 @@ namespace movielogger.api.controllers
                 
                 var mappedRequest = _mapper.Map<UserDto>(request);
                 await _usersService.CreateUserAsync(mappedRequest);
-                
-                // Generate JWT token using the original password
+
                 var (token, user) = await _accountsService.AuthenticateUserAsync(request.Email, originalPassword);
                 
                 return Ok(new { token, user = _mapper.Map<UserResponse>(user) });
