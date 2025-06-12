@@ -1,6 +1,6 @@
 # 5. Use React + TypeScript + Vite for Frontend
 
-Date: 2025-05-10
+Date: 2025-06-05
 
 Deciders: Campbell Gilpin
 

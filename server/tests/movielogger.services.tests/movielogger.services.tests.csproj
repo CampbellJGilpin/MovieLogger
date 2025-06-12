@@ -31,8 +31,4 @@
     <ProjectReference Include="..\..\src\movielogger.services\movielogger.services.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="helpers\" />
-  </ItemGroup>
-
 </Project>

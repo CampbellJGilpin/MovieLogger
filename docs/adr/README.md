@@ -6,4 +6,3 @@
 * [4. use-fluentvalidation-for-input-validation](0004-use-fluentvalidation-for-input-validation.md)
 * [5. use-react-typescript-vite-for-frontend](0005-use-react-typescript-vite-for-frontend.md)
 * [6. use-tailwind-css-for-styling](0006-use-tailwind-css-for-styling.md)
-* [7. implement-star-rating-system](0007-implement-star-rating-system.md)
