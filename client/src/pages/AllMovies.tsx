@@ -20,10 +20,13 @@ export default function AllMovies() {
   const [isAddMovieModalOpen, setIsAddMovieModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize] = useState(10);
 
   useEffect(() => {
     loadMovies();
-  }, []);
+  }, [currentPage]); // Reload when page changes
 
   // Debounce search query
   useEffect(() => {
@@ -49,8 +52,9 @@ export default function AllMovies() {
       setError(null);
       const userResponse = await api.get('/accounts/me');
       const userId = userResponse.data.id;
-      const data = await movieService.getAllMovies(userId);
-      setMovies(data);
+      const data = await movieService.getAllMovies(userId, currentPage, pageSize);
+      setMovies(data.items);
+      setTotalPages(data.totalPages);
     } catch (err) {
       setError('Failed to load movies. Please try again later.');
       console.error('Error loading movies:', err);
@@ -67,12 +71,19 @@ export default function AllMovies() {
       const userId = userResponse.data.id;
       const results = await movieService.searchMovies(query, userId);
       setMovies(results);
+      setCurrentPage(1); // Reset to first page when searching
+      setTotalPages(1); // Search results don't have pagination yet
     } catch (err) {
       setError('Failed to search movies. Please try again later.');
       console.error('Error searching movies:', err);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo(0, 0); // Scroll to top when page changes
   };
 
   const handleAddMovie = async (movieData: MovieCreateRequest) => {
@@ -161,19 +172,63 @@ export default function AllMovies() {
           <div className="text-sm text-red-700">{error}</div>
         </div>
       ) : (
-        <MovieList
-          movies={movies}
-          onToggleWatched={handleToggleInLibrary}
-          onToggleFavorite={handleToggleFavorite}
-          onDelete={handleDeleteMovie}
-          emptyMessage={
-            isLoading
-              ? 'Loading movies...'
-              : error
-              ? 'Error loading movies'
-              : 'No movies found'
-          }
-        />
+        <>
+          <MovieList
+            movies={movies}
+            onToggleWatched={handleToggleInLibrary}
+            onToggleFavorite={handleToggleFavorite}
+            onDelete={handleDeleteMovie}
+            emptyMessage={
+              isLoading
+                ? 'Loading movies...'
+                : error
+                ? 'Error loading movies'
+                : 'No movies found'
+            }
+          />
+          {/* Pagination */}
+          <div className="mt-8 flex justify-center">
+            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                  currentPage === 1
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : 'text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                Previous
+              </button>
+              
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => handlePageChange(i + 1)}
+                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                    currentPage === i + 1
+                      ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                      : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                  currentPage === totalPages
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : 'text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                Next
+              </button>
+            </nav>
+          </div>
+        </>
       )}
 
       <AddMovieModal

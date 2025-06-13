@@ -22,6 +22,14 @@ interface LibraryDto {
   libraryItems: LibraryItemDto[];
 }
 
+interface PaginatedResponse<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
 interface LibraryItemResponse {
   movieId: number;
   movieTitle: string;
@@ -46,15 +54,15 @@ function mapLibraryItemToMovieInLibrary(item: LibraryItemDto): MovieInLibrary {
   };
 }
 
-export async function getAllMovies(userId?: number): Promise<MovieInLibrary[]> {
+export async function getAllMovies(userId?: number, page = 1, pageSize = 10): Promise<PaginatedResponse<MovieInLibrary>> {
   const [moviesResponse, libraryResponse] = await Promise.all([
-    api.get<MovieInLibrary[]>('/movies'),
+    api.get<PaginatedResponse<MovieInLibrary>>(`/movies?page=${page}&pageSize=${pageSize}`),
     userId ? api.get<LibraryDto>(`/users/${userId}/library`) : Promise.resolve({ data: { libraryItems: [] } })
   ]);
 
   const libraryItems = libraryResponse.data.libraryItems || [];
   
-  const movies = moviesResponse.data.map(movie => {
+  const movies = moviesResponse.data.items.map(movie => {
     const libraryItem = libraryItems.find(item => item.movieId === movie.id);
     return {
       ...movie,
@@ -64,8 +72,10 @@ export async function getAllMovies(userId?: number): Promise<MovieInLibrary[]> {
     };
   });
 
-  // Sort movies by title
-  return movies.sort((a, b) => a.title.localeCompare(b.title));
+  return {
+    ...moviesResponse.data,
+    items: movies
+  };
 }
 
 export async function getMovie(id: number): Promise<MovieInLibrary> {
