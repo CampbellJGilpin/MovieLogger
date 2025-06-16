@@ -19,6 +19,11 @@ export default defineConfig({
       }
     }
   },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:5049',
+    },
+  },
   preview: {
     port: 4173,  // Changed from 3000
     strictPort: false,  // Will try other ports if 4173 is in use

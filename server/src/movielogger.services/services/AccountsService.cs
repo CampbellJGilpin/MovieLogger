@@ -69,6 +69,23 @@ public class AccountsService : IAccountsService
         return user;
     }
 
+    public async Task ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
+        if (user == null)
+        {
+            throw new KeyNotFoundException("User not found");
+        }
+
+        if (!BC.Verify(currentPassword, user.Password))
+        {
+            throw new UnauthorizedAccessException("Current password is incorrect");
+        }
+
+        user.Password = BC.HashPassword(newPassword);
+        await _db.SaveChangesAsync();
+    }
+
     private string GenerateJwtToken(User user)
     {
         try

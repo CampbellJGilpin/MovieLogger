@@ -5,6 +5,7 @@ using movielogger.api.models.requests.users;
 using movielogger.api.models.responses.users;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using movielogger.api.validation;
 
 namespace movielogger.api.controllers
 {
@@ -63,6 +64,38 @@ namespace movielogger.api.controllers
             }
 
             return Ok(_mapper.Map<UserResponse>(user));
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            
+            var errorResult = request.Validate();
+            if (errorResult is not null)
+            {
+                return errorResult;
+            }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                await _accountsService.ChangePasswordAsync(int.Parse(userId), request.CurrentPassword, request.NewPassword);
+                return Ok(new { message = "Password changed successfully" });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

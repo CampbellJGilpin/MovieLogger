@@ -6,4 +6,5 @@ public interface IAccountsService
 {
     Task<(User user, string token)> AuthenticateUserAsync(string email, string password);
     Task<User> Register(string email, string password, string userName);
+    Task ChangePasswordAsync(int userId, string currentPassword, string newPassword);
 }
