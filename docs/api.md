@@ -174,21 +174,11 @@ GET /users/{userId}/library
 }
 ```
 
-#### Add to Library
+#### Add Movie to Library
 ```http
-POST /users/{userId}/library
+POST /users/{userId}/library/{movieId}
 ```
-**Description:** Add a movie to the user's library.
-
-**Request Body Example:**
-```json
-{
-  "movieId": 2,
-  "favourite": false,
-  "ownsMovie": true,
-  "upcomingViewDate": "2025-06-15"
-}
-```
+**Description:** Add a movie to the user's library. 
 
 **Responses:**
 - `200 OK`
@@ -197,12 +187,37 @@ POST /users/{userId}/library
 **Response Example:**
 ```json
 {
-  "id": 14,
-  "userId": 4,
-  "movieId": 2,
-  "favourite": false,
-  "ownsMovie": true,
-  "upcomingViewDate": "2025-06-15"
+  "movieId": 10,
+  "movieTitle": "Arrival",
+  "releaseDate": "2016-11-11T00:00:00",
+  "genre": "Science Fiction",
+  "favourite": "false",
+  "inLibrary": "true",
+  "watchLater": "false"
+}
+```
+
+#### Remove Movie from Library
+```http
+DELETE /users/{userId}/library/{movieId}
+```
+**Description:** Remove a movie from the user's library.
+
+**Responses:**
+- `200 OK`
+- `204 No Content`
+- `400 Bad Request`
+
+**Response Example:**
+```json
+{
+  "movieId": 10,
+  "movieTitle": "Arrival",
+  "releaseDate": "2016-11-11T00:00:00",
+  "genre": "Science Fiction",
+  "favourite": "false",
+  "inLibrary": "false",
+  "watchLater": "false"
 }
 ```
 
@@ -249,6 +264,53 @@ GET /users/{userId}/library/watchlist
     "inLibrary": true
   }
 ]
+```
+
+#### Add Movie to Favourites
+```http
+POST /users/{userId}/favorites/{movieId}
+```
+**Description:** Mark a movie as a favourite for the user.
+
+**Responses:**
+- `200 OK`
+- `400 Bad Request`
+
+**Response Example:**
+```json
+{
+  "movieId": 10,
+  "movieTitle": "Arrival",
+  "releaseDate": "2016-11-11T00:00:00",
+  "genre": "Science Fiction",
+  "favourite": "true",
+  "inLibrary": "true",
+  "watchLater": "false"
+}
+```
+
+#### Remove Movie from Favourites
+```http
+DELETE /users/{userId}/favorites/{movieId}
+```
+**Description:** Remove a movie from the user's favourites.
+
+**Responses:**
+- `200 OK`
+- `204 No Content`
+- `400 Bad Request`
+
+**Response Example:**
+```json
+{
+  "movieId": 10,
+  "movieTitle": "Arrival",
+  "releaseDate": "2016-11-11T00:00:00",
+  "genre": "Science Fiction",
+  "favourite": "false",
+  "inLibrary": "true",
+  "watchLater": "false"
+}
 ```
 
 ### Movies

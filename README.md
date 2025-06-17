@@ -55,7 +55,7 @@ erDiagram
 
 - **Users**: An individual who uses the MovieLogger app. Users can log movies, rate them, write reviews, and add favourites. All users must authenticate to use core features.
 - **Movies**: A film entry in the database, containing title, description, release date, and genre. Users interact with movies by logging, rating, reviewing, or favouriting them.
-- **Library**: A movie that is tied to a user in any way is a part of their library. This includes if a movie has been favourited, reviewed, watched, or has been added to their watch later list.
+- **Library**: The library represents a collection of movies against a user. This is determined by a toggle.
 - **Viewings**: A snapshot of an individual movie viewing. This holds the date the user viewed a specific movie, as well as an optional review and score associated with it.
 - **Reviews**: A written user review that is associated with a viewing. There is one review per viewing, and a new review would require a new and unique viewing to be logged.
 - **Ratings**: A numerical score (e.g., 1-5) that a user assigns to a movie they've logged. This is associated with a review.
