@@ -17,7 +17,7 @@ export default function Register() {
     try {
       await register(email, password, userName);
       navigate('/');
-    } catch (err) {
+    } catch {
       setError('Registration failed. Please try again.');
     }
   };

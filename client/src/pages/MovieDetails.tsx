@@ -43,7 +43,7 @@ export default function MovieDetails() {
   const handleToggleLibrary = async (movieId: number) => {
     if (!movie) return;
     try {
-      const updatedMovie = await movieService.toggleLibrary(movieId);
+      await movieService.toggleLibrary(movieId);
       setMovie({ ...movie, inLibrary: !movie.inLibrary });
     } catch (err) {
       console.error('Error toggling library status:', err);

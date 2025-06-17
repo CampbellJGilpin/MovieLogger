@@ -56,8 +56,8 @@ export default function Profile() {
         newPassword: '',
         confirmPassword: ''
       });
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to change password');
+    } catch {
+      setError('Failed to update profile.');
     } finally {
       setIsLoading(false);
     }

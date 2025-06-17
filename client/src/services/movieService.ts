@@ -30,16 +30,6 @@ interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-interface LibraryItemResponse {
-  movieId: number;
-  movieTitle: string;
-  releaseDate: string;
-  genre: string;
-  inLibrary: string;
-  watchLater: string;
-  favourite: string;
-}
-
 function mapLibraryItemToMovieInLibrary(item: LibraryItemDto): MovieInLibrary {
   return {
     id: item.movieId,

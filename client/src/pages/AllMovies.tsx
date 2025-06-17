@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import MovieList from '../components/movies/MovieList';
 import AddMovieModal from '../components/movies/AddMovieModal';
@@ -24,9 +24,30 @@ export default function AllMovies() {
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize] = useState(10);
 
+  const loadMovies = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await movieService.getAllMovies(undefined, currentPage, pageSize);
+      setMovies(data.items);
+      setTotalPages(data.totalPages);
+    } catch (err) {
+      setError('Failed to load movies. Please try again later.');
+      console.error('Error loading movies:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, pageSize]);
+
   useEffect(() => {
     loadMovies();
-  }, [currentPage]); // Reload when page changes
+  }, [loadMovies]);
+
+  useEffect(() => {
+    if (currentPage > 1) {
+      loadMovies();
+    }
+  }, [currentPage, loadMovies]);
 
   // Debounce search query
   useEffect(() => {
@@ -45,23 +66,6 @@ export default function AllMovies() {
       loadMovies();
     }
   }, [debouncedSearchQuery]);
-
-  const loadMovies = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const userResponse = await api.get('/accounts/me');
-      const userId = userResponse.data.id;
-      const data = await movieService.getAllMovies(userId, currentPage, pageSize);
-      setMovies(data.items);
-      setTotalPages(data.totalPages);
-    } catch (err) {
-      setError('Failed to load movies. Please try again later.');
-      console.error('Error loading movies:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSearch = async (query: string) => {
     try {
