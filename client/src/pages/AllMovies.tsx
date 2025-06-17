@@ -43,12 +43,6 @@ export default function AllMovies() {
     loadMovies();
   }, [loadMovies]);
 
-  useEffect(() => {
-    if (currentPage > 1) {
-      loadMovies();
-    }
-  }, [currentPage, loadMovies]);
-
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -65,7 +59,7 @@ export default function AllMovies() {
     } else {
       loadMovies();
     }
-  }, [debouncedSearchQuery]);
+  }, [debouncedSearchQuery, loadMovies]);
 
   const handleSearch = async (query: string) => {
     try {
