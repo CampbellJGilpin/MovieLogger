@@ -5,7 +5,7 @@ import StarRating from '../common/StarRating';
 
 interface MovieDetailProps {
   movie: MovieInLibrary;
-  onToggleWatched?: (movieId: number) => void;
+  onToggleLibrary?: (movieId: number) => void;
   onToggleWatchLater?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
   onEditMovie?: (movieId: number) => void;
@@ -14,7 +14,7 @@ interface MovieDetailProps {
 
 export default function MovieDetail({
   movie,
-  onToggleWatched,
+  onToggleLibrary,
   onToggleWatchLater,
   onToggleFavorite,
   onEditMovie,
@@ -73,9 +73,9 @@ export default function MovieDetail({
 
             <div className="flex items-center gap-4">
               <Toggle
-                enabled={movie.isWatched}
-                onChange={() => onToggleWatched?.(movie.id)}
-                label="Owned"
+                enabled={movie.inLibrary}
+                onChange={() => onToggleLibrary?.(movie.id)}
+                label="In Library"
               />
               <Toggle
                 enabled={!!movie.isWatchLater}

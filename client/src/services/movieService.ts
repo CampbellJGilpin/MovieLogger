@@ -47,7 +47,7 @@ function mapLibraryItemToMovieInLibrary(item: LibraryItemDto): MovieInLibrary {
     releaseDate: item.releaseDate,
     genre: { id: 0, title: item.genre }, // We don't have genre ID from the API
     description: "", // We don't have description from the API
-    isWatched: item.inLibrary === "true",
+    inLibrary: item.inLibrary === "true",
     isWatchLater: item.watchLater === "true",
     isFavorite: item.favourite === "true",
     isDeleted: false // Movies in the library are not deleted
@@ -67,7 +67,7 @@ export async function getAllMovies(userId?: number, page = 1, pageSize = 10): Pr
     return {
       ...movie,
       isFavorite: libraryItem ? libraryItem.favourite === "true" : false,
-      isWatched: libraryItem ? libraryItem.inLibrary === "true" : false,
+      inLibrary: libraryItem ? libraryItem.inLibrary === "true" : false,
       isWatchLater: libraryItem ? libraryItem.watchLater === "true" : false
     };
   });
@@ -92,7 +92,7 @@ export async function getMovie(id: number): Promise<MovieInLibrary> {
   return {
     ...movieResponse.data,
     isFavorite: libraryItem ? libraryItem.favourite === "true" : false,
-    isWatched: libraryItem ? libraryItem.inLibrary === "true" : false,
+    inLibrary: libraryItem ? libraryItem.inLibrary === "true" : false,
     isWatchLater: libraryItem ? libraryItem.watchLater === "true" : false
   };
 }
@@ -137,8 +137,24 @@ export async function addMovieReview(movieId: number, review: { score: number; r
   return response.data;
 }
 
-export async function toggleWatched(movieId: number): Promise<void> {
-  await api.post(`/movies/${movieId}/watched`);
+export async function toggleLibrary(movieId: number): Promise<MovieInLibrary | undefined> {
+  const response = await api.get('/accounts/me');
+  const userId = response.data.id;
+  const currentLibrary = await api.get<LibraryDto>(`/users/${userId}/library`);
+  const existingItem = currentLibrary.data.libraryItems.find(item => item.movieId === movieId);
+
+  if (existingItem && existingItem.inLibrary === "true") {
+    // Remove from library
+    await api.delete(`/users/${userId}/library/${movieId}`);
+  } else {
+    // Add to library
+    await api.post(`/users/${userId}/library/${movieId}`);
+  }
+
+  // Fetch and return the updated item
+  const refreshed = await api.get<LibraryDto>(`/users/${userId}/library`);
+  const refreshedItem = refreshed.data.libraryItems.find(item => item.movieId === movieId);
+  return refreshedItem ? mapLibraryItemToMovieInLibrary(refreshedItem) : undefined;
 }
 
 export async function toggleWatchLater(movieId: number): Promise<void> {
@@ -150,25 +166,23 @@ export async function toggleFavorite(movieId: number): Promise<MovieInLibrary> {
   const userId = response.data.id;
   const currentItem = await api.get<LibraryDto>(`/users/${userId}/library`);
   const existingItem = currentItem.data.libraryItems.find(item => item.movieId === movieId);
-  
-  const updatedItem = await api.post<LibraryItemResponse>(`/users/${userId}/library`, {
-    movieId,
-    isFavorite: existingItem ? !(existingItem.favourite === "true") : true,
-    ownsMovie: false,
-    upcomingViewDate: null
-  });
 
-  return {
-    id: updatedItem.data.movieId,
-    title: updatedItem.data.movieTitle,
-    releaseDate: updatedItem.data.releaseDate,
-    genre: { id: 0, title: updatedItem.data.genre },
-    description: "",
-    isDeleted: false,
-    isFavorite: updatedItem.data.favourite === "true",
-    isWatched: updatedItem.data.inLibrary === "true",
-    isWatchLater: updatedItem.data.watchLater === "true"
-  };
+  if (!existingItem) {
+    return Promise.reject(new Error("Movie must be in your library to favorite it."));
+  }
+
+  if (existingItem.favourite === "true") {
+    // Remove from favorites
+    await api.delete(`/users/${userId}/favorites/${movieId}`);
+  } else {
+    // Add to favorites
+    await api.post(`/users/${userId}/favorites/${movieId}`);
+  }
+
+  // Fetch the updated item
+  const refreshed = await api.get<LibraryDto>(`/users/${userId}/library`);
+  const refreshedItem = refreshed.data.libraryItems.find(item => item.movieId === movieId);
+  return mapLibraryItemToMovieInLibrary(refreshedItem!);
 }
 
 export async function getMyLibrary(): Promise<MovieInLibrary[]> {
@@ -191,7 +205,7 @@ export async function searchMovies(query: string, userId?: number): Promise<Movi
     return {
       ...movie,
       isFavorite: libraryItem ? libraryItem.favourite === "true" : false,
-      isWatched: libraryItem ? libraryItem.inLibrary === "true" : false,
+      inLibrary: libraryItem ? libraryItem.inLibrary === "true" : false,
       isWatchLater: libraryItem ? libraryItem.watchLater === "true" : false
     };
   });

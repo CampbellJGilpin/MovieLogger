@@ -9,4 +9,5 @@ public class LibraryItemDto
     public bool Favourite { get; set; }
     public bool InLibrary { get; set; }
     public bool WatchLater { get; set; }
+    public bool OwnsMovie { get; set; }
 }

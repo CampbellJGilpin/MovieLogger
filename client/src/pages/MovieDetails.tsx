@@ -40,13 +40,13 @@ export default function MovieDetails() {
     }
   };
 
-  const handleToggleWatched = async (movieId: number) => {
+  const handleToggleLibrary = async (movieId: number) => {
     if (!movie) return;
     try {
-      await movieService.toggleWatched(movieId);
-      setMovie({ ...movie, isWatched: !movie.isWatched });
+      const updatedMovie = await movieService.toggleLibrary(movieId);
+      setMovie({ ...movie, inLibrary: !movie.inLibrary });
     } catch (err) {
-      console.error('Error toggling watched status:', err);
+      console.error('Error toggling library status:', err);
     }
   };
 
@@ -118,7 +118,7 @@ export default function MovieDetails() {
     <>
       <MovieDetail
         movie={movie}
-        onToggleWatched={handleToggleWatched}
+        onToggleLibrary={handleToggleLibrary}
         onToggleWatchLater={handleToggleWatchLater}
         onToggleFavorite={handleToggleFavorite}
         onEditMovie={() => setIsEditModalOpen(true)}

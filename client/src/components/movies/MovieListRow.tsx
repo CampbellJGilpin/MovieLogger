@@ -7,14 +7,14 @@ import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 interface MovieListRowProps {
   movie: MovieInLibrary;
-  onToggleWatched?: (movieId: number) => void;
+  onToggleLibrary?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
   onDelete?: (movieId: number) => void;
 }
 
 export default function MovieListRow({ 
   movie, 
-  onToggleWatched,
+  onToggleLibrary,
   onToggleFavorite,
   onDelete 
 }: MovieListRowProps) {
@@ -32,15 +32,15 @@ export default function MovieListRow({
         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{releaseYear}</td>
         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{movie.genre.title}</td>
         <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
-          {onToggleWatched && (
+          {onToggleLibrary && (
             <button
-              onClick={() => onToggleWatched(movie.id)}
+              onClick={() => onToggleLibrary(movie.id)}
               className={`p-1.5 rounded-full mr-2 ${
-                movie.isWatched
+                movie.inLibrary
                   ? 'bg-green-100 text-green-600'
                   : 'bg-gray-100 text-gray-400 hover:text-gray-500'
               }`}
-              title={movie.isWatched ? "Watched" : "Mark as watched"}
+              title={movie.inLibrary ? "In Library" : "Add to library"}
             >
               <CheckIcon className="w-5 h-5" />
             </button>

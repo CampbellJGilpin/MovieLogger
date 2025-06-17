@@ -96,12 +96,12 @@ export default function AllMovies() {
     }
   };
 
-  const handleToggleInLibrary = async (movieId: number) => {
+  const handleToggleLibrary = async (movieId: number) => {
     try {
-      await movieService.toggleWatched(movieId);
+      await movieService.toggleLibrary(movieId);
       setMovies(movies.map(movie =>
         movie.id === movieId
-          ? { ...movie, isWatched: !movie.isWatched }
+          ? { ...movie, inLibrary: !movie.inLibrary }
           : movie
       ));
     } catch (err) {
@@ -175,7 +175,7 @@ export default function AllMovies() {
         <>
           <MovieList
             movies={movies}
-            onToggleWatched={handleToggleInLibrary}
+            onToggleLibrary={handleToggleLibrary}
             onToggleFavorite={handleToggleFavorite}
             onDelete={handleDeleteMovie}
             emptyMessage={

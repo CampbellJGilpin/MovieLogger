@@ -29,16 +29,16 @@ export default function MovieSearch() {
     }
   };
 
-  const handleToggleWatched = async (movieId: number) => {
+  const handleToggleLibrary = async (movieId: number) => {
     try {
-      await movieService.toggleWatched(movieId);
+      await movieService.toggleLibrary(movieId);
       setMovies(movies.map(movie =>
         movie.id === movieId
-          ? { ...movie, isWatched: !movie.isWatched }
+          ? { ...movie, inLibrary: !movie.inLibrary }
           : movie
       ));
     } catch (error) {
-      console.error('Error toggling watched status:', error);
+      console.error('Error toggling library status:', error);
     }
   };
 
@@ -80,7 +80,7 @@ export default function MovieSearch() {
       ) : (
         <MovieList
           movies={movies}
-          onToggleWatched={handleToggleWatched}
+          onToggleLibrary={handleToggleLibrary}
           onToggleFavorite={handleToggleFavorite}
           emptyMessage="No movies found matching your search"
         />

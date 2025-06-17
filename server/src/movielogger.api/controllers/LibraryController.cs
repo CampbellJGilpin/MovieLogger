@@ -57,5 +57,79 @@ namespace movielogger.api.controllers
             
             return Ok(mappedResponse);
         }
+
+        [HttpPost("{userId}/favorites/{movieId}")]
+        public async Task<IActionResult> AddToFavorites(int userId, int movieId)
+        {
+            var request = new UpdateLibraryItemRequest
+            {
+                MovieId = movieId,
+                IsFavorite = true,
+                OwnsMovie = true
+            };
+
+            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
+            var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
+            var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
+            
+            return Ok(mappedResponse);
+        }
+
+        [HttpDelete("{userId}/favorites/{movieId}")]
+        public async Task<IActionResult> RemoveFromFavorites(int userId, int movieId)
+        {
+            var request = new UpdateLibraryItemRequest
+            {
+                MovieId = movieId,
+                IsFavorite = false,
+                OwnsMovie = true
+            };
+
+            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
+            var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
+            var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
+            
+            return Ok(mappedResponse);
+        }
+
+        [HttpPost("{userId}/library/{movieId}")]
+        public async Task<IActionResult> AddToLibrary(int userId, int movieId)
+        {
+            var request = new UpdateLibraryItemRequest
+            {
+                MovieId = movieId,
+                IsFavorite = false,
+                OwnsMovie = true
+            };
+
+            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
+            var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
+            var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
+            
+            return Ok(mappedResponse);
+        }
+
+        [HttpDelete("{userId}/library/{movieId}")]
+        public async Task<IActionResult> RemoveFromLibrary(int userId, int movieId)
+        {
+            var existingItem = await _libraryService.GetLibraryItemAsync(userId, movieId);
+            if (existingItem == null)
+            {
+                return NoContent();
+            }
+
+            var request = new UpdateLibraryItemRequest
+            {
+                MovieId = movieId,
+                IsFavorite = existingItem.Favourite,
+                OwnsMovie = false
+            };
+
+            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
+            var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
+            var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
+            
+            return Ok(mappedResponse);
+        }
     }
 }
