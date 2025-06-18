@@ -157,7 +157,7 @@ export default function AllMovies() {
             onDelete={handleDeleteMovie}
             emptyMessage={
               isLoading
-                ? 'Loading movies...'
+                ? 'Loading movies'
                 : error
                 ? 'Error loading movies'
                 : 'No movies found'
