@@ -63,8 +63,8 @@ export default function MovieDetails() {
   const handleToggleFavorite = async (movieId: number) => {
     if (!movie) return;
     try {
-      const updatedMovie = await movieService.toggleFavorite(movieId);
-      setMovie({ ...movie, isFavorite: updatedMovie.isFavorite });
+      await movieService.toggleFavorite(movieId);
+      await loadMovie(movieId);
     } catch (err) {
       console.error('Error toggling favorite status:', err);
     }

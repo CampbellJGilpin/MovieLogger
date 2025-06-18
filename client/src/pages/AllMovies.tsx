@@ -59,10 +59,6 @@ export default function AllMovies() {
     setCurrentPage(1);
   }, [debouncedSearchQuery]);
 
-  const handleSearch = async (query: string) => {
-    setSearchQuery(query);
-  };
-
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     loadMovies(debouncedSearchQuery, newPage);
