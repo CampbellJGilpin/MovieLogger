@@ -29,12 +29,8 @@ export default function MyLibrary() {
 
   const handleToggleFavorite = async (movieId: number) => {
     try {
-      const updatedMovie = await movieService.toggleFavorite(movieId);
-      setMovies(movies.map(movie =>
-        movie.id === movieId
-          ? updatedMovie
-          : movie
-      ));
+      await movieService.toggleFavorite(movieId);
+      await loadMovies();
     } catch (err) {
       console.error('Error toggling favorite status:', err);
     }
@@ -42,7 +38,7 @@ export default function MyLibrary() {
 
   const filteredMovies = activeTab === 'favorites' 
     ? movies.filter(m => m.isFavorite)
-    : movies;
+    : movies.filter(m => m.inLibrary);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

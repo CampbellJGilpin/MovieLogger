@@ -133,4 +133,163 @@ public class MoviesServiceTests : BaseServiceTest
         result.Genre.Title.Should().Be(genre.Title);
         result.Genre.Id.Should().Be(genre.Id);
     }
+
+    [Fact]
+    public async Task GetAllMoviesForUserAsync_UserHasNoMovies_AllFlagsFalse()
+    {
+        // Arrange
+        var userId = 1;
+        var genre = Fixture.Create<Genre>();
+        var movies = Fixture.Build<Movie>()
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, false)
+            .CreateMany(3)
+            .AsQueryable();
+        var mockMovieSet = movies.BuildMockDbSet();
+        _dbContext.Movies.Returns(mockMovieSet);
+
+        var userMovies = new List<UserMovie>().AsQueryable();
+        var mockUserMovieSet = userMovies.BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockUserMovieSet);
+
+        // Act
+        var (result, totalCount, totalPages) = await _service.GetAllMoviesForUserAsync(userId);
+
+        // Assert
+        result.Should().HaveCount(3);
+        result.All(m => m.OwnsMovie == false && m.IsFavourite == false).Should().BeTrue();
+        totalCount.Should().Be(3);
+        totalPages.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetAllMoviesForUserAsync_UserHasOwnedAndFavoritedMovies_FlagsAreCorrect()
+    {
+        // Arrange
+        var userId = 2;
+        var genre = Fixture.Create<Genre>();
+        var movies = Fixture.Build<Movie>()
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, false)
+            .CreateMany(3)
+            .ToList();
+        var mockMovieSet = movies.AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(mockMovieSet);
+
+        var userMovies = new List<UserMovie>
+        {
+            new UserMovie { UserId = userId, MovieId = movies[0].Id, OwnsMovie = true, Favourite = false },
+            new UserMovie { UserId = userId, MovieId = movies[1].Id, OwnsMovie = false, Favourite = true },
+            // movies[2] is neither owned nor favorited
+        }.AsQueryable();
+        var mockUserMovieSet = userMovies.BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockUserMovieSet);
+
+        // Act
+        var (result, totalCount, totalPages) = await _service.GetAllMoviesForUserAsync(userId);
+
+        // Assert
+        result.Should().HaveCount(3);
+        result.Single(m => m.Id == movies[0].Id).OwnsMovie.Should().BeTrue();
+        result.Single(m => m.Id == movies[0].Id).IsFavourite.Should().BeFalse();
+        result.Single(m => m.Id == movies[1].Id).OwnsMovie.Should().BeFalse();
+        result.Single(m => m.Id == movies[1].Id).IsFavourite.Should().BeTrue();
+        result.Single(m => m.Id == movies[2].Id).OwnsMovie.Should().BeFalse();
+        result.Single(m => m.Id == movies[2].Id).IsFavourite.Should().BeFalse();
+        totalCount.Should().Be(3);
+        totalPages.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetAllMoviesForUserAsync_DeletedMoviesAreNotReturned()
+    {
+        // Arrange
+        var userId = 3;
+        var genre = Fixture.Create<Genre>();
+        var deletedMovie = Fixture.Build<Movie>()
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, true)
+            .Create();
+        var activeMovie = Fixture.Build<Movie>()
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, false)
+            .Create();
+        var movies = new List<Movie> { deletedMovie, activeMovie };
+        var mockMovieSet = movies.AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(mockMovieSet);
+
+        var userMovies = new List<UserMovie>().AsQueryable();
+        var mockUserMovieSet = userMovies.BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockUserMovieSet);
+
+        // Act
+        var (result, totalCount, totalPages) = await _service.GetAllMoviesForUserAsync(userId);
+
+        // Assert
+        result.Should().HaveCount(1);
+        result.First().Id.Should().Be(activeMovie.Id);
+        totalCount.Should().Be(1);
+        totalPages.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetAllMoviesForUserAsync_SearchFiltersResults()
+    {
+        // Arrange
+        var userId = 4;
+        var genre = Fixture.Create<Genre>();
+        var movies = new List<Movie>
+        {
+            new Movie { Id = 1, Title = "The Matrix", Genre = genre, GenreId = genre.Id, IsDeleted = false },
+            new Movie { Id = 2, Title = "Inception", Genre = genre, GenreId = genre.Id, IsDeleted = false },
+            new Movie { Id = 3, Title = "Interstellar", Genre = genre, GenreId = genre.Id, IsDeleted = false }
+        }.AsQueryable();
+        var mockMovieSet = movies.BuildMockDbSet();
+        _dbContext.Movies.Returns(mockMovieSet);
+
+        var userMovies = new List<UserMovie>().AsQueryable();
+        var mockUserMovieSet = userMovies.BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockUserMovieSet);
+
+        // Act
+        var (result, totalCount, totalPages) = await _service.GetAllMoviesForUserAsync(userId, "inc");
+
+        // Assert
+        result.Should().HaveCount(1);
+        result.First().Title.Should().Be("Inception");
+        totalCount.Should().Be(1);
+        totalPages.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetAllMoviesForUserAsync_PaginationWorks()
+    {
+        // Arrange
+        var userId = 5;
+        var genre = Fixture.Create<Genre>();
+        var movies = Fixture.Build<Movie>()
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, false)
+            .CreateMany(25)
+            .ToList();
+        var mockMovieSet = movies.AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(mockMovieSet);
+
+        var userMovies = new List<UserMovie>().AsQueryable();
+        var mockUserMovieSet = userMovies.BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockUserMovieSet);
+
+        // Act
+        var (result, totalCount, totalPages) = await _service.GetAllMoviesForUserAsync(userId, null, 2, 10);
+
+        // Assert
+        result.Should().HaveCount(10);
+        totalCount.Should().Be(25);
+        totalPages.Should().Be(3);
+    }
 }

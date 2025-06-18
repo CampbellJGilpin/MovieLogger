@@ -30,15 +30,13 @@ export default function MovieSearch() {
   };
 
   const handleToggleLibrary = async (movieId: number) => {
+    const movie = movies.find(m => m.id === movieId);
+    if (!movie) return;
     try {
-      await movieService.toggleLibrary(movieId);
-      setMovies(movies.map(movie =>
-        movie.id === movieId
-          ? { ...movie, inLibrary: !movie.inLibrary }
-          : movie
-      ));
+      await movieService.toggleLibrary(movieId, movie.inLibrary);
+      setMovies(prev => prev.map(m => m.id === movieId ? { ...m, inLibrary: !m.inLibrary } : m));
     } catch (error) {
-      console.error('Error toggling library status:', error);
+      console.error('Error toggling library:', error);
     }
   };
 

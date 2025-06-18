@@ -10,4 +10,5 @@ public interface IMoviesService
     Task<MovieDto> UpdateMovieAsync(int movieId, MovieDto dto);
     Task<bool> DeleteMovieAsync(int movieId);
     Task<IEnumerable<MovieDto>> SearchMoviesAsync(string query);
+    Task<(IEnumerable<UserMovieDto> Items, int TotalCount, int TotalPages)> GetAllMoviesForUserAsync(int userId, string? search = null, int page = 1, int pageSize = 10);
 }

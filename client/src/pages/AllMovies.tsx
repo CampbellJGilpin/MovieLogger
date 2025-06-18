@@ -24,20 +24,22 @@ export default function AllMovies() {
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize] = useState(10);
 
-  const loadMovies = useCallback(async () => {
+  const loadMovies = useCallback(async (query = debouncedSearchQuery, page = currentPage) => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await movieService.getAllMovies(undefined, currentPage, pageSize);
-      setMovies(data.items);
-      setTotalPages(data.totalPages);
+      const userResponse = await api.get('/accounts/me');
+      const userId = userResponse.data.id;
+      const { items, totalPages } = await movieService.getAllMoviesForUser(userId, query, page, pageSize);
+      setMovies(items);
+      setTotalPages(totalPages);
     } catch (err) {
       setError('Failed to load movies. Please try again later.');
       console.error('Error loading movies:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize]);
+  }, [debouncedSearchQuery, currentPage, pageSize]);
 
   useEffect(() => {
     loadMovies();
@@ -47,41 +49,24 @@ export default function AllMovies() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 500); // Wait for 500ms after the user stops typing
-
+    }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
   // Perform search when debounced query changes
   useEffect(() => {
-    if (debouncedSearchQuery) {
-      handleSearch(debouncedSearchQuery);
-    } else {
-      loadMovies();
-    }
-  }, [debouncedSearchQuery, loadMovies]);
+    loadMovies(debouncedSearchQuery, 1);
+    setCurrentPage(1);
+  }, [debouncedSearchQuery]);
 
   const handleSearch = async (query: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const userResponse = await api.get('/accounts/me');
-      const userId = userResponse.data.id;
-      const results = await movieService.searchMovies(query, userId);
-      setMovies(results);
-      setCurrentPage(1); // Reset to first page when searching
-      setTotalPages(1); // Search results don't have pagination yet
-    } catch (err) {
-      setError('Failed to search movies. Please try again later.');
-      console.error('Error searching movies:', err);
-    } finally {
-      setIsLoading(false);
-    }
+    setSearchQuery(query);
   };
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    window.scrollTo(0, 0); // Scroll to top when page changes
+    loadMovies(debouncedSearchQuery, newPage);
+    window.scrollTo(0, 0);
   };
 
   const handleAddMovie = async (movieData: MovieCreateRequest) => {
@@ -95,15 +80,13 @@ export default function AllMovies() {
   };
 
   const handleToggleLibrary = async (movieId: number) => {
+    const movie = movies.find(m => m.id === movieId);
+    if (!movie) return;
     try {
-      await movieService.toggleLibrary(movieId);
-      setMovies(movies.map(movie =>
-        movie.id === movieId
-          ? { ...movie, inLibrary: !movie.inLibrary }
-          : movie
-      ));
-    } catch (err) {
-      console.error('Error toggling library status:', err);
+      await movieService.toggleLibrary(movieId, movie.inLibrary);
+      setMovies(prev => prev.map(m => m.id === movieId ? { ...m, inLibrary: !m.inLibrary } : m));
+    } catch (error) {
+      console.error('Error toggling library:', error);
     }
   };
 

@@ -26,7 +26,7 @@ public class LibraryService : ILibraryService
         var entries = await _db.UserMovies
             .Include(um => um.Movie)
             .ThenInclude(m => m.Genre)
-            .Where(um => um.UserId == userId && um.OwnsMovie)
+            .Where(um => um.UserId == userId)
             .ToListAsync();
 
         var dto = new LibraryDto { UserId = userId, LibraryItems = _mapper.Map<List<LibraryItemDto>>(entries) };

@@ -115,5 +115,24 @@ namespace movielogger.api.controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        [HttpGet("all-for-user")]
+        public async Task<ActionResult<PaginatedResponse<UserMovieResponse>>> GetAllMoviesForUser(
+            [FromQuery] int userId,
+            [FromQuery] string? q = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var movies = await _moviesService.GetAllMoviesForUserAsync(userId, q, page, pageSize);
+            var response = new PaginatedResponse<UserMovieResponse>
+            {
+                Items = _mapper.Map<IEnumerable<UserMovieResponse>>(movies.Items),
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = movies.TotalCount,
+                TotalPages = movies.TotalPages
+            };
+            return Ok(response);
+        }
     }
 }

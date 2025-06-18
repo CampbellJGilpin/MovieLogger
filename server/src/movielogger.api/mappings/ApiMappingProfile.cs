@@ -58,5 +58,8 @@ public class ApiMappingProfile : Profile
         // User mappings
         CreateMap<User, UserResponse>();
         CreateMap<UserDto, UserResponse>();
+
+        CreateMap<UserMovieDto, UserMovieResponse>()
+            .ForMember(dest => dest.Genre, opt => opt.MapFrom(src => new GenreResponse { Id = src.GenreId, Title = src.GenreTitle }));
     }
 }

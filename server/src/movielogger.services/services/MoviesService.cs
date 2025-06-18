@@ -105,4 +105,49 @@ public class MoviesService : IMoviesService
 
         return _mapper.Map<List<MovieDto>>(movies);
     }
+
+    public async Task<(IEnumerable<UserMovieDto> Items, int TotalCount, int TotalPages)> GetAllMoviesForUserAsync(int userId, string? search = null, int page = 1, int pageSize = 10)
+    {
+        var query = _db.Movies
+            .Include(m => m.Genre)
+            .Where(m => !m.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var normalized = search.ToLower();
+            query = query.Where(m => m.Title.ToLower().Contains(normalized));
+        }
+
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var movies = await query
+            .OrderBy(m => m.Title)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var userMovies = await _db.UserMovies
+            .Where(um => um.UserId == userId)
+            .ToListAsync();
+
+        var items = movies.Select(movie =>
+        {
+            var userMovie = userMovies.FirstOrDefault(um => um.MovieId == movie.Id);
+            return new UserMovieDto
+            {
+                Id = movie.Id,
+                Title = movie.Title,
+                GenreId = movie.GenreId,
+                GenreTitle = movie.Genre.Title,
+                ReleaseDate = movie.ReleaseDate,
+                Description = movie.Description,
+                IsDeleted = movie.IsDeleted,
+                OwnsMovie = userMovie?.OwnsMovie ?? false,
+                IsFavourite = userMovie?.Favourite ?? false
+            };
+        });
+
+        return (Items: items, TotalCount: totalCount, TotalPages: totalPages);
+    }
 }

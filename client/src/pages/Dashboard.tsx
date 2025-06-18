@@ -110,6 +110,7 @@ export default function Dashboard() {
   }
 
   const favoriteMovies = movies.filter(m => m.isFavorite);
+  const libraryMovies = movies.filter(m => m.inLibrary);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -143,7 +144,7 @@ export default function Dashboard() {
           />
           <MovieListSection
             title="Personal Library"
-            movies={movies.slice(0, 5)}
+            movies={libraryMovies.slice(0, 5)}
             onToggleFavorite={handleToggleFavorite}
             emptyMessage="Your personal library is empty"
           />
