@@ -1,21 +1,96 @@
+version: '3.8'
+
 services:
+  # Database
   db:
-    image: postgres:latest
+    image: postgres:15-alpine
     restart: always
     ports:
-      - 5432:5432
+      - "5432:5432"
     environment:
       POSTGRES_DB: movielogger
       POSTGRES_USER: movieuser
       POSTGRES_PASSWORD: hotrod1
     volumes:
-      - db:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U movieuser -d movielogger"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Database migrations
   flyway:
-    image: flyway/flyway
+    image: flyway/flyway:9-alpine
     command: -url=jdbc:postgresql://db/movielogger -schemas=public -user=movieuser -password=hotrod1 -outOfOrder=true -connectRetries=5 migrate
     volumes:
       - ./database/migrations:/flyway/sql
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    profiles:
+      - migrate
+
+  # Backend API (.NET)
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5049:5049"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5049
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=movielogger;Username=movieuser;Password=hotrod1
+    volumes:
+      - ./server:/app
+      - /app/bin
+      - /app/obj
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5049/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (React/TypeScript)
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5049
+      - NODE_ENV=development
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Reverse proxy for development (optional)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - client
+      - api
+    profiles:
+      - proxy
+
 volumes:
-  db:
+  postgres_data:

@@ -17,6 +17,10 @@ help:
 	@echo "  server           Start backend server"
 	@echo "  database         Start database and run migrations"
 	@echo "  full-dev         Start all services (database, server, client)"
+	@echo "  docker-dev       Start full development environment with Docker"
+	@echo "  docker-up        Start database with Docker"
+	@echo "  docker-down      Stop database Docker container"
+	@echo "  docker-clean     Stop and remove all containers and volumes"
 	@echo ""
 	@echo "Building:"
 	@echo "  build            Build all components"
@@ -29,8 +33,6 @@ help:
 	@echo "  test-server      Run server tests"
 	@echo ""
 	@echo "Database:"
-	@echo "  docker-up        Start database with Docker"
-	@echo "  docker-down      Stop database Docker container"
 	@echo "  migrate          Run database migrations"
 	@echo "  seed             Seed database with initial data"
 	@echo ""
@@ -83,7 +85,7 @@ database: docker-up migrate
 full-dev: database
 	@echo "Starting full development environment..."
 	@echo "Database: http://localhost:5432"
-	@echo "API: http://localhost:5000"
+	@echo "API: http://localhost:5049"
 	@echo "Client: http://localhost:5173"
 	@echo ""
 	@echo "Starting server in background..."
@@ -91,6 +93,44 @@ full-dev: database
 	@echo "Starting client in background..."
 	@cd $(CLIENT_DIR) && npm run dev &
 	@echo "All services started! Press Ctrl+C to stop all services."
+
+# Docker Development Environment
+docker-dev:
+	@echo "Starting full Docker development environment..."
+	@echo "This will start all services with hot reloading:"
+	@echo "  - Database: http://localhost:5432"
+	@echo "  - API: http://localhost:5049"
+	@echo "  - Client: http://localhost:5173"
+	@echo "  - Proxy (optional): http://localhost:80"
+	@echo ""
+	docker-compose up --build
+
+docker-dev-detached:
+	@echo "Starting Docker development environment in background..."
+	docker-compose up --build -d
+
+docker-up:
+	@echo "Starting database with Docker..."
+	docker-compose up -d db
+	@echo "Waiting for database to be ready..."
+	@sleep 5
+
+docker-down:
+	@echo "Stopping Docker containers..."
+	docker-compose down
+
+docker-clean:
+	@echo "Stopping and removing all containers and volumes..."
+	docker-compose down -v --remove-orphans
+	@echo "Docker environment cleaned!"
+
+docker-logs:
+	@echo "Showing Docker logs..."
+	docker-compose logs -f
+
+docker-migrate:
+	@echo "Running database migrations..."
+	docker-compose --profile migrate up flyway
 
 # Building
 build: build-client build-server
@@ -117,19 +157,9 @@ test-server:
 	cd $(SERVER_DIR) && dotnet test
 
 # Database
-docker-up:
-	@echo "Starting database with Docker..."
-	docker-compose up -d db
-	@echo "Waiting for database to be ready..."
-	@sleep 5
-
-docker-down:
-	@echo "Stopping database Docker container..."
-	docker-compose down
-
 migrate:
 	@echo "Running database migrations..."
-	docker-compose up flyway
+	docker-compose --profile migrate up flyway
 
 seed:
 	@echo "Seeding database with initial data..."
@@ -204,7 +234,7 @@ logs:
 
 status:
 	@echo "Checking service status..."
-	@echo "Database:"
+	@echo "Docker containers:"
 	docker-compose ps
 	@echo ""
 	@echo "Client build:"
@@ -220,6 +250,9 @@ reset-db: docker-down docker-up migrate
 dev-setup: install database
 	@echo "Development environment setup complete!"
 	@echo "Run 'make full-dev' to start all services"
+
+docker-setup: docker-clean docker-dev
+	@echo "Docker development environment setup complete!"
 
 quick-test: lint test
 	@echo "Quick test completed!"
