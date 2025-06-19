@@ -33,3 +33,18 @@ jobs:
         run: npm i && npm run build
       - name: Deploy UI
         run: aws s3 sync dist/ s3://movielogger/ --delete
+      - name: Invalidate CloudFront cache
+        run: |
+          # Get the CloudFront distribution ID from secrets or environment
+          DISTRIBUTION_ID=${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          
+          echo "Creating CloudFront invalidation for distribution: $DISTRIBUTION_ID"
+          
+          # Create the invalidation - invalidate all paths to ensure fresh content
+          aws cloudfront create-invalidation \
+            --distribution-id $DISTRIBUTION_ID \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text
+          
+          echo "CloudFront cache invalidation created successfully"
