@@ -3,6 +3,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 using movielogger.api.models.requests.genres;
+using movielogger.api.models.responses;
 using movielogger.api.models.responses.genres;
 using movielogger.api.models.responses.movies;
 using movielogger.api.tests.fixtures;
@@ -23,8 +24,8 @@ public class MoviesControllerTests : BaseTestController
         response.EnsureSuccessStatusCode();
 
         // Assert
-        var movies = await response.Content.ReadFromJsonAsync<List<MovieResponse>>();
-        movies.Should().HaveCountGreaterThanOrEqualTo(2);
+        var movies = await response.Content.ReadFromJsonAsync<PaginatedResponse<MovieResponse>>();
+        movies?.Items.Should().HaveCountGreaterThanOrEqualTo(2);
     }
     
     [Fact]
