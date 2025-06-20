@@ -57,7 +57,7 @@ export default function AllMovies() {
   useEffect(() => {
     loadMovies(debouncedSearchQuery, 1);
     setCurrentPage(1);
-  }, [debouncedSearchQuery]);
+  }, [debouncedSearchQuery, loadMovies]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);

@@ -203,9 +203,23 @@ export async function getAllMoviesForUser(
     page: page.toString(),
     pageSize: pageSize.toString(),
   });
-  const response = await api.get(`/api/movies/all-for-user?${params.toString()}`);
+
+  // Define a type for the raw movie object from the API
+  interface RawUserMovieResponse {
+    id: number;
+    title: string;
+    description: string;
+    releaseDate: string;
+    genre: Genre;
+    isDeleted: boolean;
+    ownsMovie: boolean;
+    isFavourite: boolean;
+  }
+  
+  const response = await api.get<{ items: RawUserMovieResponse[], totalPages: number }>(`/api/movies/all-for-user?${params.toString()}`);
+  
   return {
-    items: response.data.items.map((movie: any) => ({
+    items: response.data.items.map((movie: RawUserMovieResponse) => ({
       id: movie.id,
       title: movie.title,
       description: movie.description,

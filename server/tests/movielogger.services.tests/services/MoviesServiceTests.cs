@@ -292,4 +292,338 @@ public class MoviesServiceTests : BaseServiceTest
         totalCount.Should().Be(25);
         totalPages.Should().Be(3);
     }
+
+    [Fact]
+    public async Task GetMovieByIdAsync_ValidId_ReturnsMovie()
+    {
+        // Arrange
+        var genre = Fixture.Create<Genre>();
+        var movie = Fixture.Build<Movie>()
+            .With(m => m.Id, 1)
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, false)
+            .Create();
+
+        var movies = new List<Movie> { movie }.AsQueryable();
+        var mockSet = movies.BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var result = await _service.GetMovieByIdAsync(1);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Id.Should().Be(1);
+        result.Title.Should().Be(movie.Title);
+        result.Genre.Should().NotBeNull();
+        result.Genre.Title.Should().Be(genre.Title);
+    }
+
+    [Fact]
+    public async Task GetMovieByIdAsync_InvalidId_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        var movies = new List<Movie>().AsQueryable();
+        var mockSet = movies.BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var act = () => _service.GetMovieByIdAsync(999);
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Movie with ID 999 not found.");
+    }
+
+    [Fact]
+    public async Task GetMovieByIdAsync_DeletedMovie_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        var genre = Fixture.Create<Genre>();
+        var movie = Fixture.Build<Movie>()
+            .With(m => m.Id, 1)
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, true)
+            .Create();
+
+        var movies = new List<Movie> { movie }.AsQueryable();
+        var mockSet = movies.BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var act = () => _service.GetMovieByIdAsync(1);
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Movie with ID 1 not found.");
+    }
+
+    [Fact]
+    public async Task UpdateMovieAsync_ValidMovie_UpdatesAndReturnsMovie()
+    {
+        // Arrange
+        var genre = Fixture.Create<Genre>();
+        var existingMovie = Fixture.Build<Movie>()
+            .With(m => m.Id, 1)
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, false)
+            .Create();
+
+        var updateDto = Fixture.Build<MovieDto>()
+            .With(m => m.Id, 1)
+            .With(m => m.Title, "Updated Title")
+            .With(m => m.Description, "Updated Description")
+            .Create();
+
+        var movies = new List<Movie> { existingMovie };
+        var mockSet = movies.AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var result = await _service.UpdateMovieAsync(1, updateDto);
+
+        // Assert
+        await _dbContext.Received(1).SaveChangesAsync();
+        result.Should().NotBeNull();
+        result.Id.Should().Be(1);
+        result.Title.Should().Be("Updated Title");
+        result.Description.Should().Be("Updated Description");
+    }
+
+    [Fact]
+    public async Task UpdateMovieAsync_InvalidId_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        var updateDto = Fixture.Create<MovieDto>();
+        var movies = new List<Movie>().AsQueryable();
+        var mockSet = movies.BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var act = () => _service.UpdateMovieAsync(999, updateDto);
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Movie with ID 999 not found.");
+    }
+
+    [Fact]
+    public async Task UpdateMovieAsync_DeletedMovie_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        var genre = Fixture.Create<Genre>();
+        var deletedMovie = Fixture.Build<Movie>()
+            .With(m => m.Id, 1)
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, true)
+            .Create();
+
+        var updateDto = Fixture.Create<MovieDto>();
+        var movies = new List<Movie> { deletedMovie }.AsQueryable();
+        var mockSet = movies.BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var act = () => _service.UpdateMovieAsync(1, updateDto);
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Movie with ID 1 not found.");
+    }
+
+    [Fact]
+    public async Task DeleteMovieAsync_ValidMovie_ReturnsTrueAndMarksAsDeleted()
+    {
+        // Arrange
+        var genre = Fixture.Create<Genre>();
+        var movie = Fixture.Build<Movie>()
+            .With(m => m.Id, 1)
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, false)
+            .Create();
+
+        var movies = new List<Movie> { movie };
+        var mockSet = movies.AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var result = await _service.DeleteMovieAsync(1);
+
+        // Assert
+        await _dbContext.Received(1).SaveChangesAsync();
+        result.Should().BeTrue();
+        movie.IsDeleted.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task DeleteMovieAsync_InvalidId_ReturnsFalse()
+    {
+        // Arrange
+        var movies = new List<Movie>().AsQueryable();
+        var mockSet = movies.BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var result = await _service.DeleteMovieAsync(999);
+
+        // Assert
+        result.Should().BeFalse();
+        await _dbContext.DidNotReceive().SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task DeleteMovieAsync_AlreadyDeletedMovie_ReturnsFalse()
+    {
+        // Arrange
+        var genre = Fixture.Create<Genre>();
+        var deletedMovie = Fixture.Build<Movie>()
+            .With(m => m.Id, 1)
+            .With(m => m.Genre, genre)
+            .With(m => m.GenreId, genre.Id)
+            .With(m => m.IsDeleted, true)
+            .Create();
+
+        var movies = new List<Movie> { deletedMovie }.AsQueryable();
+        var mockSet = movies.BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var result = await _service.DeleteMovieAsync(1);
+
+        // Assert
+        result.Should().BeFalse();
+        await _dbContext.DidNotReceive().SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task SearchMoviesAsync_ValidQuery_ReturnsMatchingMovies()
+    {
+        // Arrange
+        var genre = Fixture.Create<Genre>();
+        var movies = new List<Movie>
+        {
+            Fixture.Build<Movie>()
+                .With(m => m.Id, 1)
+                .With(m => m.Title, "The Matrix")
+                .With(m => m.Genre, genre)
+                .With(m => m.GenreId, genre.Id)
+                .With(m => m.IsDeleted, false)
+                .Create(),
+            Fixture.Build<Movie>()
+                .With(m => m.Id, 2)
+                .With(m => m.Title, "Matrix Reloaded")
+                .With(m => m.Genre, genre)
+                .With(m => m.GenreId, genre.Id)
+                .With(m => m.IsDeleted, false)
+                .Create(),
+            Fixture.Build<Movie>()
+                .With(m => m.Id, 3)
+                .With(m => m.Title, "Star Wars")
+                .With(m => m.Genre, genre)
+                .With(m => m.GenreId, genre.Id)
+                .With(m => m.IsDeleted, false)
+                .Create()
+        };
+
+        var mockSet = movies.AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var result = await _service.SearchMoviesAsync("matrix");
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(m => m.Title == "The Matrix");
+        result.Should().Contain(m => m.Title == "Matrix Reloaded");
+        result.Should().NotContain(m => m.Title == "Star Wars");
+    }
+
+    [Fact]
+    public async Task SearchMoviesAsync_QueryWithDifferentCase_ReturnsMatchingMovies()
+    {
+        // Arrange
+        var genre = Fixture.Create<Genre>();
+        var movies = new List<Movie>
+        {
+            Fixture.Build<Movie>()
+                .With(m => m.Id, 1)
+                .With(m => m.Title, "The Matrix")
+                .With(m => m.Genre, genre)
+                .With(m => m.GenreId, genre.Id)
+                .With(m => m.IsDeleted, false)
+                .Create()
+        };
+
+        var mockSet = movies.AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var result = await _service.SearchMoviesAsync("MATRIX");
+
+        // Assert
+        result.Should().HaveCount(1);
+        result.Should().Contain(m => m.Title == "The Matrix");
+    }
+
+    [Fact]
+    public async Task SearchMoviesAsync_NoMatches_ReturnsEmptyList()
+    {
+        // Arrange
+        var genre = Fixture.Create<Genre>();
+        var movies = new List<Movie>
+        {
+            Fixture.Build<Movie>()
+                .With(m => m.Id, 1)
+                .With(m => m.Title, "The Matrix")
+                .With(m => m.Genre, genre)
+                .With(m => m.GenreId, genre.Id)
+                .With(m => m.IsDeleted, false)
+                .Create()
+        };
+
+        var mockSet = movies.AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var result = await _service.SearchMoviesAsync("nonexistent");
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SearchMoviesAsync_DeletedMoviesAreExcluded()
+    {
+        // Arrange
+        var genre = Fixture.Create<Genre>();
+        var movies = new List<Movie>
+        {
+            Fixture.Build<Movie>()
+                .With(m => m.Id, 1)
+                .With(m => m.Title, "The Matrix")
+                .With(m => m.Genre, genre)
+                .With(m => m.GenreId, genre.Id)
+                .With(m => m.IsDeleted, false)
+                .Create(),
+            Fixture.Build<Movie>()
+                .With(m => m.Id, 2)
+                .With(m => m.Title, "Matrix Reloaded")
+                .With(m => m.Genre, genre)
+                .With(m => m.GenreId, genre.Id)
+                .With(m => m.IsDeleted, true)
+                .Create()
+        };
+
+        var mockSet = movies.AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(mockSet);
+
+        // Act
+        var result = await _service.SearchMoviesAsync("matrix");
+
+        // Assert
+        result.Should().HaveCount(1);
+        result.Should().Contain(m => m.Title == "The Matrix");
+        result.Should().NotContain(m => m.Title == "Matrix Reloaded");
+    }
 }
