@@ -85,6 +85,10 @@ public class Program
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
         builder.Services.AddEndpointsApiExplorer();
+        
+        // Add Health Checks
+        builder.Services.AddHealthChecks();
+
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "MovieLogger API", Version = "v1" });
@@ -124,12 +128,19 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.UseHttpsRedirection();
+        if (!app.Environment.IsDevelopment() || Environment.GetEnvironmentVariable("ASPNETCORE_USE_HTTPS_REDIRECTION") == "true")
+        {
+            app.UseHttpsRedirection();
+        }
+        
         app.UseCors();
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
+
+        // Map the health check endpoint
+        app.MapHealthChecks("/health");
 
         app.Run();
     }

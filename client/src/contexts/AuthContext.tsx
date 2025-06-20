@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const response = await api.get('/accounts/me');
+      const response = await api.get('/api/accounts/me');
       setUser(response.data);
       setIsAuthenticated(true);
     } catch (error) {
@@ -36,8 +36,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await api.post('/accounts/login', { email, password });
-      localStorage.setItem('token', response.data.token);
+      const response = await api.post('/api/accounts/login', { email, password });
+      const { token, user } = response.data;
+      localStorage.setItem('token', token);
       await checkAuthStatus();
     } catch (error) {
       console.error('Login failed:', error);
@@ -47,8 +48,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (email: string, password: string, userName: string) => {
     try {
-      const response = await api.post('/accounts/register', { email, password, userName });
-      localStorage.setItem('token', response.data.token);
+      const response = await api.post('/api/accounts/register', { email, password, userName });
+      const { token, user } = response.data;
+      localStorage.setItem('token', token);
       await checkAuthStatus();
     } catch (error) {
       console.error('Registration failed:', error);
