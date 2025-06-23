@@ -19,6 +19,25 @@ services:
       timeout: 5s
       retries: 5
 
+  # Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    restart: always
+    ports:
+      - "5672:5672"   # AMQP protocol
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: movieuser
+      RABBITMQ_DEFAULT_PASS: hotrod1
+      RABBITMQ_DEFAULT_VHOST: /
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   # Database migrations
   flyway:
     image: flyway/flyway:9-alpine
@@ -40,6 +59,11 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5049
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=movielogger;Username=movieuser;Password=hotrod1
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=movieuser
+      - RabbitMQ__Password=hotrod1
+      - RabbitMQ__VirtualHost=/
     volumes:
       - ./server:/app
       - /app/bin
@@ -47,6 +71,8 @@ services:
     depends_on:
       flyway:
         condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5049/health"]
       interval: 30s
@@ -93,3 +119,4 @@ services:
 
 volumes:
   postgres_data:
+  rabbitmq_data:
