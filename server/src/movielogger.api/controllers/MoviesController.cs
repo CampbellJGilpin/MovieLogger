@@ -5,6 +5,8 @@ using movielogger.api.models.requests.movies;
 using movielogger.api.models.responses;
 using movielogger.api.models.responses.movies;
 using movielogger.dal.dtos;
+using movielogger.messaging.Models;
+using movielogger.messaging.Services;
 using movielogger.services.interfaces;
 
 namespace movielogger.api.controllers
@@ -16,11 +18,13 @@ namespace movielogger.api.controllers
     {
         private readonly IMoviesService _moviesService;
         private readonly IMapper _mapper;
+        private readonly IMessagePublisher _messagePublisher;
 
-        public MoviesController(IMoviesService moviesService, IMapper mapper)
+        public MoviesController(IMoviesService moviesService, IMapper mapper, IMessagePublisher messagePublisher)
         {
             _moviesService = moviesService;
             _mapper = mapper;
+            _messagePublisher = messagePublisher;
         }
         
         [HttpGet]
@@ -61,6 +65,18 @@ namespace movielogger.api.controllers
             {
                 var movieDto = _mapper.Map<MovieDto>(request);
                 var createdMovie = await _moviesService.CreateMovieAsync(movieDto);
+                
+                // Publish MovieAddedEvent
+                var movieAddedEvent = new MovieAddedEvent
+                {
+                    MovieId = createdMovie.Id,
+                    MovieTitle = createdMovie.Title,
+                    Genre = createdMovie.Genre?.Title ?? "Unknown",
+                    UserId = User.Identity?.Name ?? "Unknown"
+                };
+                
+                await _messagePublisher.PublishAsync(movieAddedEvent);
+                
                 return Ok(_mapper.Map<MovieResponse>(createdMovie));
             }
             catch (Exception ex)
@@ -76,6 +92,19 @@ namespace movielogger.api.controllers
             {
                 var movieDto = _mapper.Map<MovieDto>(request);
                 var updatedMovie = await _moviesService.UpdateMovieAsync(id, movieDto);
+                
+                // Publish MovieUpdatedEvent
+                var movieUpdatedEvent = new MovieUpdatedEvent
+                {
+                    MovieId = updatedMovie.Id,
+                    MovieTitle = updatedMovie.Title,
+                    Genre = updatedMovie.Genre?.Title ?? "Unknown",
+                    ChangedFields = GetChangedFields(request), // You'd need to implement this
+                    UserId = User.Identity?.Name ?? "Unknown"
+                };
+                
+                await _messagePublisher.PublishAsync(movieUpdatedEvent);
+                
                 return Ok(_mapper.Map<MovieResponse>(updatedMovie));
             }
             catch (KeyNotFoundException)
@@ -93,7 +122,21 @@ namespace movielogger.api.controllers
         {
             try
             {
+                // Get movie details before deletion for the event
+                var movie = await _moviesService.GetMovieByIdAsync(id);
+                
                 await _moviesService.DeleteMovieAsync(id);
+                
+                // Publish MovieDeletedEvent
+                var movieDeletedEvent = new MovieDeletedEvent
+                {
+                    MovieId = movie.Id,
+                    MovieTitle = movie.Title,
+                    UserId = User.Identity?.Name ?? "Unknown"
+                };
+                
+                await _messagePublisher.PublishAsync(movieDeletedEvent);
+                
                 return NoContent();
             }
             catch (KeyNotFoundException)
@@ -133,6 +176,22 @@ namespace movielogger.api.controllers
                 TotalPages = movies.TotalPages
             };
             return Ok(response);
+        }
+
+        private string[] GetChangedFields(UpdateMovieRequest request)
+        {
+            var changedFields = new List<string>();
+            
+            if (!string.IsNullOrEmpty(request.Title))
+                changedFields.Add("Title");
+            if (!string.IsNullOrEmpty(request.Description))
+                changedFields.Add("Description");
+            if (request.ReleaseDate.HasValue)
+                changedFields.Add("ReleaseDate");
+            if (request.GenreId.HasValue)
+                changedFields.Add("GenreId");
+                
+            return changedFields.ToArray();
         }
     }
 }

@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\movielogger.services\movielogger.services.csproj" />
+    <ProjectReference Include="..\movielogger.messaging\movielogger.messaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>
