@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.dal.extensions;
+using movielogger.messaging.Configuration;
+using movielogger.messaging.Services;
+using Microsoft.Extensions.Options;
 
 public class Program
 {
@@ -56,6 +59,10 @@ public class Program
             };
         });
 
+        // Configure RabbitMQ
+        builder.Services.Configure<RabbitMQConfig>(
+            builder.Configuration.GetSection("RabbitMQ"));
+
         var isTesting = builder.Environment.EnvironmentName == "Testing";
 
         if (!isTesting)
@@ -76,7 +83,14 @@ public class Program
             .AddScoped<ILibraryService, LibraryService>()
             .AddScoped<IMoviesService, MoviesService>()
             .AddScoped<IReviewsService, ReviewsService>()
-            .AddScoped<IViewingsService, ViewingsService>();
+            .AddScoped<IViewingsService, ViewingsService>()
+            .AddScoped<IAuditService, AuditService>();
+
+        // Register RabbitMQ services
+        builder.Services
+            .AddSingleton<IMessagePublisher, RabbitMQPublisher>()
+            .AddSingleton<IMessageConsumer, RabbitMQConsumer>()
+            .AddScoped<AuditEventConsumer>();
 
         builder.Services.AddAutoMapper(
             typeof(ApiMappingProfile).Assembly,
@@ -120,6 +134,13 @@ public class Program
         });
 
         var app = builder.Build();
+
+        // Start the audit event consumer
+        if (!isTesting)
+        {
+            var auditConsumer = app.Services.GetRequiredService<AuditEventConsumer>();
+            auditConsumer.StartConsuming();
+        }
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
