@@ -15,11 +15,11 @@ help:
 	@echo "Development:"
 	@echo "  dev              Start client development server"
 	@echo "  server           Start backend server"
-	@echo "  database         Start database and run migrations"
-	@echo "  full-dev         Start all services (database, server, client)"
+	@echo "  database         Start database and RabbitMQ, then run migrations"
+	@echo "  full-dev         Start all services (database, RabbitMQ, server, client)"
 	@echo "  docker-dev       Start full development environment with Docker"
-	@echo "  docker-up        Start database with Docker"
-	@echo "  docker-down      Stop database Docker container"
+	@echo "  docker-up        Start database and RabbitMQ with Docker"
+	@echo "  docker-down      Stop database and RabbitMQ Docker containers"
 	@echo "  docker-clean     Stop and remove all containers and volumes"
 	@echo ""
 	@echo "Building:"
@@ -80,7 +80,7 @@ server:
 	cd $(SERVER_DIR) && dotnet run --project src/movielogger.api
 
 database: docker-up migrate
-	@echo "Database is ready!"
+	@echo "Database and RabbitMQ are ready!"
 
 full-dev: database
 	@echo "Starting full development environment..."
@@ -110,9 +110,9 @@ docker-dev-detached:
 	docker-compose up --build -d
 
 docker-up:
-	@echo "Starting database with Docker..."
-	docker-compose up -d db
-	@echo "Waiting for database to be ready..."
+	@echo "Starting database and RabbitMQ with Docker..."
+	docker-compose up -d db rabbitmq
+	@echo "Waiting for database and RabbitMQ to be ready..."
 	@sleep 5
 
 docker-down:

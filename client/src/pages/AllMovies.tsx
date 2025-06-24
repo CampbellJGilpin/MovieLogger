@@ -28,7 +28,7 @@ export default function AllMovies() {
     try {
       setIsLoading(true);
       setError(null);
-      const userResponse = await api.get('/api/accounts/me');
+      const userResponse = await api.get('/accounts/me');
       const userId = userResponse.data.id;
       const { items, totalPages } = await movieService.getAllMoviesForUser(userId, query, page, pageSize);
       setMovies(items);

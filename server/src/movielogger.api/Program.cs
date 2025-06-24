@@ -90,7 +90,8 @@ public class Program
         builder.Services
             .AddSingleton<IMessagePublisher, RabbitMQPublisher>()
             .AddSingleton<IMessageConsumer, RabbitMQConsumer>()
-            .AddScoped<AuditEventConsumer>();
+            .AddScoped<AuditEventConsumer>()
+            .AddHostedService<AuditEventConsumerHostedService>();
 
         builder.Services.AddAutoMapper(
             typeof(ApiMappingProfile).Assembly,
@@ -134,13 +135,6 @@ public class Program
         });
 
         var app = builder.Build();
-
-        // Start the audit event consumer
-        if (!isTesting)
-        {
-            var auditConsumer = app.Services.GetRequiredService<AuditEventConsumer>();
-            auditConsumer.StartConsuming();
-        }
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
