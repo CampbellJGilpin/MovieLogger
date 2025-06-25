@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace movielogger.messaging.Models
 {
+    [JsonConverter(typeof(MovieEventConverter))]
     public abstract class MovieEvent
     {
         public string EventType { get; set; } = string.Empty;

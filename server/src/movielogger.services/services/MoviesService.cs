@@ -56,11 +56,11 @@ public class MoviesService : IMoviesService
     {
         var movie = _mapper.Map<Movie>(dto);
         _db.Movies.Add(movie);
-        var movieId = await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var savedMovie = await _db.Movies
             .Include(g => g.Genre)
-            .FirstOrDefaultAsync(x => x.Id == movieId);
+            .FirstOrDefaultAsync(x => x.Id == movie.Id);
         
         return _mapper.Map<MovieDto>(savedMovie);
     }

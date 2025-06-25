@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using movielogger.dal.entities;
 using movielogger.messaging.Configuration;
 using movielogger.messaging.Models;
@@ -10,16 +11,16 @@ namespace movielogger.messaging.Services
     public class AuditEventConsumer : IDisposable
     {
         private readonly RabbitMQConsumer _consumer;
-        private readonly IAuditService _auditService;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<AuditEventConsumer> _logger;
 
         public AuditEventConsumer(
             IOptions<RabbitMQConfig> config,
-            IAuditService auditService,
+            IServiceProvider serviceProvider,
             ILogger<AuditEventConsumer> logger,
             ILogger<RabbitMQConsumer> rabbitMQLogger)
         {
-            _auditService = auditService;
+            _serviceProvider = serviceProvider;
             _logger = logger;
             
             // Create the underlying RabbitMQ consumer
@@ -41,6 +42,10 @@ namespace movielogger.messaging.Services
 
         private async void OnMessageReceived(object? sender, MovieEvent e)
         {
+            // Create a new scope for each message to avoid DbContext concurrency issues
+            using var scope = _serviceProvider.CreateScope();
+            var auditService = scope.ServiceProvider.GetRequiredService<IAuditService>();
+            
             try
             {
                 _logger.LogInformation("Processing audit event: {EventType} for user {UserId}", e.EventType, e.UserId);
@@ -51,7 +56,7 @@ namespace movielogger.messaging.Services
                 var entityId = GetEntityId(e);
                 var additionalData = GetAdditionalData(e);
 
-                await _auditService.LogEventAsync(
+                await auditService.LogEventAsync(
                     eventType: eventType,
                     userId: e.UserId,
                     description: description,
