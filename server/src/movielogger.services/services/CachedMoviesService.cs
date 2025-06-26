@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.Extensions.Logging;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
+using movielogger.services.models;
 
 namespace movielogger.services.services;
 
@@ -23,16 +24,22 @@ public class CachedMoviesService : IMoviesService
     {
         var cacheKey = $"movies:all:{page}:{pageSize}";
         
-        var cached = await _cacheService.GetAsync<(IEnumerable<MovieDto> Movies, int TotalCount)>(cacheKey);
-        if (cached != default)
+        var cached = await _cacheService.GetAsync<CachedMoviesResult>(cacheKey);
+        if (cached != null)
         {
             _logger.LogDebug("Cache hit for {CacheKey}", cacheKey);
-            return cached;
+            return (cached.Movies, cached.TotalCount);
         }
 
         _logger.LogDebug("Cache miss for {CacheKey}", cacheKey);
         var result = await _moviesService.GetAllMoviesAsync(page, pageSize);
-        await _cacheService.SetAsync(cacheKey, result, _defaultCacheExpiration);
+        
+        var cachedResult = new CachedMoviesResult
+        {
+            Movies = result.Movies,
+            TotalCount = result.TotalCount
+        };
+        await _cacheService.SetAsync(cacheKey, cachedResult, _defaultCacheExpiration);
         
         return result;
     }
@@ -113,16 +120,23 @@ public class CachedMoviesService : IMoviesService
         var searchParam = search ?? "all";
         var cacheKey = $"movies:user:{userId}:{searchParam}:{page}:{pageSize}";
         
-        var cached = await _cacheService.GetAsync<(IEnumerable<UserMovieDto> Items, int TotalCount, int TotalPages)>(cacheKey);
-        if (cached != default)
+        var cached = await _cacheService.GetAsync<CachedUserMoviesResult>(cacheKey);
+        if (cached != null)
         {
             _logger.LogDebug("Cache hit for {CacheKey}", cacheKey);
-            return cached;
+            return (cached.Items, cached.TotalCount, cached.TotalPages);
         }
 
         _logger.LogDebug("Cache miss for {CacheKey}", cacheKey);
         var result = await _moviesService.GetAllMoviesForUserAsync(userId, search, page, pageSize);
-        await _cacheService.SetAsync(cacheKey, result, _defaultCacheExpiration);
+        
+        var cachedResult = new CachedUserMoviesResult
+        {
+            Items = result.Items,
+            TotalCount = result.TotalCount,
+            TotalPages = result.TotalPages
+        };
+        await _cacheService.SetAsync(cacheKey, cachedResult, _defaultCacheExpiration);
         
         return result;
     }
