@@ -14,6 +14,7 @@ using movielogger.dal.extensions;
 using movielogger.messaging.Configuration;
 using movielogger.messaging.Services;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Memory;
 
 public class Program
 {
@@ -76,15 +77,28 @@ public class Program
                 provider.GetRequiredService<MovieLoggerDbContext>());
         }
 
+        // Add Memory Cache
+        builder.Services.AddMemoryCache();
+        builder.Services.AddScoped<ICacheService, InMemoryCacheService>();
+
         builder.Services
             .AddScoped<IUsersService, UsersService>()
             .AddScoped<IAccountsService, AccountsService>()
             .AddScoped<IGenresService, GenresService>()
             .AddScoped<ILibraryService, LibraryService>()
             .AddScoped<IMoviesService, MoviesService>()
+            .AddScoped<CachedMoviesService>()
+            .AddScoped<MoviesServiceFactory>()
             .AddScoped<IReviewsService, ReviewsService>()
             .AddScoped<IViewingsService, ViewingsService>()
             .AddScoped<IAuditService, AuditService>();
+
+        // Configure MoviesService with factory pattern
+        builder.Services.AddScoped<IMoviesService>(provider =>
+        {
+            var factory = provider.GetRequiredService<MoviesServiceFactory>();
+            return factory.Create();
+        });
 
         // Register RabbitMQ services
         builder.Services

@@ -1,7 +1,7 @@
 # MovieLogger Makefile
 # A comprehensive build and development tool for the MovieLogger application
 
-.PHONY: help install build test clean dev server client database docker-up docker-down migrate seed lint format
+.PHONY: help install build test clean dev server client database docker-up docker-down migrate seed lint format dev-start dev-stop dev-status dev-logs dev-restart dev-clean kill-ports
 
 # Default target
 help:
@@ -12,7 +12,15 @@ help:
 	@echo "  install-client   Install client dependencies"
 	@echo "  install-server   Install server dependencies"
 	@echo ""
-	@echo "Development:"
+	@echo "Development (Recommended):"
+	@echo "  dev-start        Start full development environment with proper process management"
+	@echo "  dev-stop         Stop all development services"
+	@echo "  dev-status       Show status of all development services"
+	@echo "  dev-logs         Show logs for a service (server|client)"
+	@echo "  dev-restart      Restart all development services"
+	@echo "  dev-clean        Stop and clean up everything"
+	@echo ""
+	@echo "Development (Legacy):"
 	@echo "  dev              Start client development server"
 	@echo "  server           Start backend server"
 	@echo "  database         Start database and RabbitMQ, then run migrations"
@@ -21,6 +29,9 @@ help:
 	@echo "  docker-up        Start database and RabbitMQ with Docker"
 	@echo "  docker-down      Stop database and RabbitMQ Docker containers"
 	@echo "  docker-clean     Stop and remove all containers and volumes"
+	@echo ""
+	@echo "Process Management:"
+	@echo "  kill-ports       Kill processes on common development ports"
 	@echo ""
 	@echo "Building:"
 	@echo "  build            Build all components"
@@ -56,6 +67,7 @@ help:
 CLIENT_DIR = client
 SERVER_DIR = server
 DATABASE_DIR = database
+SCRIPTS_DIR = scripts
 
 # Installation
 install: install-client install-server
@@ -70,7 +82,35 @@ install-server:
 	@echo "Installing server dependencies..."
 	cd $(SERVER_DIR) && dotnet restore
 
-# Development
+# Development (New - Recommended)
+dev-start:
+	@echo "Starting development environment with proper process management..."
+	@$(SCRIPTS_DIR)/dev-start.sh start
+
+dev-stop:
+	@echo "Stopping development environment..."
+	@$(SCRIPTS_DIR)/dev-start.sh stop
+
+dev-status:
+	@$(SCRIPTS_DIR)/dev-start.sh status
+
+dev-logs:
+	@$(SCRIPTS_DIR)/dev-start.sh logs $(filter-out $@,$(MAKECMDGOALS))
+
+dev-restart:
+	@echo "Restarting development environment..."
+	@$(SCRIPTS_DIR)/dev-start.sh restart
+
+dev-clean:
+	@echo "Cleaning development environment..."
+	@$(SCRIPTS_DIR)/dev-start.sh clean
+
+# Process Management
+kill-ports:
+	@echo "Port management utility..."
+	@$(SCRIPTS_DIR)/kill-ports.sh
+
+# Development (Legacy)
 dev:
 	@echo "Starting client development server..."
 	cd $(CLIENT_DIR) && npm run dev
@@ -93,6 +133,9 @@ full-dev: database
 	@echo "Starting client in background..."
 	@cd $(CLIENT_DIR) && npm run dev &
 	@echo "All services started! Press Ctrl+C to stop all services."
+	@echo ""
+	@echo "WARNING: This method may leave processes running."
+	@echo "Use 'make dev-start' for better process management."
 
 # Docker Development Environment
 docker-dev:
@@ -249,7 +292,7 @@ reset-db: docker-down docker-up migrate
 # Development shortcuts
 dev-setup: install database
 	@echo "Development environment setup complete!"
-	@echo "Run 'make full-dev' to start all services"
+	@echo "Run 'make dev-start' to start all services"
 
 docker-setup: docker-clean docker-dev
 	@echo "Docker development environment setup complete!"
