@@ -86,18 +86,18 @@ public class Program
             .AddScoped<IAccountsService, AccountsService>()
             .AddScoped<IGenresService, GenresService>()
             .AddScoped<ILibraryService, LibraryService>()
-            .AddScoped<IMoviesService, MoviesService>()
-            .AddScoped<CachedMoviesService>()
-            .AddScoped<MoviesServiceFactory>()
+            .AddScoped<MoviesService>()
             .AddScoped<IReviewsService, ReviewsService>()
             .AddScoped<IViewingsService, ViewingsService>()
             .AddScoped<IAuditService, AuditService>();
 
-        // Configure MoviesService with factory pattern
+        // Register MoviesService with caching (avoiding circular dependency)
         builder.Services.AddScoped<IMoviesService>(provider =>
         {
-            var factory = provider.GetRequiredService<MoviesServiceFactory>();
-            return factory.Create();
+            var baseService = provider.GetRequiredService<MoviesService>();
+            var cacheService = provider.GetRequiredService<ICacheService>();
+            var logger = provider.GetRequiredService<ILogger<CachedMoviesService>>();
+            return new CachedMoviesService(baseService, cacheService, logger);
         });
 
         // Register RabbitMQ services
