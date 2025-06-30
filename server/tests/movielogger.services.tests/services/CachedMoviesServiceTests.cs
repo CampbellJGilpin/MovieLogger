@@ -1,11 +1,13 @@
 using AutoFixture;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using movielogger.dal.dtos;
 using movielogger.services.interfaces;
 using movielogger.services.services;
 using NSubstitute;
 using Xunit;
+using System.Collections.Generic;
 
 namespace movielogger.services.tests.services;
 
@@ -15,6 +17,7 @@ public class CachedMoviesServiceTests
     private readonly IMoviesService _baseMoviesService;
     private readonly ICacheService _cacheService;
     private readonly ILogger<CachedMoviesService> _logger;
+    private readonly IConfiguration _configuration;
     private readonly CachedMoviesService _cachedService;
 
     public CachedMoviesServiceTests()
@@ -30,7 +33,17 @@ public class CachedMoviesServiceTests
         _cacheService = Substitute.For<ICacheService>();
         _logger = Substitute.For<ILogger<CachedMoviesService>>();
         
-        _cachedService = new CachedMoviesService(_baseMoviesService, _cacheService, _logger);
+        // Create a real configuration with the required values
+        var configValues = new Dictionary<string, string?>
+        {
+            {"Caching:EnableMoviesCaching", "true"}
+        };
+        
+        _configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(configValues)
+            .Build();
+        
+        _cachedService = new CachedMoviesService(_baseMoviesService, _cacheService, _logger, _configuration);
     }
 
     [Fact]

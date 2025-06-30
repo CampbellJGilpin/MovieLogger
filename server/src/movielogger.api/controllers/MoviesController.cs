@@ -19,12 +19,14 @@ namespace movielogger.api.controllers
         private readonly IMoviesService _moviesService;
         private readonly IMapper _mapper;
         private readonly IMessagePublisher _messagePublisher;
+        private readonly ICacheService _cacheService;
 
-        public MoviesController(IMoviesService moviesService, IMapper mapper, IMessagePublisher messagePublisher)
+        public MoviesController(IMoviesService moviesService, IMapper mapper, IMessagePublisher messagePublisher, ICacheService cacheService)
         {
             _moviesService = moviesService;
             _mapper = mapper;
             _messagePublisher = messagePublisher;
+            _cacheService = cacheService;
         }
         
         [HttpGet]
@@ -176,6 +178,21 @@ namespace movielogger.api.controllers
                 TotalPages = movies.TotalPages
             };
             return Ok(response);
+        }
+
+        [HttpPost("clear-cache")]
+        public async Task<ActionResult> ClearCache()
+        {
+            try
+            {
+                await _cacheService.RemoveByPatternAsync("movies:*");
+                await _cacheService.RemoveByPatternAsync("movie:*");
+                return Ok(new { message = "Movie cache cleared successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         private string[] GetChangedFields(UpdateMovieRequest request)

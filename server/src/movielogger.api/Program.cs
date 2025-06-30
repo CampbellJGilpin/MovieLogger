@@ -97,7 +97,8 @@ public class Program
             var baseService = provider.GetRequiredService<MoviesService>();
             var cacheService = provider.GetRequiredService<ICacheService>();
             var logger = provider.GetRequiredService<ILogger<CachedMoviesService>>();
-            return new CachedMoviesService(baseService, cacheService, logger);
+            var configuration = provider.GetRequiredService<IConfiguration>();
+            return new CachedMoviesService(baseService, cacheService, logger, configuration);
         });
 
         // Register RabbitMQ services
