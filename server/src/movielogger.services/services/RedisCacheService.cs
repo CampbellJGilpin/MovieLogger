@@ -23,9 +23,14 @@ public class RedisCacheService : ICacheService
         {
             var value = await _database.StringGetAsync(key);
             if (!value.HasValue)
+            {
+                _logger.LogDebug("Cache miss for key: {Key}", key);
                 return null;
+            }
 
-            return System.Text.Json.JsonSerializer.Deserialize<T>(value!);
+            var result = System.Text.Json.JsonSerializer.Deserialize<T>(value!);
+            _logger.LogDebug("Cache hit for key: {Key}", key);
+            return result;
         }
         catch (Exception ex)
         {
@@ -40,6 +45,7 @@ public class RedisCacheService : ICacheService
         {
             var serializedValue = System.Text.Json.JsonSerializer.Serialize(value);
             await _database.StringSetAsync(key, serializedValue, expiration);
+            _logger.LogDebug("Cache set for key: {Key} with expiration: {Expiration}", key, expiration);
         }
         catch (Exception ex)
         {
@@ -51,7 +57,8 @@ public class RedisCacheService : ICacheService
     {
         try
         {
-            await _database.KeyDeleteAsync(key);
+            var removed = await _database.KeyDeleteAsync(key);
+            _logger.LogDebug("Cache removed for key: {Key}, success: {Success}", key, removed);
         }
         catch (Exception ex)
         {
@@ -63,13 +70,36 @@ public class RedisCacheService : ICacheService
     {
         try
         {
-            var server = _redis.GetServer(_redis.GetEndPoints().First());
-            var keys = server.Keys(pattern: pattern);
+            _logger.LogInformation("RemoveByPatternAsync called with pattern: {Pattern}", pattern);
             
-            foreach (var key in keys)
+            // Get all endpoints (Redis can have multiple servers)
+            var endpoints = _redis.GetEndPoints();
+            var totalRemoved = 0;
+            
+            foreach (var endpoint in endpoints)
             {
-                await _database.KeyDeleteAsync(key);
+                var server = _redis.GetServer(endpoint);
+                
+                // Use KEYS for pattern matching (not recommended for huge datasets, but fine for most app caches)
+                var keys = server.Keys(pattern: pattern).ToArray();
+                
+                _logger.LogInformation("Found {Count} keys matching pattern '{Pattern}' on endpoint {Endpoint}", 
+                    keys.Length, pattern, endpoint);
+                
+                // Delete keys in batches for better performance
+                if (keys.Length > 0)
+                {
+                    var batch = _database.CreateBatch();
+                    var tasks = keys.Select(key => batch.KeyDeleteAsync(key)).ToArray();
+                    batch.Execute();
+                    
+                    totalRemoved += keys.Length;
+                    _logger.LogDebug("Removed {Count} keys from endpoint {Endpoint}", keys.Length, endpoint);
+                }
             }
+            
+            _logger.LogInformation("Pattern-based cache removal completed - removed {TotalCount} keys for pattern: {Pattern}", 
+                totalRemoved, pattern);
         }
         catch (Exception ex)
         {
@@ -81,7 +111,9 @@ public class RedisCacheService : ICacheService
     {
         try
         {
-            return await _database.KeyExistsAsync(key);
+            var exists = await _database.KeyExistsAsync(key);
+            _logger.LogDebug("Cache exists check for key: {Key}, exists: {Exists}", key, exists);
+            return exists;
         }
         catch (Exception ex)
         {

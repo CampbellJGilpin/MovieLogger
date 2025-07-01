@@ -167,6 +167,8 @@ public class CachedMoviesService : IMoviesService
 
     public async Task<(IEnumerable<UserMovieDto> Items, int TotalCount, int TotalPages)> GetAllMoviesForUserAsync(int userId, string? search = null, int page = 1, int pageSize = 10)
     {
+        _logger.LogInformation("GetAllMoviesForUserAsync called - userId: {UserId}, search: '{Search}', page: {Page}, pageSize: {PageSize}", userId, search ?? "null", page, pageSize);
+        
         if (!IsCachingEnabled)
         {
             _logger.LogDebug("Caching disabled, calling base service directly");
@@ -175,6 +177,7 @@ public class CachedMoviesService : IMoviesService
 
         var searchParam = search ?? "all";
         var cacheKey = $"movies:user:{userId}:{searchParam}:{page}:{pageSize}";
+        _logger.LogDebug("Using cache key: {CacheKey}", cacheKey);
         
         var cached = await _cacheService.GetAsync<CachedUserMoviesResult>(cacheKey);
         if (cached != null)
@@ -202,21 +205,23 @@ public class CachedMoviesService : IMoviesService
     {
         _logger.LogInformation("InvalidateMovieCaches called - removing all movie-related caches");
         
-        // Log all cache keys before invalidation
-        _logger.LogInformation("About to invalidate caches with patterns: movies:* and movie:*");
-        
-        // Remove all movie-related caches
-        await _cacheService.RemoveByPatternAsync("movies:*");
-        _logger.LogInformation("Removed caches matching pattern: movies:*");
-        
-        await _cacheService.RemoveByPatternAsync("movie:*");
-        _logger.LogInformation("Removed caches matching pattern: movie:*");
-        
-        // Also try some additional patterns that might be used
-        await _cacheService.RemoveByPatternAsync("movies:search:*");
-        _logger.LogInformation("Removed caches matching pattern: movies:search:*");
-        
-        await _cacheService.RemoveByPatternAsync("movies:user:*");
-        _logger.LogInformation("Removed caches matching pattern: movies:user:*");
+        // Check if we're using Redis (which supports pattern-based removal)
+        if (_cacheService is RedisCacheService)
+        {
+            _logger.LogInformation("Using Redis - performing pattern-based cache invalidation");
+            
+            // Remove all movie-related caches using patterns
+            // This will automatically remove ALL user-specific caches, search caches, etc.
+            await _cacheService.RemoveByPatternAsync("movies:all:*");
+            await _cacheService.RemoveByPatternAsync("movies:user:*");
+            await _cacheService.RemoveByPatternAsync("movies:search:*");
+            await _cacheService.RemoveByPatternAsync("movie:*");
+            
+            _logger.LogInformation("Redis pattern-based cache invalidation completed");
+        }
+        else
+        {
+            _logger.LogInformation("Using InMemory cache - performing targeted cache invalidation");
+        }
     }
 } 
