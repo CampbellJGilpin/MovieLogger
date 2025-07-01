@@ -92,6 +92,7 @@ public class RedisCacheService : ICacheService
                     var batch = _database.CreateBatch();
                     var tasks = keys.Select(key => batch.KeyDeleteAsync(key)).ToArray();
                     batch.Execute();
+                    await Task.WhenAll(tasks);
                     
                     totalRemoved += keys.Length;
                     _logger.LogDebug("Removed {Count} keys from endpoint {Endpoint}", keys.Length, endpoint);

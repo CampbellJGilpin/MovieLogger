@@ -127,13 +127,17 @@ public class MoviesService : IMoviesService
             .Take(pageSize)
             .ToListAsync();
 
+        // Get user movies for the retrieved movies
+        var movieIds = movies.Select(m => m.Id).ToList();
         var userMovies = await _db.UserMovies
-            .Where(um => um.UserId == userId)
+            .Where(um => um.UserId == userId && movieIds.Contains(um.MovieId))
             .ToListAsync();
+
+        var userMoviesDict = userMovies.ToDictionary(um => um.MovieId);
 
         var items = movies.Select(movie =>
         {
-            var userMovie = userMovies.FirstOrDefault(um => um.MovieId == movie.Id);
+            userMoviesDict.TryGetValue(movie.Id, out var userMovie);
             return new UserMovieDto
             {
                 Id = movie.Id,

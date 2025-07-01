@@ -79,7 +79,7 @@ namespace movielogger.api.controllers
                 
                 await _messagePublisher.PublishAsync(movieAddedEvent);
                 
-                return Ok(_mapper.Map<MovieResponse>(createdMovie));
+                return CreatedAtAction(nameof(GetMovieById), new { id = createdMovie.Id }, _mapper.Map<MovieResponse>(createdMovie));
             }
             catch (Exception ex)
             {
@@ -127,7 +127,12 @@ namespace movielogger.api.controllers
                 // Get movie details before deletion for the event
                 var movie = await _moviesService.GetMovieByIdAsync(id);
                 
-                await _moviesService.DeleteMovieAsync(id);
+                var deleted = await _moviesService.DeleteMovieAsync(id);
+                
+                if (!deleted)
+                {
+                    return NotFound();
+                }
                 
                 // Publish MovieDeletedEvent
                 var movieDeletedEvent = new MovieDeletedEvent
