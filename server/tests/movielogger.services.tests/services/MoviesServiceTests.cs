@@ -1,16 +1,9 @@
-using AutoMapper;
-using EntityFrameworkCore.Testing.NSubstitute;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using movielogger.dal;
 using movielogger.dal.dtos;
 using movielogger.dal.entities;
 using movielogger.services.interfaces;
 using movielogger.services.services;
-using movielogger.services.tests.services;
 using NSubstitute;
-using Xunit;
-using System.Linq.Expressions;
 using AutoFixture;
 using MockQueryable.NSubstitute;
 

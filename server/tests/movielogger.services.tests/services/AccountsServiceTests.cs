@@ -15,6 +15,7 @@ using Xunit;
 using BC = BCrypt.Net.BCrypt;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute.ReturnsExtensions;
+using System.Threading;
 
 namespace movielogger.services.tests.services;
 
@@ -91,5 +92,100 @@ public class AccountsServiceTests : BaseServiceTest
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Email already exists");
+    }
+
+    [Fact]
+    public async Task AuthenticateUserAsync_ValidCredentials_ReturnsUserAndToken()
+    {
+        // Arrange
+        var email = "test@example.com";
+        var password = "password123";
+        var hashedPassword = BC.HashPassword(password);
+        var user = Fixture.Build<User>()
+            .With(u => u.Email, email)
+            .With(u => u.Password, hashedPassword)
+            .Create();
+
+        var users = new List<User> { user }.AsQueryable().BuildMockDbSet();
+        _dbContext.Users.Returns(users);
+
+        // Act
+        var result = await _service.AuthenticateUserAsync(email, password);
+
+        // Assert
+        result.user.Should().NotBeNull();
+        result.user.Email.Should().Be(email);
+        result.token.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task AuthenticateUserAsync_InvalidCredentials_ThrowsUnauthorizedAccessException()
+    {
+        // Arrange
+        var email = "test@example.com";
+        var password = "wrongpassword";
+        var hashedPassword = BC.HashPassword("correctpassword");
+        var user = Fixture.Build<User>()
+            .With(u => u.Email, email)
+            .With(u => u.Password, hashedPassword)
+            .Create();
+
+        var users = new List<User> { user }.AsQueryable().BuildMockDbSet();
+        _dbContext.Users.Returns(users);
+
+        // Act
+        var act = () => _service.AuthenticateUserAsync(email, password);
+
+        // Assert
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    [Fact]
+    public async Task ChangePasswordAsync_ValidInput_ChangesPassword()
+    {
+        // Arrange
+        var userId = 1;
+        var currentPassword = "oldpassword";
+        var newPassword = "newpassword";
+        var hashedCurrentPassword = BC.HashPassword(currentPassword);
+        var user = Fixture.Build<User>()
+            .With(u => u.Id, userId)
+            .With(u => u.Password, hashedCurrentPassword)
+            .Create();
+
+        var users = new List<User> { user }.AsQueryable().BuildMockDbSet();
+        _dbContext.Users.Returns(users);
+
+        _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
+
+        // Act
+        await _service.ChangePasswordAsync(userId, currentPassword, newPassword);
+
+        // Assert
+        BC.Verify(newPassword, user.Password).Should().BeTrue();
+        await _dbContext.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ChangePasswordAsync_InvalidCurrentPassword_ThrowsUnauthorizedAccessException()
+    {
+        // Arrange
+        var userId = 1;
+        var currentPassword = "wrongpassword";
+        var newPassword = "newpassword";
+        var hashedCurrentPassword = BC.HashPassword("correctpassword");
+        var user = Fixture.Build<User>()
+            .With(u => u.Id, userId)
+            .With(u => u.Password, hashedCurrentPassword)
+            .Create();
+
+        var users = new List<User> { user }.AsQueryable().BuildMockDbSet();
+        _dbContext.Users.Returns(users);
+
+        // Act
+        var act = () => _service.ChangePasswordAsync(userId, currentPassword, newPassword);
+
+        // Assert
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
     }
 }

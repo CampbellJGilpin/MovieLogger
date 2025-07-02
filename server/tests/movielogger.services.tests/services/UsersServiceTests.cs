@@ -155,4 +155,39 @@ public class UsersServiceTests : BaseServiceTest
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
+
+    [Fact]
+    public async Task DeleteUserAsync_ValidId_DeletesUser()
+    {
+        // Arrange
+        var user = Fixture.Build<User>()
+            .With(x => x.IsDeleted, false)
+            .Create();
+
+        var users = new List<User> { user }.AsQueryable().BuildMockDbSet();
+        _dbContext.Users.Returns(users);
+
+        _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
+
+        // Act
+        await _service.DeleteUserAsync(user.Id);
+
+        // Assert
+        user.IsDeleted.Should().BeTrue();
+        await _dbContext.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task DeleteUserAsync_NotFound_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        var users = new List<User>().AsQueryable().BuildMockDbSet();
+        _dbContext.Users.Returns(users);
+
+        // Act
+        var act = async () => await _service.DeleteUserAsync(999);
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>();
+    }
 }
