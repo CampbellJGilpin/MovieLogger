@@ -37,10 +37,11 @@ public class Program
             Env = cdkEnvironment
         });
 
-        var cdnStack = new CdnStack(app, Naming.CreateStackName("CDN", config.Environment), config, storageStack.MovieBucket, new StackProps
-        {
-            Env = cdkEnvironment
-        });
+        // Temporarily comment out CDN stack to fix cyclic dependency
+        // var cdnStack = new CdnStack(app, Naming.CreateStackName("CDN", config.Environment), config, storageStack.MovieBucket, new StackProps
+        // {
+        //     Env = cdkEnvironment
+        // });
 
         var computeStack = new ComputeStack(app, Naming.CreateStackName("Compute", config.Environment), config, new StackProps
         {
@@ -50,7 +51,6 @@ public class Program
         // Add dependencies
         storageStack.AddDependency(baseStack);
         databaseStack.AddDependency(baseStack);
-        cdnStack.AddDependency(storageStack);
         computeStack.AddDependency(baseStack);
 
         app.Synth();

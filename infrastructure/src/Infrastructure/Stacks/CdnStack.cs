@@ -22,10 +22,7 @@ public class CdnStack : Stack
             Comment = $"OAI for MovieLogger {config.Environment} environment"
         });
 
-        // Grant read access to CloudFront
-        s3Bucket.GrantRead(originAccessIdentity);
-
-        // Create S3 origin
+        // Create S3 origin without automatic permissions
         var origin = new S3Origin(s3Bucket, new S3OriginProps
         {
             OriginAccessIdentity = originAccessIdentity
@@ -61,21 +58,7 @@ public class CdnStack : Stack
                     ResponseHttpStatus = 200,
                     ResponsePagePath = "/index.html"
                 }
-            },
-            LogBucket = new Bucket(this, "CloudFrontLogs", new BucketProps
-            {
-                BucketName = $"movielogger-cloudfront-logs-{config.Environment}",
-                RemovalPolicy = config.Environment == "prod" ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
-                LifecycleRules = new[]
-                {
-                    new LifecycleRule
-                    {
-                        Id = "DeleteOldLogs",
-                        Expiration = Duration.Days(90),
-                        Enabled = true
-                    }
-                }
-            })
+            }
         });
 
         // Add tags
