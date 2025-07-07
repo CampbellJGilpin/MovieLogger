@@ -26,110 +26,186 @@ namespace movielogger.api.controllers
         [HttpGet("{userId}/library")]
         public async Task<IActionResult> GetLibrary(int userId)
         {
-            var serviceResponse = await _libraryService.GetLibraryByUserIdAsync(userId);
-            var mappedResponse = _mapper.Map<LibraryResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
+            try
+            {
+                var serviceResponse = await _libraryService.GetLibraryByUserIdAsync(userId);
+                var mappedResponse = _mapper.Map<LibraryResponse>(serviceResponse);
+                
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"User with ID {userId} not found");
+            }
+        }
+
+        [HttpGet("{userId}/library/{movieId}")]
+        public async Task<IActionResult> GetLibraryItem(int userId, int movieId)
+        {
+            try
+            {
+                var serviceResponse = await _libraryService.GetLibraryItemAsync(userId, movieId);
+                if (serviceResponse == null)
+                {
+                    return NotFound($"Library item not found for user {userId} and movie {movieId}");
+                }
+                
+                var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"User with ID {userId} not found");
+            }
         }
 
         [HttpPost("{userId}/library")]
         public async Task<IActionResult> AddToLibrary(int userId, [FromBody] CreateLibraryItemRequest request)
         {
             var errorResult = request.Validate();
-            if (errorResult is not null) return errorResult;
+            if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
 
-            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
-            var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
-            var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
+            try
+            {
+                var mappedRequest = _mapper.Map<LibraryItemDto>(request);
+                var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
+                if (serviceResponse == null)
+                    return BadRequest("Invalid user or movie ID");
+                var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
+                
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // Check if it's a movie not found vs user not found
+                if (ex.Message.Contains("Movie"))
+                {
+                    return BadRequest("Invalid movie ID");
+                }
+                return NotFound(ex.Message);
+            }
         }
 
-        [HttpPut("{userId}/library")]
-        public async Task<IActionResult> UpdateLibraryEntry(int userId, [FromBody] UpdateLibraryItemRequest request)
+        [HttpPut("{userId}/library/{movieId}")]
+        public async Task<IActionResult> UpdateLibraryEntry(int userId, int movieId, [FromBody] UpdateLibraryItemRequest request)
         {
-            var errorResult = request.Validate();
-            if (errorResult is not null) return errorResult;
-
-            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
-            var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
-            var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
+            // Set the MovieId from the route parameter
+            request.MovieId = movieId;
             
-            return Ok(mappedResponse);
+            var errorResult = request.Validate();
+            if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
+
+            try
+            {
+                var mappedRequest = _mapper.Map<LibraryItemDto>(request);
+                var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
+                if (serviceResponse == null)
+                    return NotFound("Library item not found");
+                var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
+                
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost("{userId}/favorites/{movieId}")]
         public async Task<IActionResult> AddToFavorites(int userId, int movieId)
         {
-            var request = new UpdateLibraryItemRequest
+            try
             {
-                MovieId = movieId,
-                IsFavorite = true,
-                OwnsMovie = true
-            };
+                var request = new UpdateLibraryItemRequest
+                {
+                    MovieId = movieId,
+                    IsFavorite = true,
+                    OwnsMovie = true
+                };
 
-            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
-            var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
-            var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
+                var mappedRequest = _mapper.Map<LibraryItemDto>(request);
+                var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
+                if (serviceResponse == null)
+                    return BadRequest("Invalid user or movie ID");
+                var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
+                
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpDelete("{userId}/favorites/{movieId}")]
         public async Task<IActionResult> RemoveFromFavorites(int userId, int movieId)
         {
-            var request = new UpdateLibraryItemRequest
+            try
             {
-                MovieId = movieId,
-                IsFavorite = false,
-                OwnsMovie = true
-            };
+                var request = new UpdateLibraryItemRequest
+                {
+                    MovieId = movieId,
+                    IsFavorite = false,
+                    OwnsMovie = true
+                };
 
-            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
-            var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
-            var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
+                var mappedRequest = _mapper.Map<LibraryItemDto>(request);
+                var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
+                if (serviceResponse == null)
+                    return NotFound("Library item not found");
+                var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
+                
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost("{userId}/library/{movieId}")]
         public async Task<IActionResult> AddToLibrary(int userId, int movieId)
         {
-            var request = new UpdateLibraryItemRequest
+            try
             {
-                MovieId = movieId,
-                IsFavorite = false,
-                OwnsMovie = true
-            };
+                var request = new UpdateLibraryItemRequest
+                {
+                    MovieId = movieId,
+                    IsFavorite = false,
+                    OwnsMovie = true
+                };
 
-            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
-            var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
-            var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
+                var mappedRequest = _mapper.Map<LibraryItemDto>(request);
+                var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
+                if (serviceResponse == null)
+                    return BadRequest("Invalid user or movie ID");
+                var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
+                
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpDelete("{userId}/library/{movieId}")]
         public async Task<IActionResult> RemoveFromLibrary(int userId, int movieId)
         {
-            var existingItem = await _libraryService.GetLibraryItemAsync(userId, movieId);
-            if (existingItem == null)
+            try
             {
+                var removed = await _libraryService.RemoveFromLibraryAsync(userId, movieId);
+                if (!removed)
+                {
+                    return NotFound($"Library item not found for user {userId} and movie {movieId}");
+                }
+                
                 return NoContent();
             }
-
-            var request = new UpdateLibraryItemRequest
+            catch (KeyNotFoundException ex)
             {
-                MovieId = movieId,
-                IsFavorite = existingItem.Favourite,
-                OwnsMovie = false
-            };
-
-            var mappedRequest = _mapper.Map<LibraryItemDto>(request);
-            var serviceResponse = await _libraryService.UpdateLibraryEntryAsync(userId, mappedRequest);
-            var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
-            
-            return Ok(mappedResponse);
+                return NotFound(ex.Message);
+            }
         }
     }
 }

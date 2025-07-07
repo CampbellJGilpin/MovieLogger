@@ -46,6 +46,8 @@ namespace movielogger.api.controllers
             try
             {
                 var serviceResponse = await _viewingsService.GetViewingByIdAsync(viewingId);
+                if (serviceResponse == null)
+                    return NotFound($"Viewing with ID {viewingId} not found.");
                 var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
                 
                 return Ok(mappedResponse);
@@ -60,14 +62,41 @@ namespace movielogger.api.controllers
         public async Task<IActionResult> CreateViewing([FromBody] CreateViewingRequest request)
         {
             var errorResult = request.Validate();
-            if (errorResult is not null) return errorResult;
+            if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
             
             try
             {
                 var viewingDto = _mapper.Map<ViewingDto>(request);
                 var serviceResponse = await _viewingsService.CreateViewingAsync(request.UserId, viewingDto);
+                if (serviceResponse == null)
+                    return BadRequest("Invalid user or movie ID");
                 var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
-                
+                if (mappedResponse == null)
+                    return BadRequest("Invalid user or movie ID");
+                return CreatedAtAction(nameof(GetViewing), new { viewingId = mappedResponse.ViewingId }, mappedResponse);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("User or Movie not found");
+            }
+        }
+
+        [HttpPost]
+        [Route("~/api/users/{userId}/viewings")]
+        public async Task<IActionResult> CreateUserViewing(int userId, [FromBody] CreateViewingRequest request)
+        {
+            var errorResult = request.Validate();
+            if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
+            
+            try
+            {
+                var viewingDto = _mapper.Map<ViewingDto>(request);
+                var serviceResponse = await _viewingsService.CreateViewingAsync(userId, viewingDto);
+                if (serviceResponse == null)
+                    return BadRequest("Invalid user or movie ID");
+                var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
+                if (mappedResponse == null)
+                    return BadRequest("Invalid user or movie ID");
                 return CreatedAtAction(nameof(GetViewing), new { viewingId = mappedResponse.ViewingId }, mappedResponse);
             }
             catch (KeyNotFoundException)
@@ -86,9 +115,25 @@ namespace movielogger.api.controllers
             {
                 var mappedRequest = _mapper.Map<ViewingDto>(request);
                 var serviceResponse = await _viewingsService.UpdateViewingAsync(viewingId, mappedRequest);
+                if (serviceResponse == null)
+                    return NotFound($"Viewing with ID {viewingId} not found.");
                 var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
 
                 return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Viewing with ID {viewingId} not found.");
+            }
+        }
+
+        [HttpDelete("{viewingId}")]
+        public async Task<IActionResult> DeleteViewing(int viewingId)
+        {
+            try
+            {
+                await _viewingsService.DeleteViewingAsync(viewingId);
+                return NoContent();
             }
             catch (KeyNotFoundException)
             {

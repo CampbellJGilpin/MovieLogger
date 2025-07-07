@@ -101,12 +101,22 @@ public class Program
             return new CachedMoviesService(baseService, cacheService, logger, configuration);
         });
 
-        // Register RabbitMQ services
-        builder.Services
-            .AddSingleton<IMessagePublisher, RabbitMQPublisher>()
-            .AddSingleton<IMessageConsumer, RabbitMQConsumer>()
-            .AddScoped<AuditEventConsumer>()
-            .AddHostedService<AuditEventConsumerHostedService>();
+        // Register RabbitMQ services only when not testing
+        if (!isTesting)
+        {
+            builder.Services
+                .AddSingleton<IMessagePublisher, RabbitMQPublisher>()
+                .AddSingleton<IMessageConsumer, RabbitMQConsumer>()
+                .AddScoped<AuditEventConsumer>()
+                .AddHostedService<AuditEventConsumerHostedService>();
+        }
+        else
+        {
+            // Register mock services for testing
+            builder.Services
+                .AddSingleton<IMessagePublisher, MockMessagePublisher>()
+                .AddSingleton<IMessageConsumer, MockMessageConsumer>();
+        }
 
         builder.Services.AddAutoMapper(
             typeof(ApiMappingProfile).Assembly,

@@ -9,6 +9,6 @@ public class UpdateViewingRequestValidator : AbstractValidator<UpdateViewingRequ
     {
         RuleFor(x => x.DateViewed)
             .NotEmpty().WithMessage("Date viewed is required")
-            .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Date viewed cannot be in the future");
+            .LessThanOrEqualTo(DateTime.Now).WithMessage("Date viewed cannot be in the future");
     }
 }

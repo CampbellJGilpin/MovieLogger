@@ -23,6 +23,13 @@ public class LibraryService : ILibraryService
 
     public async Task<LibraryDto> GetLibraryByUserIdAsync(int userId)
     {
+        // Check if user exists
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
         var entries = await _db.UserMovies
             .Include(um => um.Movie)
             .ThenInclude(m => m.Genre)
@@ -35,6 +42,13 @@ public class LibraryService : ILibraryService
 
     public async Task<LibraryDto> GetLibraryFavouritesByUserIdAsync(int userId)
     {
+        // Check if user exists
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
         var entries = await _db.UserMovies
             .Include(um => um.Movie)
             .ThenInclude(m => m.Genre)
@@ -47,6 +61,13 @@ public class LibraryService : ILibraryService
 
     public async Task<LibraryDto> GetLibraryWatchlistByUserIdAsync(int userId)
     {
+        // Check if user exists
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
         var entries = await _db.UserMovies
             .Include(um => um.Movie)
             .ThenInclude(m => m.Genre)
@@ -146,6 +167,34 @@ public class LibraryService : ILibraryService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting library item for user {UserId} and movie {MovieId}", userId, movieId);
+            throw;
+        }
+    }
+
+    public async Task<bool> RemoveFromLibraryAsync(int userId, int movieId)
+    {
+        try
+        {
+            _logger.LogInformation("Removing movie {MovieId} from library for user {UserId}", movieId, userId);
+
+            var entry = await _db.UserMovies
+                .FirstOrDefaultAsync(um => um.MovieId == movieId && um.UserId == userId);
+
+            if (entry == null)
+            {
+                _logger.LogWarning("Library item not found for user {UserId} and movie {MovieId}", userId, movieId);
+                return false;
+            }
+
+            _db.UserMovies.Remove(entry);
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully removed movie {MovieId} from library for user {UserId}", movieId, userId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error removing movie {MovieId} from library for user {UserId}", movieId, userId);
             throw;
         }
     }

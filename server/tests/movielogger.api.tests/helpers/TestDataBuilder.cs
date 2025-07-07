@@ -1,4 +1,5 @@
 using movielogger.dal.entities;
+using BC = BCrypt.Net.BCrypt;
 
 namespace movielogger.api.tests.helpers;
 
@@ -11,7 +12,7 @@ public static class TestDataBuilder
             Id = id,
             UserName = userName ?? $"TestUser{id}",
             Email = email ?? $"testuser{id}@example.com",
-            Password = "password123",
+            Password = BC.HashPassword("password123"),
             IsAdmin = false,
             IsDeleted = false
         };

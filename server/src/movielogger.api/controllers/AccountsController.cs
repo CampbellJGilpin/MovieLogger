@@ -27,24 +27,41 @@ namespace movielogger.api.controllers
         [HttpPost("register")]
         public async Task<ActionResult<LoginResponse>> Register([FromBody] RegisterRequest request)
         {
-            var user = await _accountsService.Register(request.Email, request.Password, request.UserName);
-            var (_, token) = await _accountsService.AuthenticateUserAsync(request.Email, request.Password);
-            return Ok(new LoginResponse
+            var errorResult = request.Validate();
+            if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
+
+            try
             {
-                User = _mapper.Map<UserResponse>(user),
-                Token = token
-            });
+                var user = await _accountsService.Register(request.Email, request.Password, request.UserName);
+                var (_, token) = await _accountsService.AuthenticateUserAsync(request.Email, request.Password);
+                return Ok(new LoginResponse
+                {
+                    User = _mapper.Map<UserResponse>(user),
+                    Token = token
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
         {
-            var (user, token) = await _accountsService.AuthenticateUserAsync(request.Email, request.Password);
-            return Ok(new LoginResponse
+            try
             {
-                User = _mapper.Map<UserResponse>(user),
-                Token = token
-            });
+                var (user, token) = await _accountsService.AuthenticateUserAsync(request.Email, request.Password);
+                return Ok(new LoginResponse
+                {
+                    User = _mapper.Map<UserResponse>(user),
+                    Token = token
+                });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized(new { message = "Invalid email or password" });
+            }
         }
 
         [Authorize]

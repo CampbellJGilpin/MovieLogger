@@ -20,6 +20,13 @@ public class ReviewsService : IReviewsService
 
     public async Task<IEnumerable<ReviewDto>> GetAllReviewsByUserIdAsync(int userId)
     {
+        // Check if user exists
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
         var reviews = await _db.Reviews
             .Include(r => r.Viewing)
             .ThenInclude(v => v.UserMovie)
@@ -32,6 +39,13 @@ public class ReviewsService : IReviewsService
 
     public async Task<ReviewDto> CreateReviewAsync(int viewingId, ReviewDto dto)
     {
+        // Check if viewing exists
+        var viewing = await _db.Viewings.FirstOrDefaultAsync(v => v.Id == viewingId);
+        if (viewing == null)
+        {
+            throw new KeyNotFoundException($"Viewing with ID {viewingId} not found.");
+        }
+
         var review = _mapper.Map<Review>(dto);
         review.ViewingId = viewingId;
         
@@ -132,5 +146,34 @@ public class ReviewsService : IReviewsService
             .ToListAsync();
 
         return _mapper.Map<List<ReviewDto>>(reviews);
+    }
+
+    public async Task<ReviewDto> GetReviewByIdAsync(int reviewId)
+    {
+        var review = await _db.Reviews
+            .Include(r => r.Viewing)
+                .ThenInclude(v => v.UserMovie)
+                    .ThenInclude(um => um.Movie)
+            .FirstOrDefaultAsync(r => r.Id == reviewId);
+
+        if (review == null)
+        {
+            throw new KeyNotFoundException($"Review with ID {reviewId} not found.");
+        }
+
+        return _mapper.Map<ReviewDto>(review);
+    }
+
+    public async Task DeleteReviewAsync(int reviewId)
+    {
+        var review = await _db.Reviews.FirstOrDefaultAsync(r => r.Id == reviewId);
+
+        if (review == null)
+        {
+            throw new KeyNotFoundException($"Review with ID {reviewId} not found.");
+        }
+
+        _db.Reviews.Remove(review);
+        await _db.SaveChangesAsync();
     }
 }

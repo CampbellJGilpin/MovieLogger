@@ -8,6 +8,7 @@ using movielogger.dal.dtos;
 using movielogger.messaging.Models;
 using movielogger.messaging.Services;
 using movielogger.services.interfaces;
+using movielogger.api.validation;
 
 namespace movielogger.api.controllers
 {
@@ -63,6 +64,9 @@ namespace movielogger.api.controllers
         [HttpPost]
         public async Task<ActionResult<MovieResponse>> CreateMovie([FromBody] CreateMovieRequest request)
         {
+            var errorResult = request.Validate();
+            if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
+
             try
             {
                 var movieDto = _mapper.Map<MovieDto>(request);

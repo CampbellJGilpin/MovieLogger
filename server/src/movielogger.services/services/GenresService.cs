@@ -37,6 +37,13 @@ public class GenresService : IGenresService
 
     public async Task<GenreDto> CreateGenreAsync(GenreDto genreDto)
     {
+        // Check for duplicate title
+        var existingGenre = await _db.Genres.FirstOrDefaultAsync(g => g.Title == genreDto.Title);
+        if (existingGenre != null)
+        {
+            throw new InvalidOperationException($"Genre with title '{genreDto.Title}' already exists.");
+        }
+
         var genre = _mapper.Map<Genre>(genreDto);
         
         genre.Id = 0;
@@ -55,6 +62,13 @@ public class GenresService : IGenresService
             throw new KeyNotFoundException($"Genre with ID {genreId} not found.");
         }
 
+        // Check for duplicate title (excluding current genre)
+        var existingGenre = await _db.Genres.FirstOrDefaultAsync(g => g.Title == genreDto.Title && g.Id != genreId);
+        if (existingGenre != null)
+        {
+            throw new InvalidOperationException($"Genre with title '{genreDto.Title}' already exists.");
+        }
+
         genre.Id = genreId;
         
         _mapper.Map(genreDto, genre);
@@ -69,6 +83,13 @@ public class GenresService : IGenresService
         if (genre == null)
         {
             throw new KeyNotFoundException($"Genre with ID {genreId} not found.");
+        }
+
+        // Check if genre has associated movies
+        var hasMovies = await _db.Movies.AnyAsync(m => m.GenreId == genreId);
+        if (hasMovies)
+        {
+            throw new InvalidOperationException("Cannot delete genre that has associated movies.");
         }
 
         _db.Genres.Remove(genre);

@@ -25,6 +25,16 @@ namespace movielogger.api.controllers
             [FromQuery] EntityType? entityType = null,
             [FromQuery] string? userId = null)
         {
+            if (page < 1)
+            {
+                return BadRequest(new { error = "Page must be greater than 0" });
+            }
+
+            if (pageSize < 1 || pageSize > 100)
+            {
+                return BadRequest(new { error = "Page size must be between 1 and 100" });
+            }
+
             try
             {
                 var logs = await _auditService.GetAuditLogsAsync(page, pageSize, eventType, entityType, userId);
