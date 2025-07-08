@@ -9,4 +9,5 @@ public interface IViewingsService
     Task<ViewingDto> UpdateViewingAsync(int viewingId, ViewingDto viewingDto);
     Task<List<ViewingDto>> GetViewingsByUserIdAsync(int userId);
     Task DeleteViewingAsync(int viewingId);
+    Task<List<ViewingDto>> GetRecentlyWatchedMoviesAsync(int userId, int count = 5);
 }

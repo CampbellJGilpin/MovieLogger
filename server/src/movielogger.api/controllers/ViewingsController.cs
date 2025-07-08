@@ -140,5 +140,21 @@ namespace movielogger.api.controllers
                 return NotFound($"Viewing with ID {viewingId} not found.");
             }
         }
+
+        [HttpGet]
+        [Route("~/api/users/{userId}/recently-watched")]
+        public async Task<IActionResult> GetRecentlyWatchedMovies(int userId, [FromQuery] int count = 5)
+        {
+            try
+            {
+                var serviceResponse = await _viewingsService.GetRecentlyWatchedMoviesAsync(userId, count);
+                var mappedResponse = _mapper.Map<List<ViewingResponse>>(serviceResponse);
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"User with ID {userId} not found.");
+            }
+        }
     }
 }

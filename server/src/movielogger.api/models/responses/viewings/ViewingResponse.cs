@@ -9,5 +9,6 @@ public class ViewingResponse
     public bool Favourite { get; set; }
     public bool OwnsMovies { get; set; }
     public DateTime UpcomingViewDate { get; set; }
+    public DateTime DateViewed { get; set; }
     public required MovieResponse Movie { get; set; }
 }

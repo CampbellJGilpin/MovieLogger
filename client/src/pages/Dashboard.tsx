@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import type { MovieInLibrary, MovieCreateRequest } from '../types/index';
+import type { MovieInLibrary, MovieCreateRequest, Viewing } from '../types/index';
 import * as movieService from '../services/movieService';
 import AddMovieModal from '../components/movies/AddMovieModal';
 
@@ -10,6 +10,35 @@ interface MovieListSectionProps {
   movies: MovieInLibrary[];
   onToggleFavorite?: (movieId: number) => void;
   emptyMessage?: string;
+}
+
+function RecentlyWatchedSection({ viewings }: { viewings: Viewing[] }) {
+  return (
+    <div>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">Recently Watched</h2>
+      {viewings.length === 0 ? (
+        <p className="text-gray-500 text-sm">No recently watched movies</p>
+      ) : (
+        <ul className="space-y-3">
+          {viewings.map(viewing => (
+            <li key={viewing.id} className="flex items-center justify-between bg-white rounded-lg shadow p-4">
+              <div>
+                <Link to={`/movies/${viewing.movie.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
+                  {viewing.movie.title}
+                </Link>
+                <p className="text-xs text-gray-500 mt-1">
+                  {new Date(viewing.movie.releaseDate).getFullYear()} • {viewing.movie.genre.title}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Watched on {new Date(viewing.dateViewed).toLocaleDateString()}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 function MovieListSection({ title, movies, onToggleFavorite, emptyMessage = 'No movies found' }: MovieListSectionProps) {
@@ -56,12 +85,14 @@ function MovieListSection({ title, movies, onToggleFavorite, emptyMessage = 'No 
 
 export default function Dashboard() {
   const [movies, setMovies] = useState<MovieInLibrary[]>([]);
+  const [recentlyWatched, setRecentlyWatched] = useState<Viewing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddMovieModalOpen, setIsAddMovieModalOpen] = useState(false);
 
   useEffect(() => {
     loadMovies();
+    loadRecentlyWatched();
   }, []);
 
   const loadMovies = async () => {
@@ -75,6 +106,16 @@ export default function Dashboard() {
       console.error('Error loading library:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadRecentlyWatched = async () => {
+    try {
+      const data = await movieService.getRecentlyWatchedMovies();
+      setRecentlyWatched(data);
+    } catch (err) {
+      setError('Failed to load recently watched movies. Please try again later.');
+      console.error('Error loading recently watched:', err);
     }
   };
 
@@ -136,12 +177,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <MovieListSection
-            title="Recent Movies"
-            movies={movies.slice(0, 5)}
-            onToggleFavorite={handleToggleFavorite}
-            emptyMessage="No recent movies"
-          />
+          <RecentlyWatchedSection viewings={recentlyWatched} />
           <MovieListSection
             title="Personal Library"
             movies={libraryMovies.slice(0, 5)}

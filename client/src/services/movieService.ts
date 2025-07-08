@@ -1,5 +1,5 @@
 import api from '../api/config';
-import type { Movie, MovieInLibrary, Review, Genre } from '../types/index';
+import type { Movie, MovieInLibrary, Review, Genre, Viewing } from '../types/index';
 
 interface MovieCreateRequest {
   title: string;
@@ -212,4 +212,11 @@ export async function getAllMoviesForUser(
     })),
     totalPages: response.data.totalPages ?? 1,
   };
+} 
+
+export async function getRecentlyWatchedMovies(): Promise<Viewing[]> {
+  const userResponse = await api.get<{ id: number }>(`/accounts/me`);
+  const userId = userResponse.data.id;
+  const response = await api.get<Viewing[]>(`/users/${userId}/recently-watched?count=5`);
+  return response.data;
 } 

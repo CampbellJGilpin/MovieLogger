@@ -113,6 +113,27 @@ public class ViewingsService : IViewingsService
         return viewings.Select(v => _mapper.Map<ViewingDto>(v)).ToList();
     }
 
+    public async Task<List<ViewingDto>> GetRecentlyWatchedMoviesAsync(int userId, int count = 5)
+    {
+        // Check if user exists
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        var recentViewings = await _db.Viewings
+            .Include(v => v.UserMovie)
+                .ThenInclude(um => um.Movie)
+                    .ThenInclude(m => m.Genre)
+            .Where(v => v.UserMovie.UserId == userId)
+            .OrderByDescending(v => v.DateViewed)
+            .Take(count)
+            .ToListAsync();
+
+        return recentViewings.Select(v => _mapper.Map<ViewingDto>(v)).ToList();
+    }
+
     public async Task DeleteViewingAsync(int viewingId)
     {
         var viewing = await _db.Viewings.FirstOrDefaultAsync(v => v.Id == viewingId);

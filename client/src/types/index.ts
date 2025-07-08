@@ -46,7 +46,10 @@ export interface Review {
 
 export interface Viewing {
   id: number;
-  movieId: number;
+  userId: number;
+  favourite: boolean;
+  ownsMovies: boolean;
+  upcomingViewDate: string;
   dateViewed: string;
-  review?: Review;
+  movie: Movie;
 } 
