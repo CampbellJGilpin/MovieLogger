@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using movielogger.api.models.requests.library;
+using movielogger.api.models.responses;
 using movielogger.api.models.responses.library;
 using movielogger.api.validation;
 using movielogger.dal.dtos;
@@ -205,6 +206,54 @@ namespace movielogger.api.controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("{userId}/library/paginated")]
+        public async Task<IActionResult> GetLibraryPaginated(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var (items, totalCount, totalPages) = await _libraryService.GetLibraryByUserIdPaginatedAsync(userId, page, pageSize);
+                
+                var response = new PaginatedResponse<LibraryItemResponse>
+                {
+                    Items = _mapper.Map<IEnumerable<LibraryItemResponse>>(items),
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = totalPages
+                };
+                
+                return Ok(response);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"User with ID {userId} not found");
+            }
+        }
+
+        [HttpGet("{userId}/library/favourites/paginated")]
+        public async Task<IActionResult> GetLibraryFavouritesPaginated(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var (items, totalCount, totalPages) = await _libraryService.GetLibraryFavouritesByUserIdPaginatedAsync(userId, page, pageSize);
+                
+                var response = new PaginatedResponse<LibraryItemResponse>
+                {
+                    Items = _mapper.Map<IEnumerable<LibraryItemResponse>>(items),
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = totalPages
+                };
+                
+                return Ok(response);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"User with ID {userId} not found");
             }
         }
     }

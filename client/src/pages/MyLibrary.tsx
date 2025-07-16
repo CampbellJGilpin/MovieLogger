@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import MovieList from '../components/movies/MovieList';
 import type { MovieInLibrary } from '../types/index';
 import * as movieService from '../services/movieService';
@@ -8,23 +8,46 @@ export default function MyLibrary() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize] = useState(10);
 
-  useEffect(() => {
-    loadMovies();
-  }, []);
-
-  const loadMovies = async () => {
+  const loadMovies = useCallback(async (tab = activeTab, page = currentPage) => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await movieService.getMyLibrary();
-      setMovies(data);
+      
+      let result;
+      if (tab === 'favorites') {
+        result = await movieService.getMyFavoritesPaginated(page, pageSize);
+      } else {
+        result = await movieService.getMyLibraryPaginated(page, pageSize);
+      }
+      
+      setMovies(result.items);
+      setTotalPages(result.totalPages);
     } catch (err) {
       setError('Failed to load your library. Please try again later.');
       console.error('Error loading library:', err);
     } finally {
       setIsLoading(false);
     }
+  }, [activeTab, currentPage, pageSize]);
+
+  useEffect(() => {
+    loadMovies();
+  }, [loadMovies]);
+
+  // Handle tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+    loadMovies(activeTab, 1);
+  }, [activeTab, loadMovies]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    loadMovies(activeTab, newPage);
+    window.scrollTo(0, 0);
   };
 
   const handleToggleFavorite = async (movieId: number) => {
@@ -36,9 +59,13 @@ export default function MyLibrary() {
     }
   };
 
-  const filteredMovies = activeTab === 'favorites' 
-    ? movies.filter(m => m.isFavorite)
-    : movies.filter(m => m.inLibrary);
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-gray-500">Loading your library...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -80,17 +107,65 @@ export default function MyLibrary() {
           <div className="text-sm text-red-700">{error}</div>
         </div>
       ) : (
-        <MovieList
-          movies={filteredMovies}
-          onToggleFavorite={handleToggleFavorite}
-          emptyMessage={
-            isLoading
-              ? 'Loading your library...'
-              : error
-              ? error
-              : 'No movies in your library'
-          }
-        />
+        <>
+          <MovieList
+            movies={movies}
+            onToggleFavorite={handleToggleFavorite}
+            emptyMessage={
+              isLoading
+                ? 'Loading your library...'
+                : error
+                ? error
+                : activeTab === 'favorites'
+                ? 'No favorite movies yet'
+                : 'No movies in your library'
+            }
+          />
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-center">
+              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                    currentPage === 1
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  Previous
+                </button>
+                
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => handlePageChange(i + 1)}
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                      currentPage === i + 1
+                        ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                    currentPage === totalPages
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  Next
+                </button>
+              </nav>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

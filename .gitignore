@@ -15,3 +15,6 @@ obj/
 
 # JetBrains IDEs (like Rider or IntelliJ)
 .idea/
+
+# Cursor IDE
+.cursor/

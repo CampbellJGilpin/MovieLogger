@@ -9,6 +9,11 @@ interface MovieFormProps {
   onCancel: () => void;
 }
 
+interface ValidationErrors {
+  title?: string;
+  description?: string;
+}
+
 export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -16,6 +21,7 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
   const [genreId, setGenreId] = useState(1);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [errors, setErrors] = useState<ValidationErrors>({});
 
   const loadGenres = useCallback(async () => {
     try {
@@ -44,13 +50,38 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
     }
   }, [movie]);
 
+  const validateForm = (): boolean => {
+    const newErrors: ValidationErrors = {};
+
+    // Validate title
+    if (!title.trim()) {
+      newErrors.title = 'Title is required';
+    }
+
+    // Validate description
+    if (!description.trim()) {
+      newErrors.description = 'Description is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
+    // Clear previous errors
+    setErrors({});
+
+    // Validate form before submission
+    if (!validateForm()) {
+      return; // Stop submission if validation fails
+    }
+
     const movieData: MovieCreateRequest = {
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       releaseDate: new Date(releaseDate).toISOString(),
       genreId,
       isDeleted: false
@@ -63,6 +94,19 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
     }
   };
 
+  const handleInputChange = (field: 'title' | 'description', value: string) => {
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+    
+    if (field === 'title') {
+      setTitle(value);
+    } else if (field === 'description') {
+      setDescription(value);
+    }
+  };
+
   if (isLoading) {
     return <div className="text-center py-4">Loading...</div>;
   }
@@ -71,29 +115,42 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-          Title
+          Title <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
           id="title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+          onChange={(e) => handleInputChange('title', e.target.value)}
+          className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+            errors.title 
+              ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
+              : 'border-gray-300'
+          }`}
         />
+        {errors.title && (
+          <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+        )}
       </div>
 
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-          Description
+          Description <span className="text-red-500">*</span>
         </label>
         <textarea
           id="description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => handleInputChange('description', e.target.value)}
           rows={3}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+          className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+            errors.description 
+              ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
+              : 'border-gray-300'
+          }`}
         />
+        {errors.description && (
+          <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+        )}
       </div>
 
       <div>
@@ -105,7 +162,6 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
           id="releaseDate"
           value={releaseDate}
           onChange={(e) => setReleaseDate(e.target.value)}
-          required
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
         />
       </div>
@@ -118,7 +174,6 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
           id="genre"
           value={genreId}
           onChange={(e) => setGenreId(parseInt(e.target.value, 10))}
-          required
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
         >
           {genres.map((genre) => (

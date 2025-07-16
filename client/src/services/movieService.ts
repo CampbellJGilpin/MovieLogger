@@ -151,6 +151,40 @@ export async function getMyLibrary(): Promise<MovieInLibrary[]> {
   return libraryResponse.data.libraryItems.map(mapLibraryItemToMovieInLibrary);
 }
 
+export async function getMyLibraryPaginated(
+  page = 1,
+  pageSize = 10
+): Promise<{ items: MovieInLibrary[]; totalPages: number }> {
+  const userResponse = await api.get('/accounts/me');
+  const userId = userResponse.data.id;
+  
+  const response = await api.get<PaginatedResponse<LibraryItemDto>>(
+    `/users/${userId}/library/paginated?page=${page}&pageSize=${pageSize}`
+  );
+  
+  return {
+    items: response.data.items.map(mapLibraryItemToMovieInLibrary),
+    totalPages: response.data.totalPages
+  };
+}
+
+export async function getMyFavoritesPaginated(
+  page = 1,
+  pageSize = 10
+): Promise<{ items: MovieInLibrary[]; totalPages: number }> {
+  const userResponse = await api.get('/accounts/me');
+  const userId = userResponse.data.id;
+  
+  const response = await api.get<PaginatedResponse<LibraryItemDto>>(
+    `/users/${userId}/library/favourites/paginated?page=${page}&pageSize=${pageSize}`
+  );
+  
+  return {
+    items: response.data.items.map(mapLibraryItemToMovieInLibrary),
+    totalPages: response.data.totalPages
+  };
+}
+
 export async function searchMovies(query: string, userId?: number): Promise<MovieInLibrary[]> {
   const [searchResponse, libraryResponse] = await Promise.all([
     api.get<MovieInLibrary[]>(`/movies/search?q=${encodeURIComponent(query)}`),

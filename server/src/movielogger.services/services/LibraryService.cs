@@ -176,7 +176,7 @@ public class LibraryService : ILibraryService
         try
         {
             _logger.LogInformation("Removing movie {MovieId} from library for user {UserId}", movieId, userId);
-
+            
             var entry = await _db.UserMovies
                 .FirstOrDefaultAsync(um => um.MovieId == movieId && um.UserId == userId);
 
@@ -188,7 +188,7 @@ public class LibraryService : ILibraryService
 
             _db.UserMovies.Remove(entry);
             await _db.SaveChangesAsync();
-
+            
             _logger.LogInformation("Successfully removed movie {MovieId} from library for user {UserId}", movieId, userId);
             return true;
         }
@@ -197,5 +197,59 @@ public class LibraryService : ILibraryService
             _logger.LogError(ex, "Error removing movie {MovieId} from library for user {UserId}", movieId, userId);
             throw;
         }
+    }
+
+    public async Task<(IEnumerable<LibraryItemDto> Items, int TotalCount, int TotalPages)> GetLibraryByUserIdPaginatedAsync(int userId, int page = 1, int pageSize = 10)
+    {
+        // Check if user exists
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        var query = _db.UserMovies
+            .Include(um => um.Movie)
+            .ThenInclude(m => m.Genre)
+            .Where(um => um.UserId == userId && um.OwnsMovie);
+
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var entries = await query
+            .OrderBy(um => um.Movie.Title)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var items = _mapper.Map<List<LibraryItemDto>>(entries);
+        return (Items: items, TotalCount: totalCount, TotalPages: totalPages);
+    }
+
+    public async Task<(IEnumerable<LibraryItemDto> Items, int TotalCount, int TotalPages)> GetLibraryFavouritesByUserIdPaginatedAsync(int userId, int page = 1, int pageSize = 10)
+    {
+        // Check if user exists
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        var query = _db.UserMovies
+            .Include(um => um.Movie)
+            .ThenInclude(m => m.Genre)
+            .Where(um => um.UserId == userId && um.Favourite);
+
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var entries = await query
+            .OrderBy(um => um.Movie.Title)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var items = _mapper.Map<List<LibraryItemDto>>(entries);
+        return (Items: items, TotalCount: totalCount, TotalPages: totalPages);
     }
 }

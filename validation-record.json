@@ -1,0 +1,17 @@
+{
+    "Changes": [
+        {
+            "Action": "CREATE",
+            "ResourceRecordSet": {
+                "Name": "_6c70c477bb6238bddf04653c1f69d459.movielogger.info.",
+                "Type": "CNAME",
+                "TTL": 300,
+                "ResourceRecords": [
+                    {
+                        "Value": "_f26754154c9c1de77c5f80864fab5159.xlfgrmvvlj.acm-validations.aws."
+                    }
+                ]
+            }
+        }
+    ]
+}

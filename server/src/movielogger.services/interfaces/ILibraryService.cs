@@ -10,4 +10,8 @@ public interface ILibraryService
     Task<LibraryItemDto> UpdateLibraryEntryAsync(int userId, LibraryItemDto libraryItemDto);
     Task<LibraryItemDto?> GetLibraryItemAsync(int userId, int movieId);
     Task<bool> RemoveFromLibraryAsync(int userId, int movieId);
+    
+    // New paginated methods
+    Task<(IEnumerable<LibraryItemDto> Items, int TotalCount, int TotalPages)> GetLibraryByUserIdPaginatedAsync(int userId, int page = 1, int pageSize = 10);
+    Task<(IEnumerable<LibraryItemDto> Items, int TotalCount, int TotalPages)> GetLibraryFavouritesByUserIdPaginatedAsync(int userId, int page = 1, int pageSize = 10);
 }
