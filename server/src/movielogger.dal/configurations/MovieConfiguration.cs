@@ -12,6 +12,7 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
         builder.Property(m => m.Title).IsRequired().HasMaxLength(200);
         builder.Property(m => m.Description).IsRequired();
         builder.Property(m => m.ReleaseDate).IsRequired();
+        builder.Property(m => m.PosterPath).HasMaxLength(500).IsRequired(false);
         builder.HasOne(m => m.Genre)
             .WithMany(g => g.Movies)
             .HasForeignKey(m => m.GenreId);

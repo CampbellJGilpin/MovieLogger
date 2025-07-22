@@ -9,4 +9,5 @@ public class MovieDto
     public required GenreDto  Genre { get; set; }
     public int GenreId { get; set; }
     public bool IsDeleted { get; set; }
+    public string? PosterPath { get; set; }
 }

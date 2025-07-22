@@ -10,4 +10,5 @@ public class MovieResponse
     public DateTime ReleaseDate { get; set; }
     public string Description { get; set; } = string.Empty;
     public bool IsDeleted { get; set; }
+    public string? PosterPath { get; set; }
 }

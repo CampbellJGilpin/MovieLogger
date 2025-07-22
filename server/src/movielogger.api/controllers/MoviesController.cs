@@ -9,6 +9,9 @@ using movielogger.messaging.Models;
 using movielogger.messaging.Services;
 using movielogger.services.interfaces;
 using movielogger.api.validation;
+using Microsoft.AspNetCore.Hosting;
+using Amazon.S3;
+using Amazon.S3.Transfer;
 
 namespace movielogger.api.controllers
 {
@@ -21,13 +24,15 @@ namespace movielogger.api.controllers
         private readonly IMapper _mapper;
         private readonly IMessagePublisher _messagePublisher;
         private readonly ICacheService _cacheService;
+        private readonly IWebHostEnvironment _env;
 
-        public MoviesController(IMoviesService moviesService, IMapper mapper, IMessagePublisher messagePublisher, ICacheService cacheService)
+        public MoviesController(IMoviesService moviesService, IMapper mapper, IMessagePublisher messagePublisher, ICacheService cacheService, IWebHostEnvironment env)
         {
             _moviesService = moviesService;
             _mapper = mapper;
             _messagePublisher = messagePublisher;
             _cacheService = cacheService;
+            _env = env;
         }
         
         [HttpGet]
@@ -62,7 +67,7 @@ namespace movielogger.api.controllers
         }
         
         [HttpPost]
-        public async Task<ActionResult<MovieResponse>> CreateMovie([FromBody] CreateMovieRequest request)
+        public async Task<ActionResult<MovieResponse>> CreateMovie([FromForm] CreateMovieRequest request)
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
@@ -70,6 +75,34 @@ namespace movielogger.api.controllers
             try
             {
                 var movieDto = _mapper.Map<MovieDto>(request);
+
+                // Handle poster upload
+                if (request.Poster != null && request.Poster.Length > 0)
+                {
+                    string posterPath = null!;
+                    if (_env.IsDevelopment())
+                    {
+                        // Save to wwwroot/uploads
+                        var uploadsDir = Path.Combine(_env.ContentRootPath, "wwwroot", "uploads");
+                        if (!Directory.Exists(uploadsDir))
+                            Directory.CreateDirectory(uploadsDir);
+                        var fileName = $"{Guid.NewGuid()}_{request.Poster.FileName}";
+                        var filePath = Path.Combine(uploadsDir, fileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await request.Poster.CopyToAsync(stream);
+                        }
+                        posterPath = $"/uploads/{fileName}";
+                    }
+                    else
+                    {
+                        // TODO: Implement S3 upload logic
+                        // posterPath = await UploadToS3Async(request.Poster);
+                        posterPath = null;
+                    }
+                    movieDto.PosterPath = posterPath;
+                }
+
                 var createdMovie = await _moviesService.CreateMovieAsync(movieDto);
                 
                 // Publish MovieAddedEvent
@@ -92,11 +125,39 @@ namespace movielogger.api.controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<MovieResponse>> UpdateMovie(int id, [FromBody] UpdateMovieRequest request)
+        public async Task<ActionResult<MovieResponse>> UpdateMovie(int id, [FromForm] UpdateMovieRequest request)
         {
             try
             {
                 var movieDto = _mapper.Map<MovieDto>(request);
+
+                // Handle poster upload
+                if (request.Poster != null && request.Poster.Length > 0)
+                {
+                    string posterPath = null!;
+                    if (_env.IsDevelopment())
+                    {
+                        // Save to wwwroot/uploads
+                        var uploadsDir = Path.Combine(_env.ContentRootPath, "wwwroot", "uploads");
+                        if (!Directory.Exists(uploadsDir))
+                            Directory.CreateDirectory(uploadsDir);
+                        var fileName = $"{Guid.NewGuid()}_{request.Poster.FileName}";
+                        var filePath = Path.Combine(uploadsDir, fileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await request.Poster.CopyToAsync(stream);
+                        }
+                        posterPath = $"/uploads/{fileName}";
+                    }
+                    else
+                    {
+                        // TODO: Implement S3 upload logic
+                        // posterPath = await UploadToS3Async(request.Poster);
+                        posterPath = null;
+                    }
+                    movieDto.PosterPath = posterPath;
+                }
+
                 var updatedMovie = await _moviesService.UpdateMovieAsync(id, movieDto);
                 
                 // Publish MovieUpdatedEvent

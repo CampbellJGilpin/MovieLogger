@@ -30,5 +30,8 @@ public class Movie
     [ForeignKey(nameof(GenreId))]
     public Genre Genre { get; set; } = default!;
 
+    [Column("poster_path")]
+    public string? PosterPath { get; set; }
+
     public ICollection<UserMovie> UserMovies { get; set; } = new List<UserMovie>();
 }

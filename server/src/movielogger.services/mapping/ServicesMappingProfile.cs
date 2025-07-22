@@ -14,13 +14,14 @@ public class ServicesMappingProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Movies, opt => opt.Ignore());
         
-        CreateMap<Movie, MovieDto>();
+        CreateMap<Movie, MovieDto>()
+            .ForMember(dest => dest.PosterPath, opt => opt.MapFrom(src => src.PosterPath));
 
         CreateMap<MovieDto, Movie>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Genre, opt => opt.Ignore()) 
-            .ForMember(dest => dest.UserMovies, opt => opt.Ignore()); 
-
+            .ForMember(dest => dest.UserMovies, opt => opt.Ignore())
+            .ForMember(dest => dest.PosterPath, opt => opt.MapFrom(src => src.PosterPath));
         
         CreateMap<Review, ReviewDto>()
             .ForMember(dest => dest.DateViewed, opt => opt.MapFrom(src => src.Viewing.DateViewed))
