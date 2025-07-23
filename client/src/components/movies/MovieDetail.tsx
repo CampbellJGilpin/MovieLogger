@@ -33,6 +33,14 @@ export default function MovieDetail({
   // Get the 5 most recent reviews
   const recentReviews = movie.reviews?.slice(0, 5) || [];
 
+  // Helper to get full poster URL
+  const getPosterUrl = () => {
+    if (!movie.posterPath) return undefined;
+    if (movie.posterPath.startsWith('http')) return movie.posterPath;
+    // Assume relative path, served from API
+    return `${import.meta.env.VITE_API_BASE_URL || ''}${movie.posterPath}`;
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="grid grid-cols-12 gap-8">
@@ -93,10 +101,18 @@ export default function MovieDetail({
 
         {/* Middle Column - Poster */}
         <div className="col-span-3 -mx-4">
-          <div className="aspect-[2/3] bg-gray-100 rounded-lg overflow-hidden shadow-lg">
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              No poster
-            </div>
+          <div className="aspect-[2/3] bg-gray-100 rounded-lg overflow-hidden shadow-lg flex items-center justify-center">
+            {getPosterUrl() ? (
+              <img
+                src={getPosterUrl()}
+                alt={movie.title + ' poster'}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                No poster
+              </div>
+            )}
           </div>
         </div>
 

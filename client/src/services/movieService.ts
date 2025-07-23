@@ -1,13 +1,6 @@
 import api from '../api/config';
 import type { Movie, MovieInLibrary, Review, Genre, Viewing } from '../types/index';
 
-interface MovieCreateRequest {
-  title: string;
-  description: string;
-  releaseDate: string;
-  genreId: number;
-}
-
 interface LibraryItemDto {
   movieId: number;
   movieTitle: string;
@@ -87,13 +80,17 @@ export async function getMovie(id: number): Promise<MovieInLibrary> {
   };
 }
 
-export async function createMovie(movieData: MovieCreateRequest): Promise<Movie> {
-  const response = await api.post<Movie>(`/movies`, movieData);
+export async function createMovie(movieData: FormData): Promise<Movie> {
+  const response = await api.post<Movie>(`/movies`, movieData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return response.data;
 }
 
-export async function updateMovie(id: number, movieData: MovieCreateRequest): Promise<Movie> {
-  const response = await api.put<Movie>(`/movies/${id}`, movieData);
+export async function updateMovie(id: number, movieData: FormData): Promise<Movie> {
+  const response = await api.put<Movie>(`/movies/${id}`, movieData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return response.data;
 }
 

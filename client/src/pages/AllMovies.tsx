@@ -6,13 +6,6 @@ import type { MovieInLibrary } from '../types/index';
 import * as movieService from '../services/movieService';
 import api from '../api/config';
 
-interface MovieCreateRequest {
-  title: string;
-  description: string;
-  releaseDate: string;
-  genreId: number;
-}
-
 export default function AllMovies() {
   const [movies, setMovies] = useState<MovieInLibrary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,7 +58,7 @@ export default function AllMovies() {
     window.scrollTo(0, 0);
   };
 
-  const handleAddMovie = async (movieData: MovieCreateRequest) => {
+  const handleAddMovie = async (movieData: FormData) => {
     try {
       await movieService.createMovie(movieData);
       await loadMovies();

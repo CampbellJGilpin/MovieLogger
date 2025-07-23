@@ -4,7 +4,6 @@ import MovieDetail from '../components/movies/MovieDetail';
 import EditMovieModal from '../components/movies/EditMovieModal';
 import AddReviewModal from '../components/reviews/AddReviewModal';
 import type { MovieInLibrary } from '../types/index';
-import type { MovieCreateRequest } from '../types/index';
 import * as movieService from '../services/movieService';
 
 export default function MovieDetails() {
@@ -70,7 +69,7 @@ export default function MovieDetails() {
     }
   };
 
-  const handleUpdateMovie = async (movieId: number, movieData: MovieCreateRequest) => {
+  const handleUpdateMovie = async (movieId: number, movieData: FormData) => {
     if (!movie) return;
     try {
       await movieService.updateMovie(movieId, movieData);

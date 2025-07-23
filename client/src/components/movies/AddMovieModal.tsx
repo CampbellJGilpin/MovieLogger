@@ -1,12 +1,11 @@
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import type { MovieCreateRequest } from '../../types';
 import MovieForm from './MovieForm';
 
 interface AddMovieModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (movieData: MovieCreateRequest) => void;
+  onSubmit: (movieData: FormData) => void;
 }
 
 export default function AddMovieModal({ isOpen, onClose, onSubmit }: AddMovieModalProps) {

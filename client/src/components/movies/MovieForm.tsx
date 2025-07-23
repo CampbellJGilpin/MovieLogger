@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { FormEvent } from 'react';
-import type { Movie, MovieCreateRequest, Genre } from '../../types';
+import type { Movie, Genre } from '../../types';
 import * as movieService from '../../services/movieService';
 
 interface MovieFormProps {
   movie?: Movie;
-  onSubmit: (movieData: MovieCreateRequest) => void;
+  onSubmit: (movieData: FormData) => void;
   onCancel: () => void;
 }
 
@@ -22,6 +22,8 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
   const [genres, setGenres] = useState<Genre[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [poster, setPoster] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadGenres = useCallback(async () => {
     try {
@@ -67,28 +69,35 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setPoster(e.target.files[0]);
+    } else {
+      setPoster(null);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Clear previous errors
     setErrors({});
-
-    // Validate form before submission
     if (!validateForm()) {
-      return; // Stop submission if validation fails
+      return;
     }
 
-    const movieData: MovieCreateRequest = {
-      title: title.trim(),
-      description: description.trim(),
-      releaseDate: new Date(releaseDate).toISOString(),
-      genreId,
-      isDeleted: false
-    };
+    const formData = new FormData();
+    formData.append('title', title.trim());
+    formData.append('description', description.trim());
+    formData.append('releaseDate', new Date(releaseDate).toISOString());
+    formData.append('genreId', genreId.toString());
+    formData.append('isDeleted', 'false');
+    if (poster) {
+      formData.append('poster', poster);
+    }
 
     try {
-      onSubmit(movieData);
+      onSubmit(formData);
     } catch (error) {
       console.error('Error submitting form:', error);
     }
@@ -182,6 +191,21 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
             </option>
           ))}
         </select>
+      </div>
+
+      <div>
+        <label htmlFor="poster" className="block text-sm font-medium text-gray-700">
+          Poster Image
+        </label>
+        <input
+          type="file"
+          id="poster"
+          name="poster"
+          accept="image/*"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        />
       </div>
 
       <div className="flex justify-end space-x-3">
