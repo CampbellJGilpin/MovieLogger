@@ -54,4 +54,25 @@ export interface Viewing {
   upcomingViewDate: string;
   dateViewed: string;
   movie: Movie;
+}
+
+export interface GenrePreference {
+  genreId: number;
+  genreTitle: string;
+  watchCount: number;
+  averageRating: number;
+  totalRating: number;
+  percentageOfTotalWatches: number;
+  lastWatched?: string;
+  firstWatched?: string;
+}
+
+export interface GenrePreferencesSummary {
+  userId: number;
+  totalMoviesWatched: number;
+  totalUniqueGenres: number;
+  genrePreferences: GenrePreference[];
+  mostWatchedGenre?: GenrePreference;
+  highestRatedGenre?: GenrePreference;
+  leastWatchedGenre?: GenrePreference;
 } 

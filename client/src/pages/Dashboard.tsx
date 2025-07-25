@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import type { MovieInLibrary, MovieCreateRequest, Viewing } from '../types/index';
+import type { MovieInLibrary, Viewing } from '../types/index';
 import * as movieService from '../services/movieService';
 import AddMovieModal from '../components/movies/AddMovieModal';
+import GenrePreferencesSection from '../components/dashboard/GenrePreferencesSection';
 
 interface MovieListSectionProps {
   title: string;
@@ -132,7 +133,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleAddMovie = async (movieData: MovieCreateRequest) => {
+  const handleAddMovie = async (movieData: FormData) => {
     try {
       await movieService.createMovie(movieData);
       await loadMovies();
@@ -190,6 +191,7 @@ export default function Dashboard() {
             onToggleFavorite={handleToggleFavorite}
             emptyMessage="No favorite movies yet"
           />
+          <GenrePreferencesSection />
         </div>
       )}
 

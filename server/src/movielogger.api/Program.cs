@@ -86,6 +86,7 @@ public class Program
             .AddScoped<IUsersService, UsersService>()
             .AddScoped<IAccountsService, AccountsService>()
             .AddScoped<IGenresService, GenresService>()
+            .AddScoped<IGenrePreferencesService, GenrePreferencesService>()
             .AddScoped<ILibraryService, LibraryService>()
             .AddScoped<MoviesService>()
             .AddScoped<IReviewsService, ReviewsService>()
