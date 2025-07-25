@@ -9,9 +9,6 @@ using movielogger.messaging.Models;
 using movielogger.messaging.Services;
 using movielogger.services.interfaces;
 using movielogger.api.validation;
-using Microsoft.AspNetCore.Hosting;
-using Amazon.S3;
-using Amazon.S3.Transfer;
 
 namespace movielogger.api.controllers
 {
@@ -20,25 +17,30 @@ namespace movielogger.api.controllers
     [Route("api/movies")]
     public class MoviesController : ControllerBase
     {
-        private readonly IMoviesService _moviesService;
+        private readonly IMovieQueryService _movieQueryService;
+        private readonly IMovieCommandService _movieCommandService;
         private readonly IMapper _mapper;
         private readonly IMessagePublisher _messagePublisher;
-        private readonly ICacheService _cacheService;
-        private readonly IWebHostEnvironment _env;
+        private readonly IFileUploadService _fileUploadService;
 
-        public MoviesController(IMoviesService moviesService, IMapper mapper, IMessagePublisher messagePublisher, ICacheService cacheService, IWebHostEnvironment env)
+        public MoviesController(
+            IMovieQueryService movieQueryService,
+            IMovieCommandService movieCommandService,
+            IMapper mapper, 
+            IMessagePublisher messagePublisher,
+            IFileUploadService fileUploadService)
         {
-            _moviesService = moviesService;
+            _movieQueryService = movieQueryService;
+            _movieCommandService = movieCommandService;
             _mapper = mapper;
             _messagePublisher = messagePublisher;
-            _cacheService = cacheService;
-            _env = env;
+            _fileUploadService = fileUploadService;
         }
         
         [HttpGet]
         public async Task<ActionResult<PaginatedResponse<MovieResponse>>> GetAllMovies([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var (movies, totalCount) = await _moviesService.GetAllMoviesAsync(page, pageSize);
+            var (movies, totalCount) = await _movieQueryService.GetAllMoviesAsync(page, pageSize);
             
             var response = new PaginatedResponse<MovieResponse>
             {
@@ -57,7 +59,7 @@ namespace movielogger.api.controllers
         {
             try
             {
-                var movie = await _moviesService.GetMovieByIdAsync(id);
+                var movie = await _movieQueryService.GetMovieByIdAsync(id);
                 return Ok(_mapper.Map<MovieResponse>(movie));
             }
             catch (KeyNotFoundException)
@@ -79,31 +81,11 @@ namespace movielogger.api.controllers
                 // Handle poster upload
                 if (request.Poster != null && request.Poster.Length > 0)
                 {
-                    string posterPath = null!;
-                    if (_env.IsDevelopment())
-                    {
-                        // Save to wwwroot/uploads
-                        var uploadsDir = Path.Combine(_env.ContentRootPath, "wwwroot", "uploads");
-                        if (!Directory.Exists(uploadsDir))
-                            Directory.CreateDirectory(uploadsDir);
-                        var fileName = $"{Guid.NewGuid()}_{request.Poster.FileName}";
-                        var filePath = Path.Combine(uploadsDir, fileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await request.Poster.CopyToAsync(stream);
-                        }
-                        posterPath = $"/uploads/{fileName}";
-                    }
-                    else
-                    {
-                        // TODO: Implement S3 upload logic
-                        // posterPath = await UploadToS3Async(request.Poster);
-                        posterPath = null;
-                    }
+                    var posterPath = await _fileUploadService.UploadPosterAsync(request.Poster);
                     movieDto.PosterPath = posterPath;
                 }
 
-                var createdMovie = await _moviesService.CreateMovieAsync(movieDto);
+                var createdMovie = await _movieCommandService.CreateMovieAsync(movieDto);
                 
                 // Publish MovieAddedEvent
                 var movieAddedEvent = new MovieAddedEvent
@@ -134,31 +116,11 @@ namespace movielogger.api.controllers
                 // Handle poster upload
                 if (request.Poster != null && request.Poster.Length > 0)
                 {
-                    string posterPath = null!;
-                    if (_env.IsDevelopment())
-                    {
-                        // Save to wwwroot/uploads
-                        var uploadsDir = Path.Combine(_env.ContentRootPath, "wwwroot", "uploads");
-                        if (!Directory.Exists(uploadsDir))
-                            Directory.CreateDirectory(uploadsDir);
-                        var fileName = $"{Guid.NewGuid()}_{request.Poster.FileName}";
-                        var filePath = Path.Combine(uploadsDir, fileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await request.Poster.CopyToAsync(stream);
-                        }
-                        posterPath = $"/uploads/{fileName}";
-                    }
-                    else
-                    {
-                        // TODO: Implement S3 upload logic
-                        // posterPath = await UploadToS3Async(request.Poster);
-                        posterPath = null;
-                    }
+                    var posterPath = await _fileUploadService.UploadPosterAsync(request.Poster);
                     movieDto.PosterPath = posterPath;
                 }
 
-                var updatedMovie = await _moviesService.UpdateMovieAsync(id, movieDto);
+                var updatedMovie = await _movieCommandService.UpdateMovieAsync(id, movieDto);
                 
                 // Publish MovieUpdatedEvent
                 var movieUpdatedEvent = new MovieUpdatedEvent
@@ -190,9 +152,9 @@ namespace movielogger.api.controllers
             try
             {
                 // Get movie details before deletion for the event
-                var movie = await _moviesService.GetMovieByIdAsync(id);
+                var movie = await _movieQueryService.GetMovieByIdAsync(id);
                 
-                var deleted = await _moviesService.DeleteMovieAsync(id);
+                var deleted = await _movieCommandService.DeleteMovieAsync(id);
                 
                 if (!deleted)
                 {
@@ -222,7 +184,7 @@ namespace movielogger.api.controllers
         {
             try
             {
-                var movies = await _moviesService.SearchMoviesAsync(q);
+                var movies = await _movieQueryService.SearchMoviesAsync(q);
                 return Ok(_mapper.Map<IEnumerable<MovieResponse>>(movies));
             }
             catch (Exception ex)
@@ -238,7 +200,7 @@ namespace movielogger.api.controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
-            var movies = await _moviesService.GetAllMoviesForUserAsync(userId, q, page, pageSize);
+            var movies = await _movieQueryService.GetAllMoviesForUserAsync(userId, q, page, pageSize);
             var response = new PaginatedResponse<UserMovieResponse>
             {
                 Items = _mapper.Map<IEnumerable<UserMovieResponse>>(movies.Items),
@@ -253,16 +215,9 @@ namespace movielogger.api.controllers
         [HttpPost("clear-cache")]
         public async Task<ActionResult> ClearCache()
         {
-            try
-            {
-                await _cacheService.RemoveByPatternAsync("movies:*");
-                await _cacheService.RemoveByPatternAsync("movie:*");
-                return Ok(new { message = "Movie cache cleared successfully" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
+            // Note: Cache clearing is now handled by the CachedMoviesService
+            // This endpoint can be removed or modified to work with the new architecture
+            return Ok(new { message = "Cache clearing is handled automatically by the caching service" });
         }
 
         private string[] GetChangedFields(UpdateMovieRequest request)

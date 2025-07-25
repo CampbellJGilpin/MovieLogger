@@ -15,6 +15,7 @@ using movielogger.messaging.Configuration;
 using movielogger.messaging.Services;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
+using movielogger.api.middleware;
 
 public class Program
 {
@@ -89,7 +90,10 @@ public class Program
             .AddScoped<MoviesService>()
             .AddScoped<IReviewsService, ReviewsService>()
             .AddScoped<IViewingsService, ViewingsService>()
-            .AddScoped<IAuditService, AuditService>();
+            .AddScoped<IAuditService, AuditService>()
+            .AddScoped<IFileUploadService, FileUploadService>()
+            .AddScoped<IMovieQueryService>(provider => provider.GetRequiredService<MoviesService>())
+            .AddScoped<IMovieCommandService>(provider => provider.GetRequiredService<MoviesService>());
 
         // Register MoviesService with caching (avoiding circular dependency)
         builder.Services.AddScoped<IMoviesService>(provider =>
@@ -173,7 +177,10 @@ public class Program
             app.UseHttpsRedirection();
         }
         
+        // Serve static files from wwwroot (including /uploads)
+        app.UseStaticFiles();
         app.UseCors();
+        app.UseMiddleware<GlobalExceptionHandler>();
         app.UseAuthentication();
         app.UseAuthorization();
 

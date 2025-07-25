@@ -10,6 +10,9 @@ obj/
 *.nuget.info
 *.restore.info
 
+# Image files
+*.jpg
+
 # macOS system files
 .DS_Store
 
