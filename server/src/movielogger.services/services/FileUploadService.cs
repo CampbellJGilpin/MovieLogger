@@ -1,17 +1,17 @@
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Hosting;
 using movielogger.services.interfaces;
 
 namespace movielogger.services.services;
 
 public class FileUploadService : IFileUploadService
 {
-    private readonly IHostingEnvironment _env;
+    private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _configuration;
 
-    public FileUploadService(IHostingEnvironment env, IConfiguration configuration)
+    public FileUploadService(IWebHostEnvironment env, IConfiguration configuration)
     {
         _env = env;
         _configuration = configuration;
