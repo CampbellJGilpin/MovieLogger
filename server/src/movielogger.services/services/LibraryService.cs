@@ -147,7 +147,7 @@ public class LibraryService : ILibraryService
         try
         {
             _logger.LogInformation("Getting library item for user {UserId} and movie {MovieId}", userId, movieId);
-            
+
             var entry = await _db.UserMovies
                 .Include(um => um.Movie)
                 .ThenInclude(m => m.Genre)
@@ -176,7 +176,7 @@ public class LibraryService : ILibraryService
         try
         {
             _logger.LogInformation("Removing movie {MovieId} from library for user {UserId}", movieId, userId);
-            
+
             var entry = await _db.UserMovies
                 .FirstOrDefaultAsync(um => um.MovieId == movieId && um.UserId == userId);
 
@@ -188,7 +188,7 @@ public class LibraryService : ILibraryService
 
             _db.UserMovies.Remove(entry);
             await _db.SaveChangesAsync();
-            
+
             _logger.LogInformation("Successfully removed movie {MovieId} from library for user {UserId}", movieId, userId);
             return true;
         }

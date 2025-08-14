@@ -21,4 +21,4 @@ public class GenrePreferencesSummaryDto
     public GenrePreferenceDto? MostWatchedGenre { get; set; }
     public GenrePreferenceDto? HighestRatedGenre { get; set; }
     public GenrePreferenceDto? LeastWatchedGenre { get; set; }
-} 
+}

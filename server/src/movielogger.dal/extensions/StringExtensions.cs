@@ -4,10 +4,10 @@ public static class StringExtensions
 {
     public static string? GetValue(this string @this, string? defaultValue = null)
     {
-        return GetVariable(@this) 
+        return GetVariable(@this)
                ?? defaultValue;
     }
-        
+
     public static T? GetValue<T>(this string @this, string? defaultValue = null) where T : IConvertible
     {
         var value = GetValue(@this, defaultValue);

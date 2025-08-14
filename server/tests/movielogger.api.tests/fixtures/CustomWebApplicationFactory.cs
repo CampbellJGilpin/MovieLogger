@@ -24,7 +24,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
-        
+
         builder.ConfigureTestServices(services =>
         {
             // Remove existing DbContext configuration
@@ -41,7 +41,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             {
                 services.Remove(contextDescriptor);
             }
-            
+
             // Configure in-memory database
             services.AddDbContext<MovieLoggerDbContext>(options =>
             {
@@ -95,12 +95,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             // Configure Controllers
             services.AddControllers()
                 .AddApplicationPart(typeof(Program).Assembly);
-            
+
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MovieLoggerDbContext>();
             db.Database.EnsureCreated();
-            
+
             SeedTestData(db);
         });
     }
@@ -109,7 +109,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         using var scope = Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<MovieLoggerDbContext>();
-        
+
         db.Reviews.RemoveRange(db.Reviews);
         db.Viewings.RemoveRange(db.Viewings);
         db.UserMovies.RemoveRange(db.UserMovies);
@@ -117,7 +117,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         db.Users.RemoveRange(db.Users);
         db.Genres.RemoveRange(db.Genres);
         db.SaveChanges();
-        
+
         // Reseed data
         SeedTestData(db);
     }
@@ -131,7 +131,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             var user2 = TestDataBuilder.CreateTestUser(2, "Jane Doe", "janedoe@example.com");
             db.Users.AddRange(user1, user2);
             db.SaveChanges();
-            
+
             // Add genres (including Horror that tests expect)
             var genre1 = TestDataBuilder.CreateTestGenre(1, "Horror");
             var genre2 = TestDataBuilder.CreateTestGenre(2, "Action");
@@ -146,7 +146,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             var movie4 = TestDataBuilder.CreateTestMovie(4, genre1.Id, "Test Movie 4");
             db.Movies.AddRange(movie1, movie2, movie3, movie4);
             db.SaveChanges();
-            
+
             // Add user movies
             var userMovie1 = TestDataBuilder.CreateTestUserMovie(1, user1.Id, movie1.Id);
             var userMovie2 = TestDataBuilder.CreateTestUserMovie(2, user1.Id, movie2.Id);
@@ -154,7 +154,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             var userMovie4 = TestDataBuilder.CreateTestUserMovie(4, user2.Id, movie2.Id);
             db.UserMovies.AddRange(userMovie1, userMovie2, userMovie3, userMovie4);
             db.SaveChanges();
-            
+
             // Add viewings
             var viewing1 = TestDataBuilder.CreateTestViewing(1, userMovie1.Id);
             var viewing2 = TestDataBuilder.CreateTestViewing(2, userMovie2.Id);
@@ -162,7 +162,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             var viewing4 = TestDataBuilder.CreateTestViewing(4, userMovie4.Id);
             db.Viewings.AddRange(viewing1, viewing2, viewing3, viewing4);
             db.SaveChanges();
-            
+
             // Add reviews
             var review1 = TestDataBuilder.CreateTestReview(1, viewing1.Id);
             var review2 = TestDataBuilder.CreateTestReview(2, viewing2.Id);

@@ -44,4 +44,4 @@ namespace movielogger.messaging.Models
             JsonSerializer.Serialize(writer, value, value.GetType(), options);
         }
     }
-} 
+}

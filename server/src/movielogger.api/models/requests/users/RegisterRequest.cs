@@ -14,4 +14,4 @@ public class RegisterRequest : IValidatable<RegisterRequest>
     {
         return new RegisterRequestValidator();
     }
-} 
+}

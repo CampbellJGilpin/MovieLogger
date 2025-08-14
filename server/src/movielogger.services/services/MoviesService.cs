@@ -61,7 +61,7 @@ public class MoviesService : IMoviesService
         var savedMovie = await _db.Movies
             .Include(g => g.Genre)
             .FirstOrDefaultAsync(x => x.Id == movie.Id);
-        
+
         return _mapper.Map<MovieDto>(savedMovie);
     }
 
@@ -74,7 +74,7 @@ public class MoviesService : IMoviesService
         }
 
         dto.Id = movieId;
-        
+
         _mapper.Map(dto, movie);
         await _db.SaveChangesAsync();
 

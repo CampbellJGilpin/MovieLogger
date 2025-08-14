@@ -8,4 +8,4 @@ namespace movielogger.messaging.Services
         void StopConsuming();
         event EventHandler<MovieEvent> MessageReceived;
     }
-} 
+}

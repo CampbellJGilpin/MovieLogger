@@ -36,4 +36,4 @@ public class ValidationPipeline<T> : IValidationPipeline<T>
 public interface IValidationPipeline<T>
 {
     Task<IActionResult?> ValidateAsync(T model);
-} 
+}

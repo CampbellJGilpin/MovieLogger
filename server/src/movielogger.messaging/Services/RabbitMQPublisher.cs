@@ -84,14 +84,14 @@ namespace movielogger.messaging.Services
                     basicProperties: properties,
                     body: body);
 
-                _logger.LogInformation("Message published successfully. Type: {EventType}, RoutingKey: {RoutingKey}", 
+                _logger.LogInformation("Message published successfully. Type: {EventType}, RoutingKey: {RoutingKey}",
                     message.EventType, routingKey);
 
                 await Task.CompletedTask;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error publishing message. Type: {EventType}, RoutingKey: {RoutingKey}", 
+                _logger.LogError(ex, "Error publishing message. Type: {EventType}, RoutingKey: {RoutingKey}",
                     message.EventType, routingKey);
                 throw;
             }
@@ -115,4 +115,4 @@ namespace movielogger.messaging.Services
             }
         }
     }
-} 
+}

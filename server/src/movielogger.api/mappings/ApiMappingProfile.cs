@@ -34,12 +34,12 @@ public class ApiMappingProfile : Profile
         CreateMap<CreateUserRequest, UserDto>();
         CreateMap<UpdateUserRequest, UserDto>();
         CreateMap<UpdateViewingRequest, ViewingDto>();
-        
+
         CreateMap<CreateViewingRequest, ViewingDto>()
             .ForMember(dest => dest.UserId, opt => opt.Ignore())
             .ForMember(dest => dest.UserMovieId, opt => opt.Ignore());
 
-        
+
         // DTO to Response
         CreateMap<GenreDto, GenreResponse>();
         CreateMap<LibraryItemDto, LibraryItemResponse>()
@@ -50,7 +50,7 @@ public class ApiMappingProfile : Profile
         CreateMap<MovieDto, MovieResponse>();
         CreateMap<ReviewDto, ReviewResponse>();
         CreateMap<UserDto, UserResponse>();
-        
+
         CreateMap<ViewingDto, ViewingResponse>()
             .ForMember(dest => dest.ViewingId, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.UpcomingViewDate, opt => opt.MapFrom(src => src.DateViewed))

@@ -69,10 +69,10 @@ export default function MovieDetails() {
     }
   };
 
-  const handleUpdateMovie = async (movieId: number, movieData: FormData) => {
+  const handleUpdateMovie = async (movieId: number, movieData: FormData, onUploadProgress?: (progressEvent: { loaded: number; total?: number }) => void) => {
     if (!movie) return;
     try {
-      await movieService.updateMovie(movieId, movieData);
+      await movieService.updateMovie(movieId, movieData, onUploadProgress);
       await loadMovie(movieId);
       setIsEditModalOpen(false);
     } catch (error: unknown) {

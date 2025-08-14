@@ -9,4 +9,4 @@ public interface IGenrePreferencesService
     Task<List<GenrePreferenceDto>> GetTopGenresByRatingAsync(int userId, int count = 5);
     Task<List<GenrePreferenceDto>> GetLeastWatchedGenresAsync(int userId, int count = 5);
     Task<Dictionary<string, int>> GetGenreWatchTrendsAsync(int userId, int months = 6);
-} 
+}

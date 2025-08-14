@@ -80,16 +80,35 @@ export async function getMovie(id: number): Promise<MovieInLibrary> {
   };
 }
 
-export async function createMovie(movieData: FormData): Promise<Movie> {
+export async function createMovie(
+  movieData: FormData,
+  onUploadProgress?: (progressEvent: { loaded: number; total?: number }) => void
+): Promise<Movie> {
   const response = await api.post<Movie>(`/movies`, movieData, {
     headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: onUploadProgress ? (progressEvent) => {
+      onUploadProgress({
+        loaded: progressEvent.loaded,
+        total: progressEvent.total || 0
+      });
+    } : undefined,
   });
   return response.data;
 }
 
-export async function updateMovie(id: number, movieData: FormData): Promise<Movie> {
+export async function updateMovie(
+  id: number,
+  movieData: FormData,
+  onUploadProgress?: (progressEvent: { loaded: number; total?: number }) => void
+): Promise<Movie> {
   const response = await api.put<Movie>(`/movies/${id}`, movieData, {
     headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: onUploadProgress ? (progressEvent) => {
+      onUploadProgress({
+        loaded: progressEvent.loaded,
+        total: progressEvent.total || 0
+      });
+    } : undefined,
   });
   return response.data;
 }

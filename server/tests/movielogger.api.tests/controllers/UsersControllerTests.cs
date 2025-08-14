@@ -22,27 +22,27 @@ public class UsersControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/users");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var users = await response.Content.ReadFromJsonAsync<List<UserResponse>>();
-        
+
         users.Should().NotBeNull();
         users!.Should().HaveCount(2);
         users.Should().Contain(u => u.UserName == "John Doe");
         users.Should().Contain(u => u.UserName == "Jane Doe");
     }
-    
+
     [Fact]
     public async Task GetUserById_WhenUserExists_ReturnsUser()
     {
         // Act
         var response = await _client.GetAsync("/api/users/1");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var user = await response.Content.ReadFromJsonAsync<UserResponse>();
-        
+
         user.Should().NotBeNull();
         user!.Id.Should().Be(1);
         user.UserName.Should().Be("John Doe");
@@ -54,11 +54,11 @@ public class UsersControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/users/999");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
-    
+
     [Fact]
     public async Task CreateUser_WithValidData_ReturnsCreatedUser()
     {
@@ -69,7 +69,7 @@ public class UsersControllerTests : BaseTestController
             Email = "jackburton@example.com",
             Password = "ItsAllInTheReflexes"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("api/accounts/register", request);
 
@@ -77,9 +77,9 @@ public class UsersControllerTests : BaseTestController
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<JsonElement>(content);
-        
+
         var user = result.GetProperty("user").Deserialize<UserResponse>();
-        
+
         user.Should().NotBeNull();
         user.UserName.Should().Be(request.UserName);
         user.Email.Should().Be(request.Email);
@@ -96,7 +96,7 @@ public class UsersControllerTests : BaseTestController
             Email = "not-an-email",
             Password = "password123"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/users", request);
 
@@ -114,14 +114,14 @@ public class UsersControllerTests : BaseTestController
             Email = "johndoe@example.com", // This email already exists
             Password = "password123"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/users", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-    
+
     [Fact]
     public async Task UpdateUser_WithValidData_ReturnsUpdatedUser()
     {
@@ -134,14 +134,14 @@ public class UsersControllerTests : BaseTestController
             IsAdmin = true,
             IsDeleted = false
         };
-        
+
         // Act
         var response = await _client.PutAsJsonAsync("/api/users/1", request);
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var updatedUser = await response.Content.ReadFromJsonAsync<UserResponse>();
-        
+
         updatedUser.Should().NotBeNull();
         updatedUser!.UserName.Should().Be(request.UserName);
         updatedUser.Email.Should().Be(request.Email);
@@ -160,10 +160,10 @@ public class UsersControllerTests : BaseTestController
             Email = "nonexistent@example.com",
             Password = "password123"
         };
-        
+
         // Act
         var response = await _client.PutAsJsonAsync("/api/users/999", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -173,10 +173,10 @@ public class UsersControllerTests : BaseTestController
     {
         // Act
         var response = await _client.DeleteAsync("/api/users/1");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
+
         // Verify user is deleted
         var getResponse = await _client.GetAsync("/api/users/1");
         getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -187,7 +187,7 @@ public class UsersControllerTests : BaseTestController
     {
         // Act
         var response = await _client.DeleteAsync("/api/users/999");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }

@@ -21,4 +21,4 @@ public class GenrePreferencesSummaryResponse
     public GenrePreferenceResponse? MostWatchedGenre { get; set; }
     public GenrePreferenceResponse? HighestRatedGenre { get; set; }
     public GenrePreferenceResponse? LeastWatchedGenre { get; set; }
-} 
+}

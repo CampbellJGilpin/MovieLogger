@@ -20,4 +20,4 @@ namespace movielogger.messaging.Services
             // Nothing to dispose
         }
     }
-} 
+}

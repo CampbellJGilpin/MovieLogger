@@ -22,7 +22,7 @@ public class AccountsControllerTests : BaseTestController
             Email = "newuser@example.com",
             Password = "SecurePassword123!"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("api/accounts/register", request);
 
@@ -30,9 +30,9 @@ public class AccountsControllerTests : BaseTestController
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<JsonElement>(content);
-        
+
         var user = result.GetProperty("user").Deserialize<UserResponse>();
-        
+
         user.Should().NotBeNull();
         user!.UserName.Should().Be(request.UserName);
         user.Email.Should().Be(request.Email);
@@ -49,7 +49,7 @@ public class AccountsControllerTests : BaseTestController
             Email = "johndoe@example.com", // This email already exists
             Password = "SecurePassword123!"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("api/accounts/register", request);
 
@@ -67,7 +67,7 @@ public class AccountsControllerTests : BaseTestController
             Email = "not-an-email",
             Password = "SecurePassword123!"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("api/accounts/register", request);
 
@@ -85,7 +85,7 @@ public class AccountsControllerTests : BaseTestController
             Email = "weakpassword@example.com",
             Password = "123" // Too short
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("api/accounts/register", request);
 
@@ -102,14 +102,14 @@ public class AccountsControllerTests : BaseTestController
             Email = "johndoe@example.com",
             Password = "password123"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("api/accounts/login", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
-        
+
         loginResponse.Should().NotBeNull();
         loginResponse!.Token.Should().NotBeNullOrEmpty();
         loginResponse.User.Should().NotBeNull();
@@ -125,7 +125,7 @@ public class AccountsControllerTests : BaseTestController
             Email = "johndoe@example.com",
             Password = "wrongpassword"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("api/accounts/login", request);
 
@@ -142,7 +142,7 @@ public class AccountsControllerTests : BaseTestController
             Email = "nonexistent@example.com",
             Password = "password123"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("api/accounts/login", request);
 
@@ -159,7 +159,7 @@ public class AccountsControllerTests : BaseTestController
             CurrentPassword = "password123",
             NewPassword = "NewSecurePassword123!"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("api/accounts/change-password", request);
 
@@ -176,7 +176,7 @@ public class AccountsControllerTests : BaseTestController
             CurrentPassword = "wrongpassword",
             NewPassword = "NewSecurePassword123!"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("api/accounts/change-password", request);
 
@@ -193,7 +193,7 @@ public class AccountsControllerTests : BaseTestController
             CurrentPassword = "password123",
             NewPassword = "123" // Too short
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("api/accounts/change-password", request);
 

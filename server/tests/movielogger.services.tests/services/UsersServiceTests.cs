@@ -12,7 +12,7 @@ namespace movielogger.services.tests.services;
 public class UsersServiceTests : BaseServiceTest
 {
     IUsersService _service;
-    
+
     public UsersServiceTests()
     {
         _service = new UsersService(_dbContext, _mapper);
@@ -28,14 +28,14 @@ public class UsersServiceTests : BaseServiceTest
             .ToList();
         var mockSet = users.BuildMockDbSet();
         _dbContext.Users.Returns(mockSet);
-        
+
         // Act 
         var result = await _service.GetAllUsersAsync();
-        
+
         // Assert
         result.Should().HaveCount(4);
     }
-    
+
     [Fact]
     public async Task GetUserByIdAsync_ExistingUser_ReturnsMappedUser()
     {
@@ -43,22 +43,22 @@ public class UsersServiceTests : BaseServiceTest
         var user = Fixture.Build<User>()
             .With(x => x.IsDeleted, false)
             .Create();
-        
+
         var users = new List<User> { user }.AsQueryable();
         var mockSet = users.BuildMockDbSet();
-        
+
         _dbContext.Users.Returns(mockSet);
-        
+
         // Act 
         var result = await _service.GetUserByIdAsync(user.Id);
-        
+
         // Assert
         result.Should().NotBeNull();
         result.Id.Should().Be(user.Id);
         result.UserName.Should().Be(user.UserName);
         result.Email.Should().Be(user.Email);
     }
-    
+
     [Fact]
     public async Task GetUserByIdAsync_NotFound_ThrowsKeyNotFoundException()
     {
@@ -73,7 +73,7 @@ public class UsersServiceTests : BaseServiceTest
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
-    
+
     [Fact]
     public async Task CreateUserAsync_ValidDto_AddsAndReturnsMappedUser()
     {
@@ -82,32 +82,33 @@ public class UsersServiceTests : BaseServiceTest
             .With(g => g.Id, 1)
             .With(x => x.IsDeleted, false)
             .Create();
-        
+
         User? addedUser = null;
 
         var mockSet = new List<User>().AsQueryable().BuildMockDbSet();
-        mockSet.Add(Arg.Do<User>(u => {
+        mockSet.Add(Arg.Do<User>(u =>
+        {
             u.Id = 1;
             addedUser = u;
         }));
-        
+
         _dbContext.Users.Returns(mockSet);
         _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
-        
+
         // Act 
         var result = await _service.CreateUserAsync(userDto);
-        
+
         // Assert
         await _dbContext.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         mockSet.Received(1).Add(Arg.Any<User>());
-        
+
         result.Should().NotBeNull();
         result.Id.Should().Be(userDto.Id);
         result.UserName.Should().Be(userDto.UserName);
         result.Email.Should().Be(userDto.Email);
         result.IsDeleted.Should().BeFalse();
     }
-    
+
     [Fact]
     public async Task UpdateUserAsync_ValidId_UpdatesAndReturnsMappedUser()
     {
@@ -127,10 +128,10 @@ public class UsersServiceTests : BaseServiceTest
 
         _dbContext.Users.Returns(mockSet);
         _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
-        
+
         // Act 
         var result = await _service.UpdateUserAsync(userDto.Id, userDto);
-        
+
         // Assert
         result.Should().NotBeNull();
         result.Id.Should().Be(userDto.Id);
@@ -138,7 +139,7 @@ public class UsersServiceTests : BaseServiceTest
         result.Email.Should().Be(userDto.Email);
         result.IsDeleted.Should().BeFalse();
     }
-    
+
     [Fact]
     public async Task UpdateUserAsync_NotFound_ThrowsKeyNotFoundException()
     {
@@ -148,7 +149,7 @@ public class UsersServiceTests : BaseServiceTest
         _dbContext.Users.Returns(mockSet);
 
         var dto = Fixture.Create<UserDto>();
-        
+
         // Act 
         var act = async () => await _service.UpdateUserAsync(123, dto);
 

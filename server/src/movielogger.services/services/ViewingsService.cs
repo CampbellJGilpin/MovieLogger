@@ -63,7 +63,7 @@ public class ViewingsService : IViewingsService
         }
 
         var viewing = new Viewing { UserMovieId = userMovie.Id, DateViewed = viewingDto.DateViewed };
-        
+
         _db.Viewings.Add(viewing);
         await _db.SaveChangesAsync();
 
@@ -72,10 +72,10 @@ public class ViewingsService : IViewingsService
             .Include(v => v.UserMovie)
             .ThenInclude(um => um.Movie)
             .FirstOrDefaultAsync(v => v.Id == viewing.Id);
-        
+
         return _mapper.Map<ViewingDto>(savedViewing);
     }
-    
+
     public async Task<ViewingDto> UpdateViewingAsync(int viewingId, ViewingDto viewingDto)
     {
         var viewing = await _db.Viewings

@@ -41,4 +41,4 @@ public class CacheConfigurationService
     {
         return _configuration.GetValue<string>("Caching:Redis:ConnectionString", "localhost:6379");
     }
-} 
+}

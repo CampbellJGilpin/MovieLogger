@@ -19,11 +19,11 @@ public class ViewingsControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/users/1/viewings");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var viewings = await response.Content.ReadFromJsonAsync<List<ViewingResponse>>();
-        
+
         viewings.Should().NotBeNull();
         viewings!.Should().HaveCountGreaterThanOrEqualTo(0);
     }
@@ -33,7 +33,7 @@ public class ViewingsControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/users/999/viewings");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -43,11 +43,11 @@ public class ViewingsControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/viewings/1");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var viewing = await response.Content.ReadFromJsonAsync<ViewingResponse>();
-        
+
         viewing.Should().NotBeNull();
         viewing!.ViewingId.Should().Be(1);
         viewing.UserId.Should().Be(1);
@@ -59,7 +59,7 @@ public class ViewingsControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/viewings/999");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -74,14 +74,14 @@ public class ViewingsControllerTests : BaseTestController
             MovieId = 1,
             DateViewed = DateTime.Now
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/users/1/viewings", request);
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var createdViewing = await response.Content.ReadFromJsonAsync<ViewingResponse>();
-        
+
         createdViewing.Should().NotBeNull();
         createdViewing!.Movie.Should().NotBeNull();
         createdViewing.UserId.Should().Be(request.UserId);
@@ -98,10 +98,10 @@ public class ViewingsControllerTests : BaseTestController
             MovieId = 999, // Non-existent movie
             DateViewed = DateTime.Now
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/users/1/viewings", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -116,10 +116,10 @@ public class ViewingsControllerTests : BaseTestController
             MovieId = 1,
             DateViewed = DateTime.Now
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/users/999/viewings", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -134,10 +134,10 @@ public class ViewingsControllerTests : BaseTestController
             MovieId = 1,
             DateViewed = DateTime.Now.AddDays(1) // Future date
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/users/1/viewings", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -150,14 +150,14 @@ public class ViewingsControllerTests : BaseTestController
         {
             DateViewed = DateTime.Now.AddDays(-1)
         };
-        
+
         // Act
         var response = await _client.PutAsJsonAsync("/api/viewings/1", request);
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var updatedViewing = await response.Content.ReadFromJsonAsync<ViewingResponse>();
-        
+
         updatedViewing.Should().NotBeNull();
         updatedViewing!.ViewingId.Should().Be(1);
     }
@@ -170,10 +170,10 @@ public class ViewingsControllerTests : BaseTestController
         {
             DateViewed = DateTime.Now
         };
-        
+
         // Act
         var response = await _client.PutAsJsonAsync("/api/viewings/999", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -186,10 +186,10 @@ public class ViewingsControllerTests : BaseTestController
         {
             DateViewed = DateTime.Now.AddDays(1) // Future date
         };
-        
+
         // Act
         var response = await _client.PutAsJsonAsync("/api/viewings/1", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -199,10 +199,10 @@ public class ViewingsControllerTests : BaseTestController
     {
         // Act
         var response = await _client.DeleteAsync("/api/viewings/2"); // Assuming viewing 2 exists
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
+
         // Verify viewing is deleted
         var getResponse = await _client.GetAsync("/api/viewings/2");
         getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -213,7 +213,7 @@ public class ViewingsControllerTests : BaseTestController
     {
         // Act
         var response = await _client.DeleteAsync("/api/viewings/999");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -224,11 +224,11 @@ public class ViewingsControllerTests : BaseTestController
         // Act
         var today = DateTime.Now.ToString("yyyy-MM-dd");
         var response = await _client.GetAsync($"/api/users/1/viewings?viewDate={today}");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var viewings = await response.Content.ReadFromJsonAsync<List<ViewingResponse>>();
-        
+
         viewings.Should().NotBeNull();
         // Note: This test assumes there are viewings on the current date
         // In a real scenario, you might seed specific viewing data for testing

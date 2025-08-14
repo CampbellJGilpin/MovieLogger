@@ -71,21 +71,21 @@ public class RedisCacheService : ICacheService
         try
         {
             _logger.LogInformation("RemoveByPatternAsync called with pattern: {Pattern}", pattern);
-            
+
             // Get all endpoints (Redis can have multiple servers)
             var endpoints = _redis.GetEndPoints();
             var totalRemoved = 0;
-            
+
             foreach (var endpoint in endpoints)
             {
                 var server = _redis.GetServer(endpoint);
-                
+
                 // Use KEYS for pattern matching (not recommended for huge datasets, but fine for most app caches)
                 var keys = server.Keys(pattern: pattern).ToArray();
-                
-                _logger.LogInformation("Found {Count} keys matching pattern '{Pattern}' on endpoint {Endpoint}", 
+
+                _logger.LogInformation("Found {Count} keys matching pattern '{Pattern}' on endpoint {Endpoint}",
                     keys.Length, pattern, endpoint);
-                
+
                 // Delete keys in batches for better performance
                 if (keys.Length > 0)
                 {
@@ -93,13 +93,13 @@ public class RedisCacheService : ICacheService
                     var tasks = keys.Select(key => batch.KeyDeleteAsync(key)).ToArray();
                     batch.Execute();
                     await Task.WhenAll(tasks);
-                    
+
                     totalRemoved += keys.Length;
                     _logger.LogDebug("Removed {Count} keys from endpoint {Endpoint}", keys.Length, endpoint);
                 }
             }
-            
-            _logger.LogInformation("Pattern-based cache removal completed - removed {TotalCount} keys for pattern: {Pattern}", 
+
+            _logger.LogInformation("Pattern-based cache removal completed - removed {TotalCount} keys for pattern: {Pattern}",
                 totalRemoved, pattern);
         }
         catch (Exception ex)
@@ -122,4 +122,4 @@ public class RedisCacheService : ICacheService
             return false;
         }
     }
-} 
+}

@@ -33,11 +33,11 @@ public class AccountsServiceTests : BaseServiceTest
             { "Jwt:Audience", "test-audience" },
             { "Jwt:ExpiresInMinutes", "60" }
         };
-        
+
         _configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(inMemorySettings)
             .Build();
-        
+
         _service = new AccountsService(_dbContext, _mapper, _configuration);
     }
 
@@ -51,9 +51,9 @@ public class AccountsServiceTests : BaseServiceTest
 
         var users = new List<User>();
         var mockSet = users.AsQueryable().BuildMockDbSet();
-        
+
         mockSet.When(x => x.Add(Arg.Any<User>())).Do(x => users.Add(x.Arg<User>()));
-        
+
         _dbContext.Users.Returns(mockSet);
 
         // Act

@@ -26,7 +26,7 @@ namespace movielogger.api.controllers
         public MoviesController(
             IMovieQueryService movieQueryService,
             IMovieCommandService movieCommandService,
-            IMapper mapper, 
+            IMapper mapper,
             IMessagePublisher messagePublisher,
             IFileUploadService fileUploadService)
         {
@@ -36,12 +36,12 @@ namespace movielogger.api.controllers
             _messagePublisher = messagePublisher;
             _fileUploadService = fileUploadService;
         }
-        
+
         [HttpGet]
         public async Task<ActionResult<PaginatedResponse<MovieResponse>>> GetAllMovies([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var (movies, totalCount) = await _movieQueryService.GetAllMoviesAsync(page, pageSize);
-            
+
             var response = new PaginatedResponse<MovieResponse>
             {
                 Items = _mapper.Map<IEnumerable<MovieResponse>>(movies),
@@ -50,7 +50,7 @@ namespace movielogger.api.controllers
                 TotalCount = totalCount,
                 TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
             };
-            
+
             return Ok(response);
         }
 
@@ -67,7 +67,7 @@ namespace movielogger.api.controllers
                 return NotFound();
             }
         }
-        
+
         [HttpPost]
         public async Task<ActionResult<MovieResponse>> CreateMovie([FromForm] CreateMovieRequest request)
         {
@@ -81,12 +81,19 @@ namespace movielogger.api.controllers
                 // Handle poster upload
                 if (request.Poster != null && request.Poster.Length > 0)
                 {
-                    var posterPath = await _fileUploadService.UploadPosterAsync(request.Poster);
-                    movieDto.PosterPath = posterPath;
+                    try
+                    {
+                        var posterPath = await _fileUploadService.UploadPosterAsync(request.Poster);
+                        movieDto.PosterPath = posterPath;
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        return BadRequest(new { error = $"Poster upload failed: {ex.Message}" });
+                    }
                 }
 
                 var createdMovie = await _movieCommandService.CreateMovieAsync(movieDto);
-                
+
                 // Publish MovieAddedEvent
                 var movieAddedEvent = new MovieAddedEvent
                 {
@@ -95,9 +102,9 @@ namespace movielogger.api.controllers
                     Genre = createdMovie.Genre?.Title ?? "Unknown",
                     UserId = User.Identity?.Name ?? "Unknown"
                 };
-                
+
                 await _messagePublisher.PublishAsync(movieAddedEvent);
-                
+
                 return CreatedAtAction(nameof(GetMovieById), new { id = createdMovie.Id }, _mapper.Map<MovieResponse>(createdMovie));
             }
             catch (Exception ex)
@@ -111,17 +118,32 @@ namespace movielogger.api.controllers
         {
             try
             {
+                // Get existing movie for poster cleanup
+                var existingMovie = await _movieQueryService.GetMovieByIdAsync(id);
                 var movieDto = _mapper.Map<MovieDto>(request);
 
                 // Handle poster upload
                 if (request.Poster != null && request.Poster.Length > 0)
                 {
-                    var posterPath = await _fileUploadService.UploadPosterAsync(request.Poster);
-                    movieDto.PosterPath = posterPath;
+                    try
+                    {
+                        var posterPath = await _fileUploadService.UploadPosterAsync(request.Poster);
+                        movieDto.PosterPath = posterPath;
+
+                        // Delete old poster if exists
+                        if (!string.IsNullOrEmpty(existingMovie.PosterPath))
+                        {
+                            await _fileUploadService.DeletePosterAsync(existingMovie.PosterPath);
+                        }
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        return BadRequest(new { error = $"Poster upload failed: {ex.Message}" });
+                    }
                 }
 
                 var updatedMovie = await _movieCommandService.UpdateMovieAsync(id, movieDto);
-                
+
                 // Publish MovieUpdatedEvent
                 var movieUpdatedEvent = new MovieUpdatedEvent
                 {
@@ -131,9 +153,9 @@ namespace movielogger.api.controllers
                     ChangedFields = GetChangedFields(request), // You'd need to implement this
                     UserId = User.Identity?.Name ?? "Unknown"
                 };
-                
+
                 await _messagePublisher.PublishAsync(movieUpdatedEvent);
-                
+
                 return Ok(_mapper.Map<MovieResponse>(updatedMovie));
             }
             catch (KeyNotFoundException)
@@ -153,14 +175,14 @@ namespace movielogger.api.controllers
             {
                 // Get movie details before deletion for the event
                 var movie = await _movieQueryService.GetMovieByIdAsync(id);
-                
+
                 var deleted = await _movieCommandService.DeleteMovieAsync(id);
-                
+
                 if (!deleted)
                 {
                     return NotFound();
                 }
-                
+
                 // Publish MovieDeletedEvent
                 var movieDeletedEvent = new MovieDeletedEvent
                 {
@@ -168,9 +190,9 @@ namespace movielogger.api.controllers
                     MovieTitle = movie.Title,
                     UserId = User.Identity?.Name ?? "Unknown"
                 };
-                
+
                 await _messagePublisher.PublishAsync(movieDeletedEvent);
-                
+
                 return NoContent();
             }
             catch (KeyNotFoundException)
@@ -213,7 +235,7 @@ namespace movielogger.api.controllers
         }
 
         [HttpPost("clear-cache")]
-        public async Task<ActionResult> ClearCache()
+        public ActionResult ClearCache()
         {
             // Note: Cache clearing is now handled by the CachedMoviesService
             // This endpoint can be removed or modified to work with the new architecture
@@ -223,7 +245,7 @@ namespace movielogger.api.controllers
         private string[] GetChangedFields(UpdateMovieRequest request)
         {
             var changedFields = new List<string>();
-            
+
             if (!string.IsNullOrEmpty(request.Title))
                 changedFields.Add("Title");
             if (!string.IsNullOrEmpty(request.Description))
@@ -232,7 +254,7 @@ namespace movielogger.api.controllers
                 changedFields.Add("ReleaseDate");
             if (request.GenreId.HasValue)
                 changedFields.Add("GenreId");
-                
+
             return changedFields.ToArray();
         }
     }

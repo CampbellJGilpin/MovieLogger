@@ -29,4 +29,4 @@ namespace movielogger.messaging.Services
             return Task.CompletedTask;
         }
     }
-} 
+}

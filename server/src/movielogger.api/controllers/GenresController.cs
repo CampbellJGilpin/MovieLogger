@@ -22,13 +22,13 @@ namespace movielogger.api.controllers
             _genresService = genresService;
             _mapper = mapper;
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> GetAllGenres()
         {
             var serviceResponse = await _genresService.GetGenresAsync();
             var mappedResponse = _mapper.Map<List<GenreResponse>>(serviceResponse);
-            
+
             return Ok(mappedResponse);
         }
 
@@ -41,7 +41,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return NotFound($"Genre with ID {genreId} not found.");
                 var mappedResponse = _mapper.Map<GenreResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException)
@@ -55,7 +55,7 @@ namespace movielogger.api.controllers
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
-            
+
             try
             {
                 var mappedRequest = _mapper.Map<GenreDto>(request);
@@ -63,7 +63,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return BadRequest("Failed to create genre");
                 var mappedResponse = _mapper.Map<GenreResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (InvalidOperationException ex)
@@ -77,7 +77,7 @@ namespace movielogger.api.controllers
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
-            
+
             try
             {
                 var mappedRequest = _mapper.Map<GenreDto>(request);
@@ -85,7 +85,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return NotFound($"Genre with ID {genreId} not found.");
                 var mappedResponse = _mapper.Map<GenreResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException)

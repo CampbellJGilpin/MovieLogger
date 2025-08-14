@@ -7,4 +7,4 @@ public interface ICacheService
     Task RemoveAsync(string key);
     Task RemoveByPatternAsync(string pattern);
     Task<bool> ExistsAsync(string key);
-} 
+}

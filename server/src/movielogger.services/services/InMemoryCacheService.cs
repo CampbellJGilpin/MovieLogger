@@ -31,7 +31,7 @@ public class InMemoryCacheService : ICacheService
 
     public Task SetAsync<T>(string key, T value, TimeSpan? expiration = null) where T : class
     {
-        var options = expiration.HasValue 
+        var options = expiration.HasValue
             ? new MemoryCacheEntryOptions
             {
                 SlidingExpiration = expiration.Value,
@@ -58,7 +58,7 @@ public class InMemoryCacheService : ICacheService
         _logger.LogWarning("Pattern-based cache removal is not fully supported in InMemoryCache. " +
                           "Consider using RedisCacheService for production scenarios that require pattern-based cache invalidation. " +
                           "Pattern requested: {Pattern}", pattern);
-        
+
         return Task.CompletedTask;
     }
 
@@ -68,4 +68,4 @@ public class InMemoryCacheService : ICacheService
         _logger.LogDebug("Cache exists check for key: {Key}, exists: {Exists}", key, exists);
         return Task.FromResult(exists);
     }
-} 
+}

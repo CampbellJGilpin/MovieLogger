@@ -9,4 +9,4 @@ namespace movielogger.services.interfaces
         Task<IEnumerable<EventTypeReference>> GetEventTypesAsync();
         Task<IEnumerable<EntityTypeReference>> GetEntityTypesAsync();
     }
-} 
+}

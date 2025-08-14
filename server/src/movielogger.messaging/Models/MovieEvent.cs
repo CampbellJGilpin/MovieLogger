@@ -8,7 +8,7 @@ namespace movielogger.messaging.Models
         public string EventType { get; set; } = string.Empty;
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public string UserId { get; set; } = string.Empty;
-        
+
         [JsonIgnore]
         public string RoutingKey => $"{EventType.ToLower()}.{UserId}";
     }
@@ -19,7 +19,7 @@ namespace movielogger.messaging.Models
         {
             EventType = "MovieAdded";
         }
-        
+
         public int MovieId { get; set; }
         public string MovieTitle { get; set; } = string.Empty;
         public string Genre { get; set; } = string.Empty;
@@ -31,7 +31,7 @@ namespace movielogger.messaging.Models
         {
             EventType = "MovieUpdated";
         }
-        
+
         public int MovieId { get; set; }
         public string MovieTitle { get; set; } = string.Empty;
         public string Genre { get; set; } = string.Empty;
@@ -44,7 +44,7 @@ namespace movielogger.messaging.Models
         {
             EventType = "MovieDeleted";
         }
-        
+
         public int MovieId { get; set; }
         public string MovieTitle { get; set; } = string.Empty;
     }
@@ -55,7 +55,7 @@ namespace movielogger.messaging.Models
         {
             EventType = "MovieFavorited";
         }
-        
+
         public int MovieId { get; set; }
         public string MovieTitle { get; set; } = string.Empty;
         public bool IsFavorited { get; set; }
@@ -67,9 +67,9 @@ namespace movielogger.messaging.Models
         {
             EventType = "MovieAddedToLibrary";
         }
-        
+
         public int MovieId { get; set; }
         public string MovieTitle { get; set; } = string.Empty;
         public bool AddedToLibrary { get; set; }
     }
-} 
+}

@@ -52,4 +52,4 @@ public class GlobalExceptionHandler
 
         await context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
-} 
+}

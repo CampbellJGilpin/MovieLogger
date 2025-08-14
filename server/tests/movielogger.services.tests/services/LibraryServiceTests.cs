@@ -35,7 +35,7 @@ public class LibraryServiceTests : BaseServiceTest
             .With(um => um.Movie, movie)
             .With(um => um.MovieId, movie.Id)
             .Create();
-        
+
         var userMovies = new List<UserMovie> { userMovie }.AsQueryable();
 
         var mockSet = userMovies.BuildMockDbSet();
@@ -60,7 +60,7 @@ public class LibraryServiceTests : BaseServiceTest
             .With(um => um.Movie, movie)
             .With(um => um.MovieId, movie.Id)
             .Create();
-        
+
         var userMovies = new List<UserMovie> { userMovie }.AsQueryable();
 
         var mockSet = userMovies.BuildMockDbSet();
@@ -97,7 +97,7 @@ public class LibraryServiceTests : BaseServiceTest
 
         var userMovies = new List<UserMovie> { favUserMovie, nonFavUserMovie }.AsQueryable();
         var mockSet = userMovies.BuildMockDbSet();
-        _dbContext.UserMovies.Returns(mockSet); 
+        _dbContext.UserMovies.Returns(mockSet);
 
         // Act
         var result = await _service.GetLibraryFavouritesByUserIdAsync(UserId);
@@ -107,7 +107,7 @@ public class LibraryServiceTests : BaseServiceTest
         result.LibraryItems.Should().ContainSingle(i => i.MovieId == favouriteMovie.Id);
         result.LibraryItems.Should().NotContain(i => i.MovieId == notFavouriteMovie.Id);
     }
-    
+
     [Fact]
     public async Task GetLibraryWatchlistByUserIdAsync_ValidId_ReturnsMappedLibrary()
     {
@@ -115,13 +115,13 @@ public class LibraryServiceTests : BaseServiceTest
         var movie = Fixture.Build<Movie>()
             .With(m => m.IsDeleted, false)
             .Create();
-        
+
         var userMovie = Fixture.Build<UserMovie>().With(um => um.UserId, UserId)
             .With(um => um.UpcomingViewDate, DateTime.Today.AddDays(1))
             .With(um => um.Movie, movie)
             .With(um => um.MovieId, movie.Id)
             .Create();
-        
+
         var userMovies = new List<UserMovie> { userMovie }.AsQueryable();
 
         var mockSet = userMovies.BuildMockDbSet();
@@ -158,11 +158,11 @@ public class LibraryServiceTests : BaseServiceTest
         // Setup Movies collection to return our movie
         var users = new List<User> { user }.AsQueryable().BuildMockDbSet();
         _dbContext.Users.Returns(users);
-        
+
         // Setup Movies collection to return our movie
         var userMovies = new List<UserMovie> { userMovie }.AsQueryable().BuildMockDbSet();
         _dbContext.UserMovies.Returns(userMovies);
-        
+
         var added = new List<UserMovie>();
         _dbContext.UserMovies.When(x => x.Add(Arg.Any<UserMovie>())).Do(x => added.Add(x.Arg<UserMovie>()));
         _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
@@ -199,7 +199,7 @@ public class LibraryServiceTests : BaseServiceTest
         // Setup Movies collection to return our movie
         var users = new List<User> { user }.AsQueryable().BuildMockDbSet();
         _dbContext.Users.Returns(users);
-        
+
         var dto = _mapper.Map<LibraryItemDto>(userMovie);
         dto.Favourite = true;
 

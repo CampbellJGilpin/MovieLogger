@@ -78,7 +78,8 @@ public class GenresServiceTests : BaseServiceTest
         Genre? addedGenre = null;
 
         var mockSet = new List<Genre>().AsQueryable().BuildMockDbSet();
-        mockSet.Add(Arg.Do<Genre>(g => {
+        mockSet.Add(Arg.Do<Genre>(g =>
+        {
             g.Id = 1;
             addedGenre = g;
         }));
@@ -88,14 +89,14 @@ public class GenresServiceTests : BaseServiceTest
 
         // Act 
         var result = await _service.CreateGenreAsync(genreDto);
-        
+
         // Assert
         result.Should().NotBeNull();
         result.Title.Should().Be(genreDto.Title);
-        
+
         addedGenre.Should().NotBeNull();
-        addedGenre.Id.Should().Be(1); 
-        
+        addedGenre.Id.Should().Be(1);
+
         await _dbContext.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
@@ -125,7 +126,7 @@ public class GenresServiceTests : BaseServiceTest
         _dbContext.Genres.FindAsync(Arg.Any<int>()).Returns((Genre?)null);
 
         var dto = Fixture.Create<GenreDto>();
-        
+
         // Act 
         var act = async () => await _service.UpdateGenreAsync(123, dto);
 

@@ -24,7 +24,7 @@ public class AccountsService : IAccountsService
         _mapper = mapper;
         _configuration = configuration;
     }
-    
+
     public async Task<(User user, string token)> AuthenticateUserAsync(string email, string password)
     {
         try

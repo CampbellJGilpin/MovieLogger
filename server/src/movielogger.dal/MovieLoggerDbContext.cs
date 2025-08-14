@@ -23,7 +23,7 @@ public class MovieLoggerDbContext : DbContext, IAssessmentDbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.HasDefaultSchema("public");
-        
+
         // User
         modelBuilder.Entity<User>(entity =>
         {
@@ -121,12 +121,12 @@ public class MovieLoggerDbContext : DbContext, IAssessmentDbContext
             entity.Property(e => e.Timestamp).IsRequired();
             entity.Property(e => e.AdditionalData).HasMaxLength(1000);
             entity.Property(e => e.EntityType).HasMaxLength(50);
-            
+
             // Index for efficient querying
             entity.HasIndex(e => e.Timestamp);
             entity.HasIndex(e => e.EventType);
             entity.HasIndex(e => e.UserId);
-            
+
             // Foreign key relationship to EventTypeReference
             entity.HasOne(a => a.EventTypeReference)
                   .WithMany(et => et.AuditLogs)

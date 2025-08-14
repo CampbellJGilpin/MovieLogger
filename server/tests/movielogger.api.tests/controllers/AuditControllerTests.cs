@@ -15,11 +15,11 @@ public class AuditControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/audit/logs");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var logs = await response.Content.ReadFromJsonAsync<IEnumerable<AuditLog>>();
-        
+
         logs.Should().NotBeNull();
         logs!.Should().HaveCountGreaterThanOrEqualTo(0);
     }
@@ -29,25 +29,25 @@ public class AuditControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/audit/logs?page=1&pageSize=5");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var logs = await response.Content.ReadFromJsonAsync<IEnumerable<AuditLog>>();
-        
+
         logs.Should().NotBeNull();
         logs!.Should().HaveCountLessThanOrEqualTo(5);
     }
-    
+
     [Fact]
     public async Task GetAuditLogs_WithEntityTypeFilter_ReturnsFilteredLogs()
     {
         // Act
         var response = await _client.GetAsync("/api/audit/logs?entityType=Movie");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var logs = await response.Content.ReadFromJsonAsync<IEnumerable<AuditLog>>();
-        
+
         logs.Should().NotBeNull();
         // Note: This test assumes there are logs with Movie entity type
     }
@@ -57,11 +57,11 @@ public class AuditControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/audit/logs?userId=1");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var logs = await response.Content.ReadFromJsonAsync<IEnumerable<AuditLog>>();
-        
+
         logs.Should().NotBeNull();
     }
 
@@ -70,11 +70,11 @@ public class AuditControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/audit/entity-types");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var entityTypes = await response.Content.ReadFromJsonAsync<IEnumerable<EntityTypeReference>>();
-        
+
         entityTypes.Should().NotBeNull();
         entityTypes!.Should().HaveCountGreaterThan(0);
         entityTypes.Should().Contain(et => et.Name == "Movie");
@@ -87,7 +87,7 @@ public class AuditControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/audit/logs?page=0&pageSize=10");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -97,8 +97,8 @@ public class AuditControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/audit/logs?page=1&pageSize=0");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-} 
+}

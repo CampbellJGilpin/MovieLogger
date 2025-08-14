@@ -58,9 +58,9 @@ export default function AllMovies() {
     window.scrollTo(0, 0);
   };
 
-  const handleAddMovie = async (movieData: FormData) => {
+  const handleAddMovie = async (movieData: FormData, onUploadProgress?: (progressEvent: { loaded: number; total?: number }) => void) => {
     try {
-      await movieService.createMovie(movieData);
+      await movieService.createMovie(movieData, onUploadProgress);
       await loadMovies();
       setIsAddMovieModalOpen(false);
     } catch (err) {

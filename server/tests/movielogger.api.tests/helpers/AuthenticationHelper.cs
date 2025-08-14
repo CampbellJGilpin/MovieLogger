@@ -41,4 +41,4 @@ public static class AuthenticationHelper
     {
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
     }
-} 
+}

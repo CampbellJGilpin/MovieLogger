@@ -17,4 +17,4 @@ namespace movielogger.messaging.Services
             // Do nothing for testing
         }
     }
-} 
+}

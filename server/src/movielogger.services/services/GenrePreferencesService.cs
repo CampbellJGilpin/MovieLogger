@@ -65,8 +65,8 @@ public class GenrePreferencesService : IGenrePreferencesService
         // Calculate percentages
         foreach (var genre in genreStats)
         {
-            genre.PercentageOfTotalWatches = totalWatches > 0 
-                ? Math.Round((double)genre.WatchCount / totalWatches * 100, 1) 
+            genre.PercentageOfTotalWatches = totalWatches > 0
+                ? Math.Round((double)genre.WatchCount / totalWatches * 100, 1)
                 : 0;
         }
 
@@ -139,4 +139,4 @@ public class GenrePreferencesService : IGenrePreferencesService
 
         return result;
     }
-} 
+}

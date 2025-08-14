@@ -31,7 +31,7 @@ namespace movielogger.api.controllers
             {
                 var serviceResponse = await _reviewsService.GetAllReviewsByUserIdAsync(userId);
                 var mappedResponse = _mapper.Map<List<ReviewResponse>>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException)
@@ -48,7 +48,7 @@ namespace movielogger.api.controllers
             {
                 var serviceResponse = await _reviewsService.GetMovieReviewsByUserIdAsync(movieId, userId);
                 var mappedResponse = _mapper.Map<List<ReviewResponse>>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException ex)
@@ -63,15 +63,15 @@ namespace movielogger.api.controllers
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
-            
-            try 
+
+            try
             {
                 var reviewRequest = _mapper.Map<ReviewDto>(request);
                 var serviceResponse = await _reviewsService.CreateMovieReviewAsync(movieId, request.UserId, reviewRequest);
                 if (serviceResponse == null)
                     return BadRequest("Invalid movie or user ID");
                 var mappedResponse = _mapper.Map<ReviewResponse>(serviceResponse);
-                
+
                 return CreatedAtAction(nameof(GetUserReviews), new { userId = request.UserId }, mappedResponse);
             }
             catch (KeyNotFoundException ex)
@@ -86,7 +86,7 @@ namespace movielogger.api.controllers
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
-            
+
             try
             {
                 var reviewRequest = _mapper.Map<ReviewDto>(request);
@@ -94,7 +94,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return NotFound("Invalid viewing ID");
                 var mappedResponse = _mapper.Map<ReviewResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException ex)
@@ -108,7 +108,7 @@ namespace movielogger.api.controllers
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
-            
+
             try
             {
                 var reviewRequest = _mapper.Map<ReviewDto>(request);
@@ -116,7 +116,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return NotFound($"Review with ID {reviewId} not found.");
                 var mappedResponse = _mapper.Map<ReviewResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException)
@@ -134,7 +134,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return NotFound($"Review with ID {reviewId} not found.");
                 var mappedResponse = _mapper.Map<ReviewResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException)

@@ -26,14 +26,14 @@ public class MoviesServiceFactory
     public IMoviesService Create()
     {
         var useCaching = _configuration.GetValue<bool>("Caching:EnableMoviesCaching", true);
-        
+
         if (useCaching)
         {
             _logger.LogInformation("Using cached MoviesService");
             return _cachedMoviesService;
         }
-        
+
         _logger.LogInformation("Using non-cached MoviesService");
         return _baseMoviesService;
     }
-} 
+}

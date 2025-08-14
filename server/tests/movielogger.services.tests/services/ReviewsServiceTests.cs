@@ -13,12 +13,12 @@ namespace movielogger.services.tests.services;
 public class ReviewsServiceTests : BaseServiceTest
 {
     IReviewsService _service;
-    
+
     public ReviewsServiceTests()
     {
         _service = new ReviewsService(_dbContext, _mapper);
     }
-    
+
     [Fact]
     public async Task GetAllReviewsByUserIdAsync_ReturnsMappedReviews()
     {
@@ -26,16 +26,16 @@ public class ReviewsServiceTests : BaseServiceTest
         var userId = 5;
 
         var movie = Fixture.Create<Movie>();
-        
+
         var userMovie = Fixture.Build<UserMovie>()
             .With(um => um.UserId, userId)
             .With(um => um.Movie, movie)
             .Create();
-        
+
         var viewing = Fixture.Build<Viewing>()
             .With(v => v.UserMovie, userMovie)
             .Create();
-        
+
         var reviews = Fixture.Build<Review>()
             .With(r => r.Viewing, viewing)
             .CreateMany(3)
@@ -69,17 +69,17 @@ public class ReviewsServiceTests : BaseServiceTest
 
         _dbContext.Reviews.Returns(mockSet);
         _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
-        
+
         // Act
         var result = await _service.CreateReviewAsync(viewingId, reviewDto);
-        
+
         // Assert
         result.Should().NotBeNull();
         result.ReviewText.Should().Be(reviewDto.ReviewText);
-        
+
         addedReview.Should().NotBeNull();
         addedReview.Id.Should().Be(1);
-        
+
         await _dbContext.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
@@ -90,22 +90,22 @@ public class ReviewsServiceTests : BaseServiceTest
         var reviewDto = Fixture.Build<ReviewDto>()
             .With(x => x.Id, 1)
             .Create();
-    
+
         var existingReview = Fixture.Build<Review>()
             .With(x => x.Id, reviewDto.Id)
             .Create();
-    
+
         var reviews = new List<Review> { existingReview }.AsQueryable();
         var mockSet = reviews.BuildMockDbSet();
-        
+
         _dbContext.Reviews.Returns(mockSet);
         _dbContext.Reviews.FindAsync(reviewDto.Id)!.Returns(new ValueTask<Review>(existingReview));
 
         _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
-        
+
         // Act
         var result = await _service.UpdateReviewAsync(reviewDto.Id, reviewDto);
-        
+
         // Assert
         result.Should().NotBeNull();
         result.Id.Should().Be(reviewDto.Id);

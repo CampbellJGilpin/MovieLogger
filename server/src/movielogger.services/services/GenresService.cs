@@ -45,9 +45,9 @@ public class GenresService : IGenresService
         }
 
         var genre = _mapper.Map<Genre>(genreDto);
-        
+
         genre.Id = 0;
-        
+
         _db.Genres.Add(genre);
         await _db.SaveChangesAsync();
 
@@ -70,7 +70,7 @@ public class GenresService : IGenresService
         }
 
         genre.Id = genreId;
-        
+
         _mapper.Map(genreDto, genre);
         await _db.SaveChangesAsync();
 

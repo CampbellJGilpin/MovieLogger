@@ -15,4 +15,4 @@ public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRe
             .MinimumLength(6).WithMessage("New password must be at least 6 characters long")
             .NotEqual(x => x.CurrentPassword).WithMessage("New password must be different from current password");
     }
-} 
+}

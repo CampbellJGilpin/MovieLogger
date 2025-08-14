@@ -9,36 +9,36 @@ public class ServicesMappingProfile : Profile
     public ServicesMappingProfile()
     {
         CreateMap<Genre, GenreDto>();
-        
+
         CreateMap<GenreDto, Genre>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Movies, opt => opt.Ignore());
-        
+
         CreateMap<Movie, MovieDto>()
             .ForMember(dest => dest.PosterPath, opt => opt.MapFrom(src => src.PosterPath));
 
         CreateMap<MovieDto, Movie>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Genre, opt => opt.Ignore()) 
+            .ForMember(dest => dest.Genre, opt => opt.Ignore())
             .ForMember(dest => dest.UserMovies, opt => opt.Ignore())
             .ForMember(dest => dest.PosterPath, opt => opt.MapFrom(src => src.PosterPath));
-        
+
         CreateMap<Review, ReviewDto>()
             .ForMember(dest => dest.DateViewed, opt => opt.MapFrom(src => src.Viewing.DateViewed))
             .ForMember(dest => dest.MovieTitle, opt => opt.MapFrom(src => src.Viewing.UserMovie.Movie.Title));
-        
+
         CreateMap<ReviewDto, Review>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.ViewingId, opt => opt.Ignore());
-        
+
         CreateMap<Viewing, ViewingDto>()
             .ForMember(dest => dest.Movie, opt => opt.MapFrom(src => src.UserMovie.Movie))
             .ForMember(dest => dest.MovieId, opt => opt.MapFrom(src => src.UserMovie.MovieId))
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserMovie.UserId));
         CreateMap<ViewingDto, Viewing>();
-        
+
         CreateMap<User, UserDto>().ReverseMap();
-        
+
         CreateMap<LibraryItemDto, UserMovie>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.User, opt => opt.Ignore())

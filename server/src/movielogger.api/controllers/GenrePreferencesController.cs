@@ -36,7 +36,7 @@ public class GenrePreferencesController : ControllerBase
 
             var preferences = await _genrePreferencesService.GetUserGenrePreferencesAsync(userId);
             var response = _mapper.Map<GenrePreferencesSummaryResponse>(preferences);
-            
+
             return Ok(response);
         }
         catch (KeyNotFoundException ex)
@@ -67,7 +67,7 @@ public class GenrePreferencesController : ControllerBase
 
             var genres = await _genrePreferencesService.GetTopGenresByWatchCountAsync(userId, count);
             var response = _mapper.Map<List<GenrePreferenceResponse>>(genres);
-            
+
             return Ok(response);
         }
         catch (KeyNotFoundException ex)
@@ -98,7 +98,7 @@ public class GenrePreferencesController : ControllerBase
 
             var genres = await _genrePreferencesService.GetTopGenresByRatingAsync(userId, count);
             var response = _mapper.Map<List<GenrePreferenceResponse>>(genres);
-            
+
             return Ok(response);
         }
         catch (KeyNotFoundException ex)
@@ -129,7 +129,7 @@ public class GenrePreferencesController : ControllerBase
 
             var genres = await _genrePreferencesService.GetLeastWatchedGenresAsync(userId, count);
             var response = _mapper.Map<List<GenrePreferenceResponse>>(genres);
-            
+
             return Ok(response);
         }
         catch (KeyNotFoundException ex)
@@ -159,7 +159,7 @@ public class GenrePreferencesController : ControllerBase
             }
 
             var trends = await _genrePreferencesService.GetGenreWatchTrendsAsync(userId, months);
-            
+
             return Ok(trends);
         }
         catch (KeyNotFoundException ex)
@@ -171,4 +171,4 @@ public class GenrePreferencesController : ControllerBase
             return StatusCode(500, "An error occurred while retrieving genre trends");
         }
     }
-} 
+}

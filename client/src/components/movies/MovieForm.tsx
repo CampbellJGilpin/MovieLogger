@@ -2,16 +2,18 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { FormEvent } from 'react';
 import type { Movie, Genre } from '../../types';
 import * as movieService from '../../services/movieService';
+import UploadProgress from '../common/UploadProgress';
 
 interface MovieFormProps {
   movie?: Movie;
-  onSubmit: (movieData: FormData) => void;
+  onSubmit: (movieData: FormData, onUploadProgress?: (progressEvent: { loaded: number; total?: number }) => void) => void;
   onCancel: () => void;
 }
 
 interface ValidationErrors {
   title?: string;
   description?: string;
+  poster?: string;
 }
 
 export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps) {
@@ -23,6 +25,10 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [poster, setPoster] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [currentPosterUrl, setCurrentPosterUrl] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadGenres = useCallback(async () => {
@@ -49,6 +55,16 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
       setDescription(movie.description);
       setReleaseDate(new Date(movie.releaseDate).toISOString().split('T')[0]);
       setGenreId(movie.genre.id);
+      
+      // Set current poster URL if exists
+      if (movie.posterPath) {
+        const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5049';
+        const baseUrl = apiBaseUrl.replace('/api', '');
+        const fullPosterUrl = movie.posterPath.startsWith('http') 
+          ? movie.posterPath 
+          : `${baseUrl}${movie.posterPath}`;
+        setCurrentPosterUrl(fullPosterUrl);
+      }
     }
   }, [movie]);
 
@@ -69,12 +85,72 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
     return Object.keys(newErrors).length === 0;
   };
 
+  const validateFile = (file: File): string | null => {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    
+    if (file.size > maxSize) {
+      return 'File size must be less than 5MB';
+    }
+    
+    if (!allowedTypes.includes(file.type)) {
+      return 'Only JPEG, PNG, and WebP images are allowed';
+    }
+    
+    return null;
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setPoster(e.target.files[0]);
+    const selectedFile = e.target.files?.[0];
+    
+    // Clear previous errors
+    if (errors.poster) {
+      setErrors(prev => ({ ...prev, poster: undefined }));
+    }
+    
+    if (selectedFile) {
+      const validationError = validateFile(selectedFile);
+      if (validationError) {
+        setErrors(prev => ({ ...prev, poster: validationError }));
+        setPoster(null);
+        setPreviewUrl(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+      
+      setPoster(selectedFile);
+      
+      // Create preview URL
+      const objectUrl = URL.createObjectURL(selectedFile);
+      setPreviewUrl(objectUrl);
     } else {
       setPoster(null);
+      setPreviewUrl(null);
     }
+  };
+
+  const handleRemovePoster = () => {
+    setPoster(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Clean up preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  const handleUploadProgress = (progressEvent: { loaded: number; total?: number }) => {
+    const progress = progressEvent.total ? (progressEvent.loaded / progressEvent.total) * 100 : 0;
+    setUploadProgress(progress);
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -94,12 +170,17 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
     formData.append('isDeleted', 'false');
     if (poster) {
       formData.append('poster', poster);
+      setIsUploading(true);
+      setUploadProgress(0);
     }
 
     try {
-      onSubmit(formData);
+      onSubmit(formData, poster ? handleUploadProgress : undefined);
     } catch (error) {
       console.error('Error submitting form:', error);
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -197,14 +278,55 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
         <label htmlFor="poster" className="block text-sm font-medium text-gray-700">
           Poster Image
         </label>
+        
+        {/* Current/Preview Image Display */}
+        {(previewUrl || currentPosterUrl) && (
+          <div className="mt-2 mb-3">
+            <div className="relative inline-block">
+              <img
+                src={previewUrl || currentPosterUrl || ''}
+                alt="Poster preview"
+                className="h-32 w-24 object-cover rounded-lg border border-gray-200 shadow-sm"
+              />
+              <button
+                type="button"
+                onClick={handleRemovePoster}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                title="Remove poster"
+              >
+                ×
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              {previewUrl ? 'New poster selected' : 'Current poster'}
+            </p>
+          </div>
+        )}
+
         <input
           type="file"
           id="poster"
           name="poster"
-          accept="image/*"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
           ref={fileInputRef}
           onChange={handleFileChange}
-          className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          className={`mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
+            errors.poster ? 'border-red-300' : ''
+          }`}
+        />
+        
+        <p className="mt-1 text-xs text-gray-500">
+          Maximum file size: 5MB. Supported formats: JPEG, PNG, WebP
+        </p>
+        
+        {errors.poster && (
+          <p className="mt-1 text-sm text-red-600">{errors.poster}</p>
+        )}
+        
+        <UploadProgress
+          progress={uploadProgress}
+          isUploading={isUploading}
+          fileName={poster?.name}
         />
       </div>
 

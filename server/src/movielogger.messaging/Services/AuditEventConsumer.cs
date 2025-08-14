@@ -22,7 +22,7 @@ namespace movielogger.messaging.Services
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
-            
+
             // Create the underlying RabbitMQ consumer
             _consumer = new RabbitMQConsumer(config, rabbitMQLogger);
             _consumer.MessageReceived += OnMessageReceived;
@@ -45,7 +45,7 @@ namespace movielogger.messaging.Services
             // Create a new scope for each message to avoid DbContext concurrency issues
             using var scope = _serviceProvider.CreateScope();
             var auditService = scope.ServiceProvider.GetRequiredService<IAuditService>();
-            
+
             try
             {
                 _logger.LogInformation("Processing audit event: {EventType} for user {UserId}", e.EventType, e.UserId);
@@ -136,4 +136,4 @@ namespace movielogger.messaging.Services
             _consumer?.Dispose();
         }
     }
-} 
+}

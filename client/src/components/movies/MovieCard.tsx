@@ -15,8 +15,28 @@ export default function MovieCard({
     return null;
   }
 
+  // Helper to get full poster URL
+  const getPosterUrl = () => {
+    if (!movie.posterPath) return undefined;
+    if (movie.posterPath.startsWith('http')) return movie.posterPath;
+    // Static files are served from the backend root, not the /api endpoint
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5049';
+    const baseUrl = apiBaseUrl.replace('/api', ''); // Remove /api suffix for static files
+    return `${baseUrl}${movie.posterPath}`;
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Poster Image */}
+      {getPosterUrl() && (
+        <div className="aspect-[2/3] bg-gray-100 overflow-hidden">
+          <img
+            src={getPosterUrl()}
+            alt={movie.title + ' poster'}
+            className="object-cover w-full h-full"
+          />
+        </div>
+      )}
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold text-gray-900">{movie.title}</h3>

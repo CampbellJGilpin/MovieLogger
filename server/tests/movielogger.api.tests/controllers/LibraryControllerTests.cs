@@ -16,11 +16,11 @@ public class LibraryControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/users/1/library");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var library = await response.Content.ReadFromJsonAsync<LibraryResponse>();
-        
+
         library.Should().NotBeNull();
         library!.LibraryItems.Should().NotBeNull();
         library.LibraryItems.Should().HaveCountGreaterThanOrEqualTo(0);
@@ -31,7 +31,7 @@ public class LibraryControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/users/999/library");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -47,14 +47,14 @@ public class LibraryControllerTests : BaseTestController
             OwnsMovie = false,
             UpcomingViewDate = DateTime.Now.AddDays(7)
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/users/1/library", request);
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var libraryItem = await response.Content.ReadFromJsonAsync<LibraryItemResponse>();
-        
+
         libraryItem.Should().NotBeNull();
         libraryItem!.MovieId.Should().Be(request.MovieId);
         libraryItem.Favourite.Should().Be("true"); // String representation
@@ -71,10 +71,10 @@ public class LibraryControllerTests : BaseTestController
             IsFavorite = false,
             OwnsMovie = false
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/users/1/library", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -89,10 +89,10 @@ public class LibraryControllerTests : BaseTestController
             IsFavorite = false,
             OwnsMovie = false
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/users/999/library", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -107,20 +107,20 @@ public class LibraryControllerTests : BaseTestController
             IsFavorite = false,
             OwnsMovie = false
         };
-        
+
         await _client.PostAsJsonAsync("/api/users/1/library", addRequest);
-        
+
         // Act - Remove the movie from library
         var response = await _client.DeleteAsync("/api/users/1/library/2");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
+
         // Verify the movie is removed
         var libraryResponse = await _client.GetAsync("/api/users/1/library");
         libraryResponse.EnsureSuccessStatusCode();
         var library = await libraryResponse.Content.ReadFromJsonAsync<LibraryResponse>();
-        
+
         library!.LibraryItems.Should().NotContain(item => item.MovieId == 2);
     }
 
@@ -129,7 +129,7 @@ public class LibraryControllerTests : BaseTestController
     {
         // Act
         var response = await _client.DeleteAsync("/api/users/1/library/999");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -144,9 +144,9 @@ public class LibraryControllerTests : BaseTestController
             IsFavorite = false,
             OwnsMovie = false
         };
-        
+
         await _client.PostAsJsonAsync("/api/users/1/library", addRequest);
-        
+
         // Arrange - Update the library item
         var updateRequest = new UpdateLibraryItemRequest
         {
@@ -154,14 +154,14 @@ public class LibraryControllerTests : BaseTestController
             OwnsMovie = true,
             UpcomingViewDate = DateTime.Now.AddDays(14)
         };
-        
+
         // Act
         var response = await _client.PutAsJsonAsync("/api/users/1/library/3", updateRequest);
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var updatedItem = await response.Content.ReadFromJsonAsync<LibraryItemResponse>();
-        
+
         updatedItem.Should().NotBeNull();
         updatedItem!.Favourite.Should().Be("true"); // String representation
         updatedItem.InLibrary.Should().Be("true"); // String representation
@@ -177,10 +177,10 @@ public class LibraryControllerTests : BaseTestController
             IsFavorite = true,
             OwnsMovie = false
         };
-        
+
         // Act
         var response = await _client.PutAsJsonAsync("/api/users/1/library/999", updateRequest);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -195,16 +195,16 @@ public class LibraryControllerTests : BaseTestController
             IsFavorite = true,
             OwnsMovie = false
         };
-        
+
         await _client.PostAsJsonAsync("/api/users/1/library", addRequest);
-        
+
         // Act
         var response = await _client.GetAsync("/api/users/1/library/4");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var libraryItem = await response.Content.ReadFromJsonAsync<LibraryItemResponse>();
-        
+
         libraryItem.Should().NotBeNull();
         libraryItem!.MovieId.Should().Be(4);
         libraryItem.Favourite.Should().Be("true");
@@ -215,7 +215,7 @@ public class LibraryControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/users/1/library/999");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }

@@ -12,17 +12,17 @@ using NSubstitute;
 namespace movielogger.api.tests.controllers;
 
 [Collection("IntegrationTests")]
-public class ReviewsControllerTests  : BaseTestController
+public class ReviewsControllerTests : BaseTestController
 {
     [Fact]
     public async Task GetUserReviews_ReturnsSeededReviews()
     {
         // Act
         var response = await _client.GetAsync("/api/users/1/reviews");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var reviews = await response.Content.ReadFromJsonAsync<List<ReviewResponse>>();
         reviews.Should().HaveCountGreaterThanOrEqualTo(2);
     }
@@ -32,7 +32,7 @@ public class ReviewsControllerTests  : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/users/999/reviews");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -42,11 +42,11 @@ public class ReviewsControllerTests  : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/reviews/1");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var review = await response.Content.ReadFromJsonAsync<ReviewResponse>();
-        
+
         review.Should().NotBeNull();
         review!.Id.Should().Be(1);
         review.Score.Should().BeGreaterThan(0);
@@ -58,17 +58,17 @@ public class ReviewsControllerTests  : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/reviews/999");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
-    
+
     [Fact]
     public async Task CreateReview_ReturnsCreatedReview()
     {
         // Arrange
         const int viewingId = 1;
-        
+
         var request = new CreateReviewRequest
         {
             Score = 4,
@@ -93,7 +93,7 @@ public class ReviewsControllerTests  : BaseTestController
     {
         // Arrange
         const int viewingId = 999; // Non-existent viewing
-        
+
         var request = new CreateReviewRequest
         {
             Score = 4,
@@ -112,7 +112,7 @@ public class ReviewsControllerTests  : BaseTestController
     {
         // Arrange
         const int viewingId = 1;
-        
+
         var request = new CreateReviewRequest
         {
             Score = 6, // Invalid score (should be 1-5)
@@ -131,7 +131,7 @@ public class ReviewsControllerTests  : BaseTestController
     {
         // Arrange
         const int viewingId = 1;
-        
+
         var request = new CreateReviewRequest
         {
             Score = 4,
@@ -144,7 +144,7 @@ public class ReviewsControllerTests  : BaseTestController
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-    
+
     [Fact]
     public async Task UpdateReview_ReturnsUpdatedReview()
     {
@@ -210,10 +210,10 @@ public class ReviewsControllerTests  : BaseTestController
     {
         // Act
         var response = await _client.DeleteAsync("/api/reviews/2"); // Assuming review 2 exists
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
+
         // Verify review is deleted
         var getResponse = await _client.GetAsync("/api/reviews/2");
         getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -224,7 +224,7 @@ public class ReviewsControllerTests  : BaseTestController
     {
         // Act
         var response = await _client.DeleteAsync("/api/reviews/999");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -234,11 +234,11 @@ public class ReviewsControllerTests  : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/users/1/reviews?score=4");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var reviews = await response.Content.ReadFromJsonAsync<List<ReviewResponse>>();
-        
+
         reviews.Should().NotBeNull();
         reviews!.Should().OnlyContain(r => r.Score == 4);
     }
@@ -249,11 +249,11 @@ public class ReviewsControllerTests  : BaseTestController
         // Act
         var today = DateTime.Now.ToString("yyyy-MM-dd");
         var response = await _client.GetAsync($"/api/users/1/reviews?reviewDate={today}");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var reviews = await response.Content.ReadFromJsonAsync<List<ReviewResponse>>();
-        
+
         reviews.Should().NotBeNull();
         // Note: This test assumes there are reviews on the current date
         // In a real scenario, you might seed specific review data for testing

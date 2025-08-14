@@ -23,7 +23,7 @@ namespace movielogger.api.controllers
             _libraryService = libraryService;
             _mapper = mapper;
         }
-        
+
         [HttpGet("{userId}/library")]
         public async Task<IActionResult> GetLibrary(int userId)
         {
@@ -31,7 +31,7 @@ namespace movielogger.api.controllers
             {
                 var serviceResponse = await _libraryService.GetLibraryByUserIdAsync(userId);
                 var mappedResponse = _mapper.Map<LibraryResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException)
@@ -50,7 +50,7 @@ namespace movielogger.api.controllers
                 {
                     return NotFound($"Library item not found for user {userId} and movie {movieId}");
                 }
-                
+
                 var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
                 return Ok(mappedResponse);
             }
@@ -73,7 +73,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return BadRequest("Invalid user or movie ID");
                 var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException ex)
@@ -92,7 +92,7 @@ namespace movielogger.api.controllers
         {
             // Set the MovieId from the route parameter
             request.MovieId = movieId;
-            
+
             var errorResult = request.Validate();
             if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
 
@@ -103,7 +103,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return NotFound("Library item not found");
                 var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException ex)
@@ -129,7 +129,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return BadRequest("Invalid user or movie ID");
                 var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException ex)
@@ -155,7 +155,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return NotFound("Library item not found");
                 var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException ex)
@@ -181,7 +181,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return BadRequest("Invalid user or movie ID");
                 var mappedResponse = _mapper.Map<LibraryItemResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException ex)
@@ -200,7 +200,7 @@ namespace movielogger.api.controllers
                 {
                     return NotFound($"Library item not found for user {userId} and movie {movieId}");
                 }
-                
+
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -215,7 +215,7 @@ namespace movielogger.api.controllers
             try
             {
                 var (items, totalCount, totalPages) = await _libraryService.GetLibraryByUserIdPaginatedAsync(userId, page, pageSize);
-                
+
                 var response = new PaginatedResponse<LibraryItemResponse>
                 {
                     Items = _mapper.Map<IEnumerable<LibraryItemResponse>>(items),
@@ -224,7 +224,7 @@ namespace movielogger.api.controllers
                     TotalCount = totalCount,
                     TotalPages = totalPages
                 };
-                
+
                 return Ok(response);
             }
             catch (KeyNotFoundException)
@@ -239,7 +239,7 @@ namespace movielogger.api.controllers
             try
             {
                 var (items, totalCount, totalPages) = await _libraryService.GetLibraryFavouritesByUserIdPaginatedAsync(userId, page, pageSize);
-                
+
                 var response = new PaginatedResponse<LibraryItemResponse>
                 {
                     Items = _mapper.Map<IEnumerable<LibraryItemResponse>>(items),
@@ -248,7 +248,7 @@ namespace movielogger.api.controllers
                     TotalCount = totalCount,
                     TotalPages = totalPages
                 };
-                
+
                 return Ok(response);
             }
             catch (KeyNotFoundException)

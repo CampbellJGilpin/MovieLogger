@@ -48,7 +48,7 @@ public class MoviesServiceTests : BaseServiceTest
         // Arrange
         const int pageNumber = 1;
         const int movieCount = 10;
-        
+
         var genre = Fixture.Create<Genre>();
 
         var deletedMovies = Fixture.Build<Movie>()
@@ -66,7 +66,7 @@ public class MoviesServiceTests : BaseServiceTest
         var allMovies = new List<Movie>();
         allMovies.AddRange(deletedMovies);
         allMovies.AddRange(activeMovies);
-        
+
         var movieEntities = allMovies.AsQueryable();
         var mockSet = movieEntities.BuildMockDbSet();
 

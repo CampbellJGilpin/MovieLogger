@@ -6,4 +6,4 @@ public class UserMovieResponse : MovieResponse
 {
     public bool OwnsMovie { get; set; }
     public bool IsFavourite { get; set; }
-} 
+}

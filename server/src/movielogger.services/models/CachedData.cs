@@ -11,4 +11,4 @@ public class CachedUserMoviesResult
     public IEnumerable<movielogger.dal.dtos.UserMovieDto> Items { get; set; } = new List<movielogger.dal.dtos.UserMovieDto>();
     public int TotalCount { get; set; }
     public int TotalPages { get; set; }
-} 
+}

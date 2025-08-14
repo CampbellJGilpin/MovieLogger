@@ -87,7 +87,7 @@ namespace movielogger.api.controllers
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            
+
             var errorResult = request.Validate();
             if (errorResult is not null)
             {

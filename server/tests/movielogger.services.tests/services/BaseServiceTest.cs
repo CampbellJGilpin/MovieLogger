@@ -20,9 +20,9 @@ public abstract class BaseServiceTest
             .ToList()
             .ForEach(b => Fixture.Behaviors.Remove(b));
         Fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-        
+
         _dbContext = Substitute.For<IAssessmentDbContext>();
-        
+
         var config = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile<ServicesMappingProfile>();

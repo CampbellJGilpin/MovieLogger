@@ -70,11 +70,11 @@ public class Program
         if (!isTesting)
         {
             var dbConnection = "DATABASE_URL".GetValue();
-            
+
             builder.Services.AddDbContext<MovieLoggerDbContext>(options =>
                 options.UseNpgsql(dbConnection ?? builder.Configuration.GetConnectionString("DefaultConnection")));
-            
-            builder.Services.AddScoped<IAssessmentDbContext>(provider => 
+
+            builder.Services.AddScoped<IAssessmentDbContext>(provider =>
                 provider.GetRequiredService<MovieLoggerDbContext>());
         }
 
@@ -130,14 +130,14 @@ public class Program
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
         builder.Services.AddEndpointsApiExplorer();
-        
+
         // Add Health Checks
         builder.Services.AddHealthChecks();
 
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "MovieLogger API", Version = "v1" });
-            
+
             // Configure Swagger to use JWT
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
@@ -177,9 +177,23 @@ public class Program
         {
             app.UseHttpsRedirection();
         }
-        
+
         // Serve static files from wwwroot (including /uploads)
         app.UseStaticFiles();
+
+        // In development, also serve files from the server root wwwroot directory
+        if (app.Environment.IsDevelopment())
+        {
+            var serverRootPath = Path.GetDirectoryName(Path.GetDirectoryName(app.Environment.ContentRootPath));
+            var wwwrootPath = Path.Combine(serverRootPath ?? app.Environment.ContentRootPath, "wwwroot");
+            if (Directory.Exists(wwwrootPath))
+            {
+                app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwrootPath)
+                });
+            }
+        }
         app.UseCors();
         app.UseMiddleware<GlobalExceptionHandler>();
         app.UseAuthentication();

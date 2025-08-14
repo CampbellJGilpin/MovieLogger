@@ -24,4 +24,4 @@ namespace movielogger.dal.entities
         Viewing = 5,
         LibraryItem = 6
     }
-} 
+}

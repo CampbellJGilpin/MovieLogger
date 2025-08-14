@@ -48,7 +48,7 @@ public class ReviewsService : IReviewsService
 
         var review = _mapper.Map<Review>(dto);
         review.ViewingId = viewingId;
-        
+
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
@@ -62,7 +62,7 @@ public class ReviewsService : IReviewsService
         {
             throw new KeyNotFoundException($"Review with ID {reviewId} not found.");
         }
-        
+
         _mapper.Map(dto, review);
         await _db.SaveChangesAsync();
 
@@ -71,7 +71,7 @@ public class ReviewsService : IReviewsService
             .ThenInclude(v => v.UserMovie)
             .ThenInclude(x => x.Movie)
             .FirstOrDefaultAsync(v => v.Id == reviewId);
-        
+
         return _mapper.Map<ReviewDto>(savedReview);
     }
 
@@ -103,8 +103,8 @@ public class ReviewsService : IReviewsService
         }
 
         // Create a viewing
-        var viewing = new Viewing 
-        { 
+        var viewing = new Viewing
+        {
             UserMovieId = userMovie.Id,
             DateViewed = DateTime.UtcNow
         };
@@ -114,7 +114,7 @@ public class ReviewsService : IReviewsService
         // Create the review
         var reviewEntity = _mapper.Map<Review>(review);
         reviewEntity.ViewingId = viewing.Id;
-        
+
         _db.Reviews.Add(reviewEntity);
         await _db.SaveChangesAsync();
 

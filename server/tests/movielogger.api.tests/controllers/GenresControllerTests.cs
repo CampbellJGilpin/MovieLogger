@@ -19,11 +19,11 @@ public class GenresControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/genres");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var genres = await response.Content.ReadFromJsonAsync<List<GenreResponse>>();
-        
+
         genres.Should().NotBeNull();
         genres!.Should().HaveCountGreaterThanOrEqualTo(2);
         genres.Should().Contain(g => g.Title == "Horror");
@@ -35,11 +35,11 @@ public class GenresControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/genres/1");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var genre = await response.Content.ReadFromJsonAsync<GenreResponse>();
-        
+
         genre.Should().NotBeNull();
         genre!.Id.Should().Be(1);
         genre.Title.Should().Be("Horror");
@@ -50,7 +50,7 @@ public class GenresControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/genres/999");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -63,14 +63,14 @@ public class GenresControllerTests : BaseTestController
         {
             Title = "Comedy"
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/genres", request);
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var createdGenre = await response.Content.ReadFromJsonAsync<GenreResponse>();
-        
+
         createdGenre.Should().NotBeNull();
         createdGenre!.Title.Should().Be(request.Title);
         createdGenre.Id.Should().BeGreaterThan(0);
@@ -84,10 +84,10 @@ public class GenresControllerTests : BaseTestController
         {
             Title = ""
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/genres", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -100,10 +100,10 @@ public class GenresControllerTests : BaseTestController
         {
             Title = "Horror" // This genre already exists
         };
-        
+
         // Act
         var response = await _client.PostAsJsonAsync("/api/genres", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -117,14 +117,14 @@ public class GenresControllerTests : BaseTestController
             GenreId = 1,
             Title = "Updated Horror"
         };
-        
+
         // Act
         var response = await _client.PutAsJsonAsync("/api/genres/1", request);
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var updatedGenre = await response.Content.ReadFromJsonAsync<GenreResponse>();
-        
+
         updatedGenre.Should().NotBeNull();
         updatedGenre!.Title.Should().Be(request.Title);
         updatedGenre.Id.Should().Be(1);
@@ -139,10 +139,10 @@ public class GenresControllerTests : BaseTestController
             GenreId = 999,
             Title = "Non-existent Genre"
         };
-        
+
         // Act
         var response = await _client.PutAsJsonAsync("/api/genres/999", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -156,10 +156,10 @@ public class GenresControllerTests : BaseTestController
             GenreId = 1,
             Title = "Action" // This genre already exists
         };
-        
+
         // Act
         var response = await _client.PutAsJsonAsync("/api/genres/1", request);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -169,10 +169,10 @@ public class GenresControllerTests : BaseTestController
     {
         // Act
         var response = await _client.DeleteAsync("/api/genres/3"); // Assuming genre 3 exists
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
+
         // Verify genre is deleted
         var getResponse = await _client.GetAsync("/api/genres/3");
         getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -183,7 +183,7 @@ public class GenresControllerTests : BaseTestController
     {
         // Act
         var response = await _client.DeleteAsync("/api/genres/999");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -193,7 +193,7 @@ public class GenresControllerTests : BaseTestController
     {
         // Act - Try to delete a genre that has associated movies
         var response = await _client.DeleteAsync("/api/genres/1"); // Assuming genre 1 has movies
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

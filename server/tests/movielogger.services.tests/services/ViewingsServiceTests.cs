@@ -16,7 +16,7 @@ namespace movielogger.services.tests.services;
 public class ViewingsServiceTests : BaseServiceTest
 {
     IViewingsService _service;
-    
+
     public ViewingsServiceTests()
     {
         _service = new ViewingsService(_dbContext, _mapper);
@@ -38,15 +38,15 @@ public class ViewingsServiceTests : BaseServiceTest
         var viewing = Fixture.Build<Viewing>()
             .With(x => x.UserMovie, userMovie)
             .Create();
-        
-        var viewings = new List<Viewing> {viewing}.AsQueryable();
+
+        var viewings = new List<Viewing> { viewing }.AsQueryable();
 
         var mockSet = viewings.BuildMockDbSet();
         _dbContext.Viewings.Returns(mockSet);
-        
+
         // Act
         var result = await _service.GetViewingByIdAsync(viewing.Id);
-        
+
         // Assert
         result.Should().NotBeNull();
         result.Id.Should().Be(viewing.Id);

@@ -11,4 +11,4 @@ public class UserMovieDto
     public bool IsDeleted { get; set; }
     public bool OwnsMovie { get; set; }
     public bool IsFavourite { get; set; }
-} 
+}

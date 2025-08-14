@@ -22,7 +22,7 @@ namespace movielogger.api.controllers
             _viewingsService = viewingsService;
             _mapper = mapper;
         }
-        
+
         [HttpGet]
         [Route("~/api/users/{userId}/viewings")]
         public async Task<IActionResult> GetUserViewings(int userId)
@@ -31,7 +31,7 @@ namespace movielogger.api.controllers
             {
                 var serviceResponse = await _viewingsService.GetViewingsByUserIdAsync(userId);
                 var mappedResponse = _mapper.Map<List<ViewingResponse>>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException)
@@ -39,7 +39,7 @@ namespace movielogger.api.controllers
                 return NotFound($"User with ID {userId} not found.");
             }
         }
-        
+
         [HttpGet("{viewingId}")]
         public async Task<IActionResult> GetViewing(int viewingId)
         {
@@ -49,7 +49,7 @@ namespace movielogger.api.controllers
                 if (serviceResponse == null)
                     return NotFound($"Viewing with ID {viewingId} not found.");
                 var mappedResponse = _mapper.Map<ViewingResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException)
@@ -57,13 +57,13 @@ namespace movielogger.api.controllers
                 return NotFound($"Viewing with ID {viewingId} not found.");
             }
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> CreateViewing([FromBody] CreateViewingRequest request)
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
-            
+
             try
             {
                 var viewingDto = _mapper.Map<ViewingDto>(request);
@@ -87,7 +87,7 @@ namespace movielogger.api.controllers
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return BadRequest(((BadRequestObjectResult)errorResult).Value);
-            
+
             try
             {
                 var viewingDto = _mapper.Map<ViewingDto>(request);
@@ -104,7 +104,7 @@ namespace movielogger.api.controllers
                 return NotFound("User or Movie not found");
             }
         }
-        
+
         [HttpPut("{viewingId}")]
         public async Task<IActionResult> UpdateViewing(int viewingId, [FromBody] UpdateViewingRequest request)
         {

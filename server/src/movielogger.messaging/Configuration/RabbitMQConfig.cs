@@ -10,4 +10,4 @@ namespace movielogger.messaging.Configuration
         public string ExchangeName { get; set; } = "movielogger.events";
         public string QueueName { get; set; } = "movielogger.notifications";
     }
-} 
+}

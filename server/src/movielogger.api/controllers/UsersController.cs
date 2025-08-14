@@ -25,14 +25,14 @@ namespace movielogger.api.controllers
             _accountsService = accountsService;
             _mapper = mapper;
         }
-        
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetAllUsers()
         {
             var serviceResponse = await _usersService.GetAllUsersAsync();
             var mappedResponse = _mapper.Map<IList<UserResponse>>(serviceResponse);
-            
+
             return Ok(mappedResponse);
         }
 
@@ -60,17 +60,17 @@ namespace movielogger.api.controllers
             {
                 return errorResult;
             }
-            
+
             try
             {
                 var originalPassword = request.Password;
                 request.Password = BC.HashPassword(request.Password);
-                
+
                 var mappedRequest = _mapper.Map<UserDto>(request);
                 await _usersService.CreateUserAsync(mappedRequest);
 
                 var (token, user) = await _accountsService.AuthenticateUserAsync(request.Email, originalPassword);
-                
+
                 return Ok(new { token, user = _mapper.Map<UserResponse>(user) });
             }
             catch (EmailAlreadyExistsException)
@@ -93,18 +93,18 @@ namespace movielogger.api.controllers
         {
             var errorResult = request.Validate();
             if (errorResult is not null) return errorResult;
-            
+
             try
             {
                 if (!string.IsNullOrEmpty(request.Password))
                 {
                     request.Password = BC.HashPassword(request.Password);
                 }
-                
+
                 var mappedRequest = _mapper.Map<UserDto>(request);
                 var serviceResponse = await _usersService.UpdateUserAsync(userId, mappedRequest);
                 var mappedResponse = _mapper.Map<UserResponse>(serviceResponse);
-                
+
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException)

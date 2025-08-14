@@ -22,6 +22,22 @@ public class FileUploadService : IFileUploadService
         if (posterFile == null || posterFile.Length == 0)
             throw new ArgumentException("Poster file is required");
 
+        // Validate file size (5MB max)
+        const long maxFileSize = 5 * 1024 * 1024; // 5MB
+        if (posterFile.Length > maxFileSize)
+            throw new ArgumentException("File size cannot exceed 5MB");
+
+        // Validate file type
+        var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/webp" };
+        if (!allowedTypes.Contains(posterFile.ContentType.ToLower()))
+            throw new ArgumentException("Only JPEG, PNG, and WebP images are allowed");
+
+        // Validate file extension
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+        var extension = Path.GetExtension(posterFile.FileName).ToLower();
+        if (!allowedExtensions.Contains(extension))
+            throw new ArgumentException("Invalid file extension");
+
         if (_env.IsDevelopment())
         {
             return await SaveToLocalAsync(posterFile);
@@ -64,7 +80,10 @@ public class FileUploadService : IFileUploadService
 
     private async Task<string> SaveToLocalAsync(IFormFile file)
     {
-        var uploadsDir = Path.Combine(_env.ContentRootPath, "wwwroot", "uploads");
+        // For development, save to a wwwroot directory that's accessible from the server root
+        var serverRoot = Path.GetDirectoryName(Path.GetDirectoryName(_env.ContentRootPath));
+        var uploadsDir = Path.Combine(serverRoot ?? _env.ContentRootPath, "wwwroot", "uploads");
+
         if (!Directory.Exists(uploadsDir))
             Directory.CreateDirectory(uploadsDir);
 
@@ -90,7 +109,9 @@ public class FileUploadService : IFileUploadService
     {
         try
         {
-            var filePath = Path.Combine(_env.ContentRootPath, "wwwroot", posterPath.TrimStart('/'));
+            // For development, delete from the wwwroot directory at the server root
+            var serverRoot = Path.GetDirectoryName(Path.GetDirectoryName(_env.ContentRootPath));
+            var filePath = Path.Combine(serverRoot ?? _env.ContentRootPath, "wwwroot", posterPath.TrimStart('/'));
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
@@ -109,4 +130,4 @@ public class FileUploadService : IFileUploadService
         // TODO: Implement S3 delete logic
         throw new NotImplementedException("S3 delete not yet implemented");
     }
-} 
+}

@@ -48,4 +48,4 @@ public enum ErrorType
     Unauthorized,
     Conflict,
     Internal
-} 
+}

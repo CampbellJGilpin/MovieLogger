@@ -18,11 +18,11 @@ public class GenrePreferencesControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/genre-preferences/summary");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var preferences = await response.Content.ReadFromJsonAsync<GenrePreferencesSummaryResponse>();
-        
+
         preferences.Should().NotBeNull();
         preferences!.UserId.Should().BeGreaterThan(0);
         preferences.TotalMoviesWatched.Should().BeGreaterThanOrEqualTo(0);
@@ -38,7 +38,7 @@ public class GenrePreferencesControllerTests : BaseTestController
 
         // Act
         var response = await clientWithoutAuth.GetAsync("/api/genre-preferences/summary");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -48,14 +48,14 @@ public class GenrePreferencesControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/genre-preferences/top-by-watches?count=3");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var genres = await response.Content.ReadFromJsonAsync<List<GenrePreferenceResponse>>();
-        
+
         genres.Should().NotBeNull();
         genres!.Should().HaveCountLessThanOrEqualTo(3);
-        
+
         if (genres.Any())
         {
             genres.Should().BeInDescendingOrder(g => g.WatchCount);
@@ -67,7 +67,7 @@ public class GenrePreferencesControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/genre-preferences/top-by-watches?count=-1");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -77,14 +77,14 @@ public class GenrePreferencesControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/genre-preferences/top-by-rating?count=3");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var genres = await response.Content.ReadFromJsonAsync<List<GenrePreferenceResponse>>();
-        
+
         genres.Should().NotBeNull();
         genres!.Should().HaveCountLessThanOrEqualTo(3);
-        
+
         if (genres.Any())
         {
             genres.Should().BeInDescendingOrder(g => g.AverageRating);
@@ -96,14 +96,14 @@ public class GenrePreferencesControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/genre-preferences/least-watched?count=3");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var genres = await response.Content.ReadFromJsonAsync<List<GenrePreferenceResponse>>();
-        
+
         genres.Should().NotBeNull();
         genres!.Should().HaveCountLessThanOrEqualTo(3);
-        
+
         if (genres.Any())
         {
             genres.Should().BeInAscendingOrder(g => g.WatchCount);
@@ -115,11 +115,11 @@ public class GenrePreferencesControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/genre-preferences/trends?months=6");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var trends = await response.Content.ReadFromJsonAsync<Dictionary<string, int>>();
-        
+
         trends.Should().NotBeNull();
         trends!.Should().BeOfType<Dictionary<string, int>>();
     }
@@ -129,7 +129,7 @@ public class GenrePreferencesControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/genre-preferences/trends?months=-1");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -139,8 +139,8 @@ public class GenrePreferencesControllerTests : BaseTestController
     {
         // Act
         var response = await _client.GetAsync("/api/genre-preferences/trends?months=100");
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-} 
+}

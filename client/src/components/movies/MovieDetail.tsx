@@ -37,8 +37,10 @@ export default function MovieDetail({
   const getPosterUrl = () => {
     if (!movie.posterPath) return undefined;
     if (movie.posterPath.startsWith('http')) return movie.posterPath;
-    // Assume relative path, served from API
-    return `${import.meta.env.VITE_API_BASE_URL || ''}${movie.posterPath}`;
+    // Static files are served from the backend root, not the /api endpoint
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5049';
+    const baseUrl = apiBaseUrl.replace('/api', ''); // Remove /api suffix for static files
+    return `${baseUrl}${movie.posterPath}`;
   };
 
   return (

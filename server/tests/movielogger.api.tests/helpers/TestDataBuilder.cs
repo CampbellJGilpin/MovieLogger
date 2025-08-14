@@ -72,4 +72,4 @@ public static class TestDataBuilder
             Score = 4
         };
     }
-} 
+}

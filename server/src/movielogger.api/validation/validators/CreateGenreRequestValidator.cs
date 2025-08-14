@@ -8,6 +8,6 @@ public class CreateGenreRequestValidator : AbstractValidator<CreateGenreRequest>
 {
     public CreateGenreRequestValidator()
     {
-        RuleFor(x => x.Title).NotEmpty().WithMessage("Title is required"); 
+        RuleFor(x => x.Title).NotEmpty().WithMessage("Title is required");
     }
 }

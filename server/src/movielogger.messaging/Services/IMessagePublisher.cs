@@ -8,4 +8,4 @@ namespace movielogger.messaging.Services
         Task PublishAsync<T>(T message, string routingKey) where T : MovieEvent;
         void Dispose();
     }
-} 
+}
