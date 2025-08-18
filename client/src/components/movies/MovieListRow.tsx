@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import { HeartIcon, TrashIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, TrashIcon, CheckIcon, ListBulletIcon } from '@heroicons/react/24/outline';
 import type { MovieInLibrary } from '../../types/index';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 
@@ -10,13 +10,15 @@ interface MovieListRowProps {
   onToggleLibrary?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
   onDelete?: (movieId: number) => void;
+  onAddToList?: (movie: MovieInLibrary) => void;
 }
 
 export default function MovieListRow({ 
   movie, 
   onToggleLibrary,
   onToggleFavorite,
-  onDelete 
+  onDelete,
+  onAddToList 
 }: MovieListRowProps) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const releaseYear = movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Unknown';
@@ -48,7 +50,7 @@ export default function MovieListRow({
           {onToggleFavorite && (
             <button
               onClick={() => onToggleFavorite(movie.id)}
-              className={`p-1.5 rounded-full ${
+              className={`p-1.5 rounded-full mr-2 ${
                 movie.isFavorite
                   ? 'bg-red-100 text-red-600'
                   : 'bg-gray-100 text-gray-400 hover:text-gray-500'
@@ -60,6 +62,15 @@ export default function MovieListRow({
               ) : (
                 <HeartIcon className="w-5 h-5" />
               )}
+            </button>
+          )}
+          {onAddToList && (
+            <button
+              onClick={() => onAddToList(movie)}
+              className="p-1.5 rounded-full bg-gray-100 text-gray-400 hover:text-gray-500"
+              title="Add to list"
+            >
+              <ListBulletIcon className="w-5 h-5" />
             </button>
           )}
         </td>

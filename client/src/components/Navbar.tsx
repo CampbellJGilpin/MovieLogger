@@ -8,7 +8,8 @@ import {
   HomeIcon,
   FilmIcon,
   BookmarkIcon,
-  UserIcon
+  UserIcon,
+  QueueListIcon
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
@@ -21,6 +22,7 @@ export default function Navbar() {
     { name: 'Dashboard', href: '/', icon: HomeIcon },
     { name: 'All Movies', href: '/movies', icon: FilmIcon },
     { name: 'My Library', href: '/library', icon: BookmarkIcon },
+    { name: 'My Lists', href: '/lists', icon: QueueListIcon },
     { name: 'Profile', href: '/profile', icon: UserIcon },
   ];
 
@@ -85,7 +87,7 @@ export default function Navbar() {
                                   to={item.href}
                                   className={`
                                     group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6
-                                    ${location.pathname === item.href
+                                    ${location.pathname === item.href || (item.href === '/lists' && location.pathname.startsWith('/lists'))
                                       ? 'bg-gray-50 text-blue-600'
                                       : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                                     }
@@ -93,7 +95,7 @@ export default function Navbar() {
                                 >
                                   <item.icon
                                     className={`h-6 w-6 shrink-0 ${
-                                      location.pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'
+                                      location.pathname === item.href || (item.href === '/lists' && location.pathname.startsWith('/lists')) ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'
                                     }`}
                                     aria-hidden="true"
                                   />
@@ -143,7 +145,7 @@ export default function Navbar() {
                           to={item.href}
                           className={`
                             group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6
-                            ${location.pathname === item.href
+                            ${location.pathname === item.href || (item.href === '/lists' && location.pathname.startsWith('/lists'))
                               ? 'bg-gray-50 text-blue-600'
                               : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                             }
@@ -151,7 +153,7 @@ export default function Navbar() {
                         >
                           <item.icon
                             className={`h-6 w-6 shrink-0 ${
-                              location.pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'
+                              location.pathname === item.href || (item.href === '/lists' && location.pathname.startsWith('/lists')) ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'
                             }`}
                             aria-hidden="true"
                           />

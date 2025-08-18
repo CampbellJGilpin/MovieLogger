@@ -14,6 +14,8 @@ public interface IAssessmentDbContext
     DbSet<AuditLog> AuditLogs { get; }
     DbSet<EventTypeReference> EventTypeReferences { get; }
     DbSet<EntityTypeReference> EntityTypeReferences { get; }
+    DbSet<List> Lists { get; }
+    DbSet<ListMovie> ListMovies { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

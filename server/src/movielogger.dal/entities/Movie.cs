@@ -34,4 +34,5 @@ public class Movie
     public string? PosterPath { get; set; }
 
     public ICollection<UserMovie> UserMovies { get; set; } = new List<UserMovie>();
+    public ICollection<ListMovie> ListMovies { get; set; } = new List<ListMovie>();
 }

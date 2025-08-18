@@ -6,6 +6,8 @@ interface MovieListProps {
   onToggleLibrary?: (movieId: number) => void;
   onToggleFavorite?: (movieId: number) => void;
   onDelete?: (movieId: number) => void;
+  onAddToList?: (movie: MovieInLibrary) => void;
+  showAddToList?: boolean;
   emptyMessage?: string;
 }
 
@@ -14,6 +16,8 @@ export default function MovieList({
   onToggleLibrary,
   onToggleFavorite,
   onDelete,
+  onAddToList,
+  showAddToList = false,
   emptyMessage = 'No movies found'
 }: MovieListProps) {
   if (!movies.length) {
@@ -48,6 +52,7 @@ export default function MovieList({
                   onToggleLibrary={onToggleLibrary}
                   onToggleFavorite={onToggleFavorite}
                   onDelete={onDelete}
+                  onAddToList={showAddToList ? onAddToList : undefined}
                 />
               ))}
             </tbody>

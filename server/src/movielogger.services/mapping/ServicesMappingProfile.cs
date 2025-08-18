@@ -56,5 +56,24 @@ public class ServicesMappingProfile : Profile
             .ForMember(dest => dest.InLibrary, opt => opt.MapFrom(src => src.OwnsMovie))
             .ForMember(dest => dest.WatchLater, opt => opt.MapFrom(src => src.UpcomingViewDate.HasValue))
             .ForMember(dest => dest.OwnsMovie, opt => opt.MapFrom(src => src.OwnsMovie));
+
+        // List mappings
+        CreateMap<List, ListDto>()
+            .ForMember(dest => dest.MovieCount, opt => opt.MapFrom(src => src.ListMovies.Count(lm => !lm.Movie.IsDeleted)))
+            .ForMember(dest => dest.Movies, opt => opt.MapFrom(src => src.ListMovies.Select(lm => lm.Movie)));
+
+        CreateMap<ListDto, List>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.User, opt => opt.Ignore())
+            .ForMember(dest => dest.ListMovies, opt => opt.Ignore());
+
+        CreateMap<ListMovie, ListMovieDto>()
+            .ForMember(dest => dest.Movie, opt => opt.MapFrom(src => src.Movie))
+            .ForMember(dest => dest.List, opt => opt.MapFrom(src => src.List));
+
+        CreateMap<ListMovieDto, ListMovie>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Movie, opt => opt.Ignore())
+            .ForMember(dest => dest.List, opt => opt.Ignore());
     }
 }

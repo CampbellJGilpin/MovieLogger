@@ -31,4 +31,5 @@ public class User
     public bool IsDeleted { get; set; }
 
     public ICollection<UserMovie> Library { get; set; } = new List<UserMovie>();
+    public ICollection<List> Lists { get; set; } = new List<List>();
 }

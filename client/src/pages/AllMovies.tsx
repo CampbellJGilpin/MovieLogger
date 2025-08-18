@@ -1,21 +1,29 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import MovieList from '../components/movies/MovieList';
 import AddMovieModal from '../components/movies/AddMovieModal';
-import type { MovieInLibrary } from '../types/index';
+import AddToListModal from '../components/lists/AddToListModal';
+import type { MovieInLibrary, Movie } from '../types/index';
 import * as movieService from '../services/movieService';
 import api from '../api/config';
 
 export default function AllMovies() {
+  const [searchParams] = useSearchParams();
   const [movies, setMovies] = useState<MovieInLibrary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddMovieModalOpen, setIsAddMovieModalOpen] = useState(false);
+  const [isAddToListModalOpen, setIsAddToListModalOpen] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize] = useState(10);
+  
+  // Check if we're in "add to list" mode
+  const addToListId = searchParams.get('addToList');
 
   const loadMovies = useCallback(async (query = debouncedSearchQuery, page = currentPage) => {
     try {
@@ -101,6 +109,11 @@ export default function AllMovies() {
     }
   };
 
+  const handleAddToList = (movie: MovieInLibrary) => {
+    setSelectedMovie(movie as Movie);
+    setIsAddToListModalOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="text-center py-12">
@@ -148,6 +161,8 @@ export default function AllMovies() {
             onToggleLibrary={handleToggleLibrary}
             onToggleFavorite={handleToggleFavorite}
             onDelete={handleDeleteMovie}
+            onAddToList={handleAddToList}
+            showAddToList={true}
             emptyMessage={
               isLoading
                 ? 'Loading movies'
@@ -205,6 +220,16 @@ export default function AllMovies() {
         isOpen={isAddMovieModalOpen}
         onClose={() => setIsAddMovieModalOpen(false)}
         onSubmit={handleAddMovie}
+      />
+
+      <AddToListModal
+        isOpen={isAddToListModalOpen}
+        onClose={() => setIsAddToListModalOpen(false)}
+        movie={selectedMovie}
+        onSuccess={() => {
+          // Optional: Show success message or refresh data
+          console.log('Movie added to list successfully');
+        }}
       />
     </div>
   );

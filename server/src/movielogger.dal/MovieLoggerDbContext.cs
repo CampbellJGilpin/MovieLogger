@@ -17,6 +17,8 @@ public class MovieLoggerDbContext : DbContext, IAssessmentDbContext
     public virtual DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public virtual DbSet<EventTypeReference> EventTypeReferences => Set<EventTypeReference>();
     public virtual DbSet<EntityTypeReference> EntityTypeReferences => Set<EntityTypeReference>();
+    public virtual DbSet<List> Lists => Set<List>();
+    public virtual DbSet<ListMovie> ListMovies => Set<ListMovie>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -108,6 +110,40 @@ public class MovieLoggerDbContext : DbContext, IAssessmentDbContext
             entity.HasIndex(e => e.EntityType).IsUnique();
             entity.Property(e => e.Name).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(500);
+        });
+
+        // List
+        modelBuilder.Entity<List>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasColumnType("text");
+            entity.HasIndex(e => new { e.UserId, e.Name }).IsUnique();
+            entity.HasIndex(e => e.UserId);
+
+            entity.HasOne(l => l.User)
+                  .WithMany(u => u.Lists)
+                  .HasForeignKey(l => l.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ListMovie
+        modelBuilder.Entity<ListMovie>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.ListId, e.MovieId }).IsUnique();
+            entity.HasIndex(e => e.ListId);
+            entity.HasIndex(e => e.MovieId);
+
+            entity.HasOne(lm => lm.List)
+                  .WithMany(l => l.ListMovies)
+                  .HasForeignKey(lm => lm.ListId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(lm => lm.Movie)
+                  .WithMany(m => m.ListMovies)
+                  .HasForeignKey(lm => lm.MovieId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         // AuditLog

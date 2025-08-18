@@ -1,15 +1,19 @@
-import type { MovieInLibrary } from '../../types/index';
-import { HeartIcon } from '@heroicons/react/24/outline';
+import type { MovieInLibrary, Movie } from '../../types/index';
+import { HeartIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 
 interface MovieCardProps {
-  movie: MovieInLibrary;
+  movie: MovieInLibrary | Movie;
   onToggleFavorite?: (movieId: number) => void;
+  onRemoveFromList?: () => void;
+  showRemoveFromList?: boolean;
 }
 
 export default function MovieCard({ 
   movie, 
-  onToggleFavorite 
+  onToggleFavorite,
+  onRemoveFromList,
+  showRemoveFromList
 }: MovieCardProps) {
   if (!movie) {
     return null;
@@ -41,7 +45,7 @@ export default function MovieCard({
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold text-gray-900">{movie.title}</h3>
           <div className="flex space-x-2">
-            {onToggleFavorite && (
+            {onToggleFavorite && 'isFavorite' in movie && (
               <button
                 onClick={() => onToggleFavorite(movie.id)}
                 className={`p-1.5 rounded-full ${
@@ -56,6 +60,15 @@ export default function MovieCard({
                 ) : (
                   <HeartIcon className="w-5 h-5" />
                 )}
+              </button>
+            )}
+            {showRemoveFromList && onRemoveFromList && (
+              <button
+                onClick={onRemoveFromList}
+                className="p-1.5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                title="Remove from list"
+              >
+                <XMarkIcon className="w-5 h-5" />
               </button>
             )}
           </div>
@@ -74,7 +87,7 @@ export default function MovieCard({
           <p className="text-gray-700 text-sm mb-4">{movie.description}</p>
         )}
 
-        {movie.userRating && (
+        {'userRating' in movie && movie.userRating && (
           <div className="flex items-center">
             <span className="text-sm text-gray-600">{movie.userRating}/5</span>
           </div>

@@ -4,6 +4,8 @@ import Dashboard from './pages/Dashboard';
 import AllMovies from './pages/AllMovies';
 import MovieDetails from './pages/MovieDetails';
 import MyLibrary from './pages/MyLibrary';
+import MyLists from './pages/MyLists';
+import ListDetail from './pages/ListDetail';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import NotFound from './pages/NotFound';
@@ -73,6 +75,16 @@ function App() {
             <Route path="library" element={
               <PrivateRoute>
                 <MyLibrary />
+              </PrivateRoute>
+            } />
+            <Route path="lists" element={
+              <PrivateRoute>
+                <MyLists />
+              </PrivateRoute>
+            } />
+            <Route path="lists/:listId" element={
+              <PrivateRoute>
+                <ListDetail />
               </PrivateRoute>
             } />
             <Route path="profile" element={
