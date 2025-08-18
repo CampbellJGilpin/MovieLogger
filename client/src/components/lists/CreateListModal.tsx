@@ -44,9 +44,10 @@ export default function CreateListModal({ isOpen, onClose, onSubmit, title, init
         name: name.trim(),
         description: description.trim() || undefined
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to save list:', err);
-      setError(err.response?.data?.message || 'Failed to save list');
+      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to save list';
+      setError(errorMessage);
       setIsSubmitting(false);
     }
   };

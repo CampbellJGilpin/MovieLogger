@@ -61,7 +61,7 @@ public class ListsController : ControllerBase
     public async Task<IActionResult> CreateList(int userId, [FromBody] CreateListRequest request)
     {
         var errorResult = request.Validate();
-        if (errorResult is not null) 
+        if (errorResult is not null)
             return BadRequest(((BadRequestObjectResult)errorResult).Value);
 
         var result = await _listsService.CreateListAsync(userId, request.Name, request.Description);
@@ -79,7 +79,7 @@ public class ListsController : ControllerBase
     public async Task<IActionResult> UpdateList(int userId, int listId, [FromBody] UpdateListRequest request)
     {
         var errorResult = request.Validate();
-        if (errorResult is not null) 
+        if (errorResult is not null)
             return BadRequest(((BadRequestObjectResult)errorResult).Value);
 
         var result = await _listsService.UpdateListAsync(listId, userId, request.Name, request.Description);
@@ -110,7 +110,7 @@ public class ListsController : ControllerBase
     public async Task<IActionResult> AddMovieToList(int userId, int listId, [FromBody] AddMovieToListRequest request)
     {
         var errorResult = request.Validate();
-        if (errorResult is not null) 
+        if (errorResult is not null)
             return BadRequest(((BadRequestObjectResult)errorResult).Value);
 
         var result = await _listsService.AddMovieToListAsync(listId, request.MovieId, userId);

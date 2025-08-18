@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import MovieList from '../components/movies/MovieList';
 import AddMovieModal from '../components/movies/AddMovieModal';
@@ -9,7 +8,6 @@ import * as movieService from '../services/movieService';
 import api from '../api/config';
 
 export default function AllMovies() {
-  const [searchParams] = useSearchParams();
   const [movies, setMovies] = useState<MovieInLibrary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +20,6 @@ export default function AllMovies() {
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize] = useState(10);
   
-  // Check if we're in "add to list" mode
-  const addToListId = searchParams.get('addToList');
 
   const loadMovies = useCallback(async (query = debouncedSearchQuery, page = currentPage) => {
     try {

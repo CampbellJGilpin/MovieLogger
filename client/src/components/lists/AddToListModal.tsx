@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/useAuth';
 import listService, { type ListSummary } from '../../services/listService';
@@ -24,9 +24,9 @@ export default function AddToListModal({ isOpen, onClose, movie, onSuccess }: Ad
       loadUserLists();
       checkMovieInLists();
     }
-  }, [isOpen, user, movie]);
+  }, [isOpen, user, movie, loadUserLists, checkMovieInLists]);
 
-  const loadUserLists = async () => {
+  const loadUserLists = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -40,9 +40,9 @@ export default function AddToListModal({ isOpen, onClose, movie, onSuccess }: Ad
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const checkMovieInLists = async () => {
+  const checkMovieInLists = useCallback(async () => {
     if (!user || !movie) return;
     
     try {
@@ -53,7 +53,7 @@ export default function AddToListModal({ isOpen, onClose, movie, onSuccess }: Ad
         try {
           const inList = await listService.isMovieInList(user.id, list.id, movie.id);
           movieStatus[list.id] = inList;
-        } catch (err) {
+        } catch {
           movieStatus[list.id] = false;
         }
       }
@@ -62,7 +62,7 @@ export default function AddToListModal({ isOpen, onClose, movie, onSuccess }: Ad
     } catch (err) {
       console.error('Failed to check movie status in lists:', err);
     }
-  };
+  }, [user, movie]);
 
   const handleAddToList = async (listId: number) => {
     if (!user || !movie) return;
@@ -74,9 +74,10 @@ export default function AddToListModal({ isOpen, onClose, movie, onSuccess }: Ad
       await listService.addMovieToList(user.id, listId, movie.id);
       setMovieInLists(prev => ({ ...prev, [listId]: true }));
       onSuccess?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to add movie to list:', err);
-      setError(err.response?.data?.message || 'Failed to add movie to list');
+      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to add movie to list';
+      setError(errorMessage);
     } finally {
       setAdding(prev => ({ ...prev, [listId]: false }));
     }
@@ -92,9 +93,10 @@ export default function AddToListModal({ isOpen, onClose, movie, onSuccess }: Ad
       await listService.removeMovieFromList(user.id, listId, movie.id);
       setMovieInLists(prev => ({ ...prev, [listId]: false }));
       onSuccess?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to remove movie from list:', err);
-      setError(err.response?.data?.message || 'Failed to remove movie from list');
+      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to remove movie from list';
+      setError(errorMessage);
     } finally {
       setAdding(prev => ({ ...prev, [listId]: false }));
     }

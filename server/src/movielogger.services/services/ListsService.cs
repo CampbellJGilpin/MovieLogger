@@ -243,10 +243,10 @@ public class ListsService : IListsService
             };
 
             _db.ListMovies.Add(listMovie);
-            
+
             // Update list's updated_date
             list.UpdatedDate = DateTime.UtcNow;
-            
+
             await _db.SaveChangesAsync();
 
             return Result<bool>.Success(true);
@@ -279,10 +279,10 @@ public class ListsService : IListsService
             }
 
             _db.ListMovies.Remove(listMovie);
-            
+
             // Update list's updated_date
             list.UpdatedDate = DateTime.UtcNow;
-            
+
             await _db.SaveChangesAsync();
 
             return Result<bool>.Success(true);

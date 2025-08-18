@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import ListCard from './ListCard';
 import CreateListModal from './CreateListModal';
@@ -21,9 +21,9 @@ export default function ListGrid({ onListCreated, onListUpdated, onListDeleted }
 
   useEffect(() => {
     loadLists();
-  }, [user]);
+  }, [loadLists]);
 
-  const loadLists = async () => {
+  const loadLists = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -37,7 +37,7 @@ export default function ListGrid({ onListCreated, onListUpdated, onListDeleted }
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const handleCreateList = async (request: CreateListRequest) => {
     if (!user) return;

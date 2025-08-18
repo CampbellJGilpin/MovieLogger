@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeftIcon, PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { FilmIcon } from '@heroicons/react/24/solid';
@@ -20,9 +20,9 @@ export default function ListDetail() {
 
   useEffect(() => {
     loadList();
-  }, [listId, user]);
+  }, [loadList]);
 
-  const loadList = async () => {
+  const loadList = useCallback(async () => {
     if (!user || !listId) return;
 
     try {
@@ -30,9 +30,9 @@ export default function ListDetail() {
       const listData = await listService.getList(user.id, parseInt(listId));
       setList(listData);
       setError(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load list:', err);
-      if (err.response?.status === 404) {
+      if ((err as { response?: { status?: number } })?.response?.status === 404) {
         setError('List not found');
       } else {
         setError('Failed to load list');
@@ -40,7 +40,7 @@ export default function ListDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, listId]);
 
   const handleUpdateList = async (request: { name: string; description?: string }) => {
     if (!user || !list) return;
