@@ -19,13 +19,6 @@ export default function AddToListModal({ isOpen, onClose, movie, onSuccess }: Ad
   const [movieInLists, setMovieInLists] = useState<Record<number, boolean>>({});
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isOpen && user && movie) {
-      loadUserLists();
-      checkMovieInLists();
-    }
-  }, [isOpen, user, movie, loadUserLists, checkMovieInLists]);
-
   const loadUserLists = useCallback(async () => {
     if (!user) return;
     
@@ -63,6 +56,13 @@ export default function AddToListModal({ isOpen, onClose, movie, onSuccess }: Ad
       console.error('Failed to check movie status in lists:', err);
     }
   }, [user, movie]);
+
+  useEffect(() => {
+    if (isOpen && user && movie) {
+      loadUserLists();
+      checkMovieInLists();
+    }
+  }, [isOpen, user, movie, loadUserLists, checkMovieInLists]);
 
   const handleAddToList = async (listId: number) => {
     if (!user || !movie) return;

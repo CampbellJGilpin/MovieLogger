@@ -18,10 +18,6 @@ export default function ListDetail() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    loadList();
-  }, [loadList]);
-
   const loadList = useCallback(async () => {
     if (!user || !listId) return;
 
@@ -41,6 +37,10 @@ export default function ListDetail() {
       setLoading(false);
     }
   }, [user, listId]);
+
+  useEffect(() => {
+    loadList();
+  }, [loadList]);
 
   const handleUpdateList = async (request: { name: string; description?: string }) => {
     if (!user || !list) return;

@@ -19,10 +19,6 @@ export default function ListGrid({ onListCreated, onListUpdated, onListDeleted }
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingList, setEditingList] = useState<ListSummary | null>(null);
 
-  useEffect(() => {
-    loadLists();
-  }, [loadLists]);
-
   const loadLists = useCallback(async () => {
     if (!user) return;
     
@@ -38,6 +34,10 @@ export default function ListGrid({ onListCreated, onListUpdated, onListDeleted }
       setLoading(false);
     }
   }, [user]);
+
+  useEffect(() => {
+    loadLists();
+  }, [loadLists]);
 
   const handleCreateList = async (request: CreateListRequest) => {
     if (!user) return;
