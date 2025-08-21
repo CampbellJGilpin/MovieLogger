@@ -1,0 +1,142 @@
+MOVIELOGGER APPLICATION ARCHITECTURE
+=====================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          USER INTERFACE (Port 5173)                        │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │    React    │  │   Pages     │  │ Components  │  │    API Services     │ │
+│  │     App     │  │ Dashboard   │  │ MovieCard   │  │  movieService.ts    │ │
+│  │             │  │ Movies      │  │ Reviews     │  │  reviewService.ts   │ │
+│  │             │  │ Library     │  │ Auth        │  │  listService.ts     │ │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────────┘ │
+│                                    │                                        │
+│                        ┌───────────▼───────────┐                          │
+│                        │   Auth Context        │                          │
+│                        │   JWT Management      │                          │
+│                        └───────────────────────┘                          │
+└─────────────────────────────────┬───────────────────────────────────────────┘
+                                  │ HTTP REST API
+                                  │ JSON Requests
+┌─────────────────────────────────▼───────────────────────────────────────────┐
+│                          WEB API LAYER (Port 5049)                         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │   ASP.NET   │  │ Controllers │  │ Middleware  │  │   FluentValidation  │ │
+│  │  Core API   │  │ Movies      │  │ Auth        │  │   Request           │ │
+│  │             │  │ Reviews     │  │ Exception   │  │   Validators        │ │
+│  │             │  │ Library     │  │ Handling    │  │                     │ │
+│  │             │  │ Lists       │  │             │  │                     │ │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────────┘ │
+└─────────────────────────────────┬───────────────────────────────────────────┘
+                                  │
+┌─────────────────────────────────▼───────────────────────────────────────────┐
+│                           BUSINESS SERVICES LAYER                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │    Core     │  │   Caching   │  │ File Upload │  │   Service Factory   │ │
+│  │  Services   │  │   Service   │  │   Service   │  │   Dependency        │ │
+│  │ Movies      │  │ Cached      │  │ Poster      │  │   Resolution        │ │
+│  │ Reviews     │  │ Movies      │  │ Management  │  │                     │ │
+│  │ Library     │  │ Service     │  │             │  │                     │ │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────────┘ │
+└─────────────────────┬─────────────────────────┬─────────────────────────────┘
+                      │                         │
+          ┌───────────▼──────────┐             │
+          │                      │             │
+┌─────────▼───────────────────────▼─────────────▼───────────────────────────────┐
+│                        DATA ACCESS LAYER                                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                          │
+│  │Entity Frame-│  │   Domain    │  │    Data     │                          │
+│  │ work Core   │  │  Entities   │  │  Transfer   │                          │
+│  │  DbContext  │  │ Movie       │  │  Objects    │                          │
+│  │             │  │ User        │  │   (DTOs)    │                          │
+│  │             │  │ Review      │  │             │                          │
+│  │             │  │ List        │  │             │                          │
+│  └─────────────┘  └─────────────┘  └─────────────┘                          │
+└─────────────────────────────────┬───────────────────────────────────────────┘
+                                  │ SQL Queries
+                                  │ CRUD Operations
+┌─────────────────────────────────▼───────────────────────────────────────────┐
+│                       DATABASE LAYER (Port 5432)                           │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────────────────┐  │
+│  │ PostgreSQL  │  │   Flyway    │  │         Database Tables         │  │
+│  │  Database   │  │ Migrations  │  │  Users     Movies    Reviews    │  │
+│  │             │  │ V1.0 - V1.4 │  │  Lists     Genres    Audit      │  │
+│  │             │  │ Schema      │  │  ViewingHistory   UserMovies    │  │
+│  │             │  │ Versioning  │  │                                 │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    MESSAGING LAYER (Ports 5672, 15672)                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │  RabbitMQ   │  │   Event     │  │   Audit     │  │    Movie Events     │ │
+│  │   Broker    │◄─┤ Publisher   │  │   Event     │  │   & Audit Logs      │ │
+│  │             │  │             │  │  Consumer   │  │                     │ │
+│  │             │  │             │  │             │  │                     │ │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────────┘ │
+│                                                      │                      │
+└──────────────────────────────────────────────────────┼──────────────────────┘
+                                                       │ Async Audit Logging
+                                                       ▼
+                                           ┌─────────────────┐
+                                           │   Database      │
+                                           │   Audit Table   │
+                                           └─────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          INFRASTRUCTURE & STORAGE                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                          │
+│  │   Docker    │  │   AWS CDK   │  │    File     │                          │
+│  │  Compose    │  │ Deployment  │  │   Storage   │                          │
+│  │ Local Dev   │  │ S3          │  │   Movie     │                          │
+│  │ Environment │  │ CloudFront  │  │   Posters   │                          │
+│  │             │  │ ECS         │  │             │                          │
+│  │             │  │ RDS         │  │             │                          │
+│  └─────────────┘  └─────────────┘  └─────────────┘                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+DATA FLOW SUMMARY:
+==================
+
+1. USER INTERACTION:
+   User → React UI → API Services → JWT Auth
+
+2. API REQUEST FLOW:
+   Frontend Services → HTTP Request → ASP.NET Controllers → Middleware → Validation
+
+3. BUSINESS LOGIC:
+   Controllers → Business Services → Service Factory → Caching Layer
+
+4. DATA OPERATIONS:
+   Business Services → Entity Framework → SQL Queries → PostgreSQL
+
+5. EVENT PROCESSING:
+   Business Services → Event Publisher → RabbitMQ → Audit Consumer → Database
+
+6. FILE HANDLING:
+   Movie Poster Upload → File Upload Service → Local/Cloud Storage
+
+7. INFRASTRUCTURE:
+   Development: Docker Compose (DB + RabbitMQ)
+   Production: AWS CDK (S3, CloudFront, ECS, RDS)
+
+
+KEY TECHNOLOGIES:
+=================
+• Frontend: React 18 + TypeScript + Vite + Tailwind CSS
+• Backend: ASP.NET Core 8.0 Web API
+• Database: PostgreSQL 15 with Entity Framework Core
+• Messaging: RabbitMQ for event-driven architecture
+• Caching: In-Memory caching with Redis option
+• Authentication: JWT Bearer tokens
+• Validation: FluentValidation
+• File Upload: Custom service for movie posters
+• Development: Docker Compose
+• Deployment: AWS CDK (Infrastructure as Code)
+
+PORTS:
+======
+• Frontend (React): 5173
+• Backend API: 5049
+• Database: 5432
+• RabbitMQ: 5672 (AMQP), 15672 (Management UI)

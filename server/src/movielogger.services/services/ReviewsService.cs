@@ -106,7 +106,7 @@ public class ReviewsService : IReviewsService
         var viewing = new Viewing
         {
             UserMovieId = userMovie.Id,
-            DateViewed = DateTime.UtcNow
+            DateViewed = review.DateViewed ?? DateTime.UtcNow
         };
         _db.Viewings.Add(viewing);
         await _db.SaveChangesAsync();

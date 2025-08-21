@@ -82,7 +82,7 @@ export default function MovieDetails() {
     }
   };
 
-  const handleAddReview = async (review: { score: number; reviewText: string }) => {
+  const handleAddReview = async (review: { score: number; reviewText: string; dateViewed: string }) => {
     if (!movie?.id) return;
     try {
       await movieService.addMovieReview(movie.id, review);

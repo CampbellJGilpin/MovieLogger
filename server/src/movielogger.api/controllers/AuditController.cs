@@ -8,14 +8,9 @@ namespace movielogger.api.controllers
     [Authorize]
     [ApiController]
     [Route("api/audit")]
-    public class AuditController : ControllerBase
+    public class AuditController(IAuditService auditService) : ControllerBase
     {
-        private readonly IAuditService _auditService;
-
-        public AuditController(IAuditService auditService)
-        {
-            _auditService = auditService;
-        }
+        private readonly IAuditService _auditService = auditService;
 
         [HttpGet("logs")]
         public async Task<ActionResult<IEnumerable<AuditLog>>> GetAuditLogs(

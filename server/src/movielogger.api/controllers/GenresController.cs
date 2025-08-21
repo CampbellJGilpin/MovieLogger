@@ -12,16 +12,10 @@ namespace movielogger.api.controllers
     [Authorize]
     [Route("api/genres")]
     [ApiController]
-    public class GenresController : ControllerBase
+    public class GenresController(IGenresService genresService, IMapper mapper) : ControllerBase
     {
-        private readonly IGenresService _genresService;
-        private readonly IMapper _mapper;
-
-        public GenresController(IGenresService genresService, IMapper mapper)
-        {
-            _genresService = genresService;
-            _mapper = mapper;
-        }
+        private readonly IGenresService _genresService = genresService;
+        private readonly IMapper _mapper = mapper;
 
         [HttpGet]
         public async Task<IActionResult> GetAllGenres()

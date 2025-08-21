@@ -12,16 +12,10 @@ namespace movielogger.api.controllers
     [Authorize]
     [ApiController]
     [Route("api/reviews")]
-    public class ReviewsController : ControllerBase
+    public class ReviewsController(IReviewsService reviewsService, IMapper mapper) : ControllerBase
     {
-        private readonly IReviewsService _reviewsService;
-        private readonly IMapper _mapper;
-
-        public ReviewsController(IReviewsService reviewsService, IMapper mapper)
-        {
-            _reviewsService = reviewsService;
-            _mapper = mapper;
-        }
+        private readonly IReviewsService _reviewsService = reviewsService;
+        private readonly IMapper _mapper = mapper;
 
         [HttpGet]
         [Route("~/api/users/{userId}/reviews")]

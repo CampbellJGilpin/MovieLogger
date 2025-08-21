@@ -13,16 +13,10 @@ namespace movielogger.api.controllers
     [Authorize]
     [ApiController]
     [Route("api/users")]
-    public class LibraryController : ControllerBase
+    public class LibraryController(ILibraryService libraryService, IMapper mapper) : ControllerBase
     {
-        private readonly ILibraryService _libraryService;
-        private readonly IMapper _mapper;
-
-        public LibraryController(ILibraryService libraryService, IMapper mapper)
-        {
-            _libraryService = libraryService;
-            _mapper = mapper;
-        }
+        private readonly ILibraryService _libraryService = libraryService;
+        private readonly IMapper _mapper = mapper;
 
         [HttpGet("{userId}/library")]
         public async Task<IActionResult> GetLibrary(int userId)

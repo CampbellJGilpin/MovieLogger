@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieLogger Architecture Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .diagram-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .legend {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .legend h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .legend-item {
+            display: inline-block;
+            margin: 5px 15px;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .frontend { background-color: #61dafb; color: #000; }
+        .backend { background-color: #512bd4; color: #fff; }
+        .database { background-color: #336791; color: #fff; }
+        .messaging { background-color: #ff6600; color: #fff; }
+        .infrastructure { background-color: #232f3e; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MovieLogger Application Architecture</h1>
+        
+        <div class="diagram-container">
+            <div class="mermaid">
+                graph TB
+                    %% User Interface Layer
+                    subgraph "Frontend Layer (React + TypeScript) - Port 5173"
+                        UI[React App]
+                        Pages[Pages<br/>Dashboard, Movies, Library, Lists]
+                        Components[Components<br/>MovieCard, Reviews, Auth]
+                        Services[API Services<br/>movieService, reviewService]
+                        Auth[Auth Context<br/>JWT Token Management]
+                    end
+
+                    %% API Gateway Layer
+                    subgraph "Web API Layer (ASP.NET Core) - Port 5049"
+                        API[Web API Controllers]
+                        Controllers[Specific Controllers<br/>Movies, Reviews, Library, Lists]
+                        Middleware[Middleware<br/>Auth, Exception Handling]
+                        Validation[FluentValidation<br/>Request Validators]
+                    end
+
+                    %% Business Logic Layer
+                    subgraph "Business Services Layer"
+                        BizServices[Core Services<br/>MoviesService, ReviewsService]
+                        Cache[Caching Service<br/>CachedMoviesService]
+                        FileUpload[File Upload Service<br/>Movie Poster Management]
+                        Factory[Service Factory<br/>Dependency Resolution]
+                    end
+
+                    %% Data Access Layer
+                    subgraph "Data Access Layer (Entity Framework)"
+                        EF[EF Core DbContext]
+                        Entities[Domain Entities<br/>Movie, User, Review, List]
+                        DTOs[Data Transfer Objects]
+                    end
+
+                    %% Message Queue
+                    subgraph "Messaging Layer (RabbitMQ) - Ports 5672, 15672"
+                        Queue[RabbitMQ Broker]
+                        Publisher[Event Publisher]
+                        Consumer[Audit Event Consumer]
+                        Events[Movie Events & Audit Logs]
+                    end
+
+                    %% Database
+                    subgraph "Database Layer (PostgreSQL) - Port 5432"
+                        DB[(PostgreSQL Database)]
+                        Migrations[Flyway Migrations<br/>Schema Versioning]
+                        Tables[Database Tables<br/>Users, Movies, Reviews, Lists, Genres]
+                    end
+
+                    %% Infrastructure
+                    subgraph "Infrastructure & Storage"
+                        Docker[Docker Compose<br/>Local Development]
+                        AWS[AWS CDK Deployment<br/>S3, CloudFront, ECS, RDS]
+                        Files[File Storage<br/>Movie Poster Images]
+                    end
+
+                    %% User Interactions
+                    User([End User]) --> UI
+                    UI --> Pages
+                    Pages --> Components
+                    Components --> Services
+                    Services --> Auth
+
+                    %% API Communication Flow
+                    Services -.->|HTTP REST API<br/>JSON Requests| API
+                    API --> Controllers
+                    Controllers --> Middleware
+                    Controllers --> Validation
+                    Controllers --> BizServices
+
+                    %% Business Logic Flow
+                    BizServices --> Factory
+                    Factory --> Cache
+                    Cache --> EF
+                    BizServices --> FileUpload
+                    BizServices --> Publisher
+
+                    %% Data Access Flow
+                    EF --> Entities
+                    EF --> DTOs
+                    EF -.->|SQL Queries<br/>CRUD Operations| DB
+                    Migrations --> DB
+
+                    %% Event-Driven Architecture
+                    Publisher --> Queue
+                    Queue --> Consumer
+                    Consumer --> Events
+                    Events -.->|Audit Logging| DB
+
+                    %% Infrastructure Dependencies
+                    Docker -.->|Container Orchestration| DB
+                    Docker -.->|Container Orchestration| Queue
+                    FileUpload --> Files
+                    AWS -.->|Cloud Hosting| UI
+                    AWS -.->|Cloud Hosting| API
+
+                    %% Color Coding
+                    classDef frontend fill:#61dafb,stroke:#000,stroke-width:2px,color:#000
+                    classDef backend fill:#512bd4,stroke:#000,stroke-width:2px,color:#fff
+                    classDef database fill:#336791,stroke:#000,stroke-width:2px,color:#fff
+                    classDef messaging fill:#ff6600,stroke:#000,stroke-width:2px,color:#fff
+                    classDef infrastructure fill:#232f3e,stroke:#000,stroke-width:2px,color:#fff
+
+                    class UI,Pages,Components,Services,Auth frontend
+                    class API,Controllers,Middleware,Validation,BizServices,Cache,FileUpload,Factory,EF,Entities,DTOs backend
+                    class DB,Migrations,Tables database
+                    class Queue,Publisher,Consumer,Events messaging
+                    class Docker,AWS,Files infrastructure
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>Component Legend:</h3>
+            <div class="legend-item frontend">Frontend (React)</div>
+            <div class="legend-item backend">Backend (.NET)</div>
+            <div class="legend-item database">Database (PostgreSQL)</div>
+            <div class="legend-item messaging">Messaging (RabbitMQ)</div>
+            <div class="legend-item infrastructure">Infrastructure (Docker/AWS)</div>
+        </div>
+
+        <h2>Application Flow Summary:</h2>
+        <ol>
+            <li><strong>User Authentication:</strong> JWT-based login system with protected routes</li>
+            <li><strong>Frontend:</strong> React components make API calls through service layer</li>
+            <li><strong>API Gateway:</strong> ASP.NET controllers validate requests and route to services</li>
+            <li><strong>Business Logic:</strong> Services handle core functionality with caching and file upload</li>
+            <li><strong>Data Access:</strong> Entity Framework manages database operations</li>
+            <li><strong>Event Handling:</strong> RabbitMQ processes audit events asynchronously</li>
+            <li><strong>Infrastructure:</strong> Docker for development, AWS CDK for cloud deployment</li>
+        </ol>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'default',
+            flowchart: { 
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>

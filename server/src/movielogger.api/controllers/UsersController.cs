@@ -13,18 +13,11 @@ namespace movielogger.api.controllers
 {
     [ApiController]
     [Route("api/users")]
-    public class UsersController : ControllerBase
+    public class UsersController(IUsersService usersService, IAccountsService accountsService, IMapper mapper) : ControllerBase
     {
-        private readonly IUsersService _usersService;
-        private readonly IAccountsService _accountsService;
-        private readonly IMapper _mapper;
-
-        public UsersController(IUsersService usersService, IAccountsService accountsService, IMapper mapper)
-        {
-            _usersService = usersService;
-            _accountsService = accountsService;
-            _mapper = mapper;
-        }
+        private readonly IUsersService _usersService = usersService;
+        private readonly IAccountsService _accountsService = accountsService;
+        private readonly IMapper _mapper = mapper;
 
         [HttpGet]
         [Authorize]

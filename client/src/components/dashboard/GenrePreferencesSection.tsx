@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { ChartBarIcon, StarIcon, EyeIcon } from '@heroicons/react/24/outline';
 import type { GenrePreferencesSummary } from '../../types/index';
 import * as genrePreferencesService from '../../services/genrePreferencesService';
@@ -173,15 +172,6 @@ export default function GenrePreferencesSection({ className = '' }: GenrePrefere
         )}
       </div>
 
-      {/* View All Link */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <Link
-          to="/movies"
-          className="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
-        >
-          View all movies →
-        </Link>
-      </div>
     </div>
   );
 } 

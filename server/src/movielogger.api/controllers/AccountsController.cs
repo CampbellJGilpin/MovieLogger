@@ -11,18 +11,11 @@ namespace movielogger.api.controllers
 {
     [ApiController]
     [Route("api/accounts")]
-    public class AccountsController : ControllerBase
+    public class AccountsController(IAccountsService accountsService, IUsersService usersService, IMapper mapper) : ControllerBase
     {
-        private readonly IAccountsService _accountsService;
-        private readonly IUsersService _usersService;
-        private readonly IMapper _mapper;
-
-        public AccountsController(IAccountsService accountsService, IUsersService usersService, IMapper mapper)
-        {
-            _accountsService = accountsService;
-            _usersService = usersService;
-            _mapper = mapper;
-        }
+        private readonly IAccountsService _accountsService = accountsService;
+        private readonly IUsersService _usersService = usersService;
+        private readonly IMapper _mapper = mapper;
 
         [HttpPost("register")]
         public async Task<ActionResult<LoginResponse>> Register([FromBody] RegisterRequest request)

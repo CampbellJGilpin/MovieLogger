@@ -14,29 +14,79 @@ interface MovieListSectionProps {
 }
 
 function RecentlyWatchedSection({ viewings }: { viewings: Viewing[] }) {
+  // Helper to get full poster URL
+  const getPosterUrl = (posterPath?: string) => {
+    if (!posterPath) return undefined;
+    if (posterPath.startsWith('http')) return posterPath;
+    // Static files are served from the backend root, not the /api endpoint
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5049';
+    const baseUrl = apiBaseUrl.replace('/api', ''); // Remove /api suffix for static files
+    return `${baseUrl}${posterPath}`;
+  };
+
   return (
-    <div>
+    <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Recently Watched</h2>
       {viewings.length === 0 ? (
         <p className="text-gray-500 text-sm">No recently watched movies</p>
       ) : (
-        <ul className="space-y-3">
-          {viewings.map(viewing => (
-            <li key={viewing.id} className="flex items-center justify-between bg-white rounded-lg shadow p-4">
-              <div>
-                <Link to={`/movies/${viewing.movie.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
-                  {viewing.movie.title}
+        <div className="flex space-x-4 overflow-x-auto pb-2">
+          {viewings.slice(0, 8).map(viewing => {
+            const posterUrl = getPosterUrl(viewing.movie.posterPath);
+            return (
+              <div key={viewing.id} className="flex-shrink-0">
+                <Link to={`/movies/${viewing.movie.id}`} className="block">
+                  <div className="w-32">
+                    <div className="relative aspect-[2/3] mb-2">
+                      {posterUrl ? (
+                        <img
+                          src={posterUrl}
+                          alt={viewing.movie.title}
+                          className="w-full h-full object-cover rounded-lg shadow-sm"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+                          <span className="text-gray-400 text-xs text-center px-2">
+                            No poster
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-xs">
+                      <h3 className="font-medium text-gray-900 hover:text-indigo-600 line-clamp-2">
+                        {viewing.movie.title}
+                      </h3>
+                      <p className="text-gray-500 mt-1">
+                        {new Date(viewing.movie.releaseDate).getFullYear()}
+                      </p>
+                      <p className="text-gray-400">
+                        Watched {new Date(viewing.dateViewed).toLocaleDateString()}
+                      </p>
+                      {viewing.review && viewing.review.score > 0 && (
+                        <div className="flex items-center mt-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <svg
+                              key={star}
+                              className={`h-3 w-3 ${
+                                star <= viewing.review!.score
+                                  ? 'text-yellow-400'
+                                  : 'text-gray-300'
+                              }`}
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </Link>
-                <p className="text-xs text-gray-500 mt-1">
-                  {new Date(viewing.movie.releaseDate).getFullYear()} • {viewing.movie.genre.title}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Watched on {new Date(viewing.dateViewed).toLocaleDateString()}
-                </p>
               </div>
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -177,22 +227,26 @@ export default function Dashboard() {
           <div className="text-sm text-red-700">{error}</div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <RecentlyWatchedSection viewings={recentlyWatched} />
-          <MovieListSection
-            title="Personal Library"
-            movies={libraryMovies.slice(0, 5)}
-            onToggleFavorite={handleToggleFavorite}
-            emptyMessage="Your personal library is empty"
-          />
-          <MovieListSection
-            title="Favourites"
-            movies={favoriteMovies.slice(0, 5)}
-            onToggleFavorite={handleToggleFavorite}
-            emptyMessage="No favorite movies yet"
-          />
-          <GenrePreferencesSection />
-        </div>
+        <>
+          <div className="mb-8">
+            <RecentlyWatchedSection viewings={recentlyWatched} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <MovieListSection
+              title="Personal Library"
+              movies={libraryMovies.slice(0, 5)}
+              onToggleFavorite={handleToggleFavorite}
+              emptyMessage="Your personal library is empty"
+            />
+            <MovieListSection
+              title="Favourites"
+              movies={favoriteMovies.slice(0, 5)}
+              onToggleFavorite={handleToggleFavorite}
+              emptyMessage="No favorite movies yet"
+            />
+            <GenrePreferencesSection />
+          </div>
+        </>
       )}
 
       <AddMovieModal

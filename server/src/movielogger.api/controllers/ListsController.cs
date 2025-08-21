@@ -13,16 +13,10 @@ namespace movielogger.api.controllers;
 [Authorize]
 [ApiController]
 [Route("api/users/{userId}/lists")]
-public class ListsController : ControllerBase
+public class ListsController(IListsService listsService, IMapper mapper) : ControllerBase
 {
-    private readonly IListsService _listsService;
-    private readonly IMapper _mapper;
-
-    public ListsController(IListsService listsService, IMapper mapper)
-    {
-        _listsService = listsService;
-        _mapper = mapper;
-    }
+    private readonly IListsService _listsService = listsService;
+    private readonly IMapper _mapper = mapper;
 
     [HttpGet]
     public async Task<IActionResult> GetUserLists(int userId)

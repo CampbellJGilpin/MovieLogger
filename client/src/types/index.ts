@@ -54,6 +54,7 @@ export interface Viewing {
   upcomingViewDate: string;
   dateViewed: string;
   movie: Movie;
+  review?: Review;
 }
 
 export interface GenrePreference {

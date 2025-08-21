@@ -6,19 +6,27 @@ import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 interface AddReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (review: { score: number; reviewText: string }) => void;
+  onSubmit: (review: { score: number; reviewText: string; dateViewed: string }) => void;
   movieTitle: string;
 }
 
 export default function AddReviewModal({ isOpen, onClose, onSubmit, movieTitle }: AddReviewModalProps) {
   const [score, setScore] = useState(0);
   const [reviewText, setReviewText] = useState('');
+  const [dateViewed, setDateViewed] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ score, reviewText });
+    onSubmit({ score, reviewText, dateViewed });
     setScore(0);
     setReviewText('');
+    setDateViewed(() => {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+    });
   };
 
   return (
@@ -76,6 +84,23 @@ export default function AddReviewModal({ isOpen, onClose, onSubmit, movieTitle }
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label
+                      htmlFor="dateViewed"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Date Watched
+                    </label>
+                    <input
+                      type="date"
+                      id="dateViewed"
+                      value={dateViewed}
+                      onChange={(e) => setDateViewed(e.target.value)}
+                      max={new Date().toISOString().split('T')[0]}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    />
                   </div>
 
                   <div className="mb-4">

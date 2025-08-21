@@ -124,12 +124,13 @@ export async function getMovieReviews(movieId: number): Promise<Review[]> {
   return response.data;
 }
 
-export async function addMovieReview(movieId: number, review: { score: number; reviewText: string }): Promise<Review> {
+export async function addMovieReview(movieId: number, review: { score: number; reviewText: string; dateViewed: string }): Promise<Review> {
   const userResponse = await api.get<{ id: number }>(`/accounts/me`);
   const userId = userResponse.data.id;
   const response = await api.post<Review>(`/movies/${movieId}/reviews`, {
     userId,
-    ...review
+    ...review,
+    dateViewed: new Date(review.dateViewed).toISOString()
   });
   return response.data;
 }

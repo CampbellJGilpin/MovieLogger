@@ -15,27 +15,18 @@ namespace movielogger.api.controllers
     [Authorize]
     [ApiController]
     [Route("api/movies")]
-    public class MoviesController : ControllerBase
+    public class MoviesController(
+        IMovieQueryService movieQueryService,
+        IMovieCommandService movieCommandService,
+        IMapper mapper,
+        IMessagePublisher messagePublisher,
+        IFileUploadService fileUploadService) : ControllerBase
     {
-        private readonly IMovieQueryService _movieQueryService;
-        private readonly IMovieCommandService _movieCommandService;
-        private readonly IMapper _mapper;
-        private readonly IMessagePublisher _messagePublisher;
-        private readonly IFileUploadService _fileUploadService;
-
-        public MoviesController(
-            IMovieQueryService movieQueryService,
-            IMovieCommandService movieCommandService,
-            IMapper mapper,
-            IMessagePublisher messagePublisher,
-            IFileUploadService fileUploadService)
-        {
-            _movieQueryService = movieQueryService;
-            _movieCommandService = movieCommandService;
-            _mapper = mapper;
-            _messagePublisher = messagePublisher;
-            _fileUploadService = fileUploadService;
-        }
+        private readonly IMovieQueryService _movieQueryService = movieQueryService;
+        private readonly IMovieCommandService _movieCommandService = movieCommandService;
+        private readonly IMapper _mapper = mapper;
+        private readonly IMessagePublisher _messagePublisher = messagePublisher;
+        private readonly IFileUploadService _fileUploadService = fileUploadService;
 
         [HttpGet]
         public async Task<ActionResult<PaginatedResponse<MovieResponse>>> GetAllMovies([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
