@@ -228,10 +228,18 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          <div className="mb-8">
-            <RecentlyWatchedSection viewings={recentlyWatched} />
+          {/* Top row: Recently Watched (2/3) + Genre Preferences (1/3) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div className="lg:col-span-2">
+              <RecentlyWatchedSection viewings={recentlyWatched} />
+            </div>
+            <div className="lg:col-span-1">
+              <GenrePreferencesSection />
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {/* Bottom row: Personal Library + Favourites */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <MovieListSection
               title="Personal Library"
               movies={libraryMovies.slice(0, 5)}
@@ -244,7 +252,6 @@ export default function Dashboard() {
               onToggleFavorite={handleToggleFavorite}
               emptyMessage="No favorite movies yet"
             />
-            <GenrePreferencesSection />
           </div>
         </>
       )}
