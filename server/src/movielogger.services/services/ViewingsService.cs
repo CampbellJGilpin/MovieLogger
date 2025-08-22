@@ -106,6 +106,7 @@ public class ViewingsService : IViewingsService
         var viewings = await _db.Viewings
             .Include(v => v.UserMovie)
                 .ThenInclude(um => um.Movie)
+                    .ThenInclude(m => m.Genre)
             .Include(v => v.Review)
             .Where(v => v.UserMovie.UserId == userId)
             .ToListAsync();

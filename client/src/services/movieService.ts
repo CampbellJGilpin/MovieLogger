@@ -270,4 +270,29 @@ export async function getRecentlyWatchedMovies(): Promise<Viewing[]> {
   const userId = userResponse.data.id;
   const response = await api.get<Viewing[]>(`/users/${userId}/recently-watched?count=5`);
   return response.data;
+}
+
+export async function getViewingHistoryPaginated(
+  page = 1,
+  pageSize = 10
+): Promise<{ items: Viewing[]; totalPages: number }> {
+  const userResponse = await api.get('/accounts/me');
+  const userId = userResponse.data.id;
+  
+  const response = await api.get<Viewing[]>(`/users/${userId}/viewings`);
+  
+  // Since the backend doesn't support pagination for viewings yet, we'll do client-side pagination
+  const allViewings = response.data.sort((a, b) => 
+    new Date(b.dateViewed).getTime() - new Date(a.dateViewed).getTime()
+  );
+  
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const items = allViewings.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(allViewings.length / pageSize);
+  
+  return {
+    items,
+    totalPages
+  };
 } 

@@ -21,7 +21,7 @@ export default function Navbar() {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
     { name: 'All Movies', href: '/movies', icon: FilmIcon },
-    { name: 'My Library', href: '/library', icon: BookmarkIcon },
+    { name: 'My Movies', href: '/library', icon: BookmarkIcon },
     { name: 'My Lists', href: '/lists', icon: QueueListIcon },
     { name: 'Profile', href: '/profile', icon: UserIcon },
   ];

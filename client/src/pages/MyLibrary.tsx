@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import MovieList from '../components/movies/MovieList';
-import type { MovieInLibrary } from '../types/index';
+import ViewingHistoryList from '../components/movies/ViewingHistoryList';
+import type { MovieInLibrary, Viewing } from '../types/index';
 import * as movieService from '../services/movieService';
 
 export default function MyLibrary() {
   const [movies, setMovies] = useState<MovieInLibrary[]>([]);
+  const [viewings, setViewings] = useState<Viewing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'favorites' | 'history'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize] = useState(10);
@@ -18,14 +20,19 @@ export default function MyLibrary() {
       setError(null);
       
       let result;
-      if (tab === 'favorites') {
+      if (tab === 'history') {
+        result = await movieService.getViewingHistoryPaginated(page, pageSize);
+        setViewings(result.items);
+        setTotalPages(result.totalPages);
+      } else if (tab === 'favorites') {
         result = await movieService.getMyFavoritesPaginated(page, pageSize);
+        setMovies(result.items);
+        setTotalPages(result.totalPages);
       } else {
         result = await movieService.getMyLibraryPaginated(page, pageSize);
+        setMovies(result.items);
+        setTotalPages(result.totalPages);
       }
-      
-      setMovies(result.items);
-      setTotalPages(result.totalPages);
     } catch (err) {
       setError('Failed to load your library. Please try again later.');
       console.error('Error loading library:', err);
@@ -70,7 +77,7 @@ export default function MyLibrary() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">My Library</h1>
+        <h1 className="text-2xl font-bold text-gray-900">My Movies</h1>
       </div>
 
       <div className="border-b border-gray-200 mb-8">
@@ -85,7 +92,7 @@ export default function MyLibrary() {
               }
             `}
           >
-            All Movies
+            My Library
           </button>
           <button
             onClick={() => setActiveTab('favorites')}
@@ -99,6 +106,18 @@ export default function MyLibrary() {
           >
             Favorites
           </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`
+              whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+              ${activeTab === 'history'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }
+            `}
+          >
+            Viewing History
+          </button>
         </nav>
       </div>
 
@@ -108,19 +127,31 @@ export default function MyLibrary() {
         </div>
       ) : (
         <>
-          <MovieList
-            movies={movies}
-            onToggleFavorite={handleToggleFavorite}
-            emptyMessage={
-              isLoading
-                ? 'Loading your library...'
-                : error
-                ? error
-                : activeTab === 'favorites'
-                ? 'No favorite movies yet'
-                : 'No movies in your library'
-            }
-          />
+          {activeTab === 'history' ? (
+            <ViewingHistoryList
+              viewings={viewings}
+              onToggleFavorite={handleToggleFavorite}
+              emptyMessage={
+                isLoading
+                  ? 'Loading viewing history...'
+                  : 'No viewing history found'
+              }
+            />
+          ) : (
+            <MovieList
+              movies={movies}
+              onToggleFavorite={handleToggleFavorite}
+              emptyMessage={
+                isLoading
+                  ? 'Loading your library...'
+                  : error
+                  ? error
+                  : activeTab === 'favorites'
+                  ? 'No favorite movies yet'
+                  : 'No movies in your library'
+              }
+            />
+          )}
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-8 flex justify-center">
