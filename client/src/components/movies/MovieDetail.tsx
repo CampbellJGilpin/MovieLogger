@@ -43,6 +43,16 @@ export default function MovieDetail({
     return `${baseUrl}${movie.posterPath}`;
   };
 
+  // Helper to format runtime in minutes to hours and minutes
+  const formatRuntime = (runtimeMinutes?: number) => {
+    if (!runtimeMinutes) return null;
+    const hours = Math.floor(runtimeMinutes / 60);
+    const minutes = runtimeMinutes % 60;
+    if (hours === 0) return `${minutes}m`;
+    if (minutes === 0) return `${hours}h`;
+    return `${hours}h ${minutes}m`;
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="grid grid-cols-12 gap-8">
@@ -53,6 +63,12 @@ export default function MovieDetail({
             <h1 className="text-4xl font-bold text-gray-900 mb-2">{movie.title}</h1>
             <div className="flex items-center gap-3">
               <span className="text-xl text-gray-600">{new Date(movie.releaseDate).getFullYear()}</span>
+              {formatRuntime(movie.runtimeMinutes) && (
+                <span className="text-xl text-gray-600">•</span>
+              )}
+              {formatRuntime(movie.runtimeMinutes) && (
+                <span className="text-xl text-gray-600">{formatRuntime(movie.runtimeMinutes)}</span>
+              )}
               <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
                 {movie.genre.title}
               </span>

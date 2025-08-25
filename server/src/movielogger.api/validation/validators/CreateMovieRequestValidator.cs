@@ -12,5 +12,9 @@ public class CreateMovieRequestValidator : AbstractValidator<CreateMovieRequest>
         RuleFor(x => x.Description).NotEmpty().WithMessage("Description is required");
         RuleFor(x => x.ReleaseDate).NotEmpty().WithMessage("ReleaseDate is required");
         RuleFor(x => x.GenreId).GreaterThan(0).WithMessage("GenreId must be greater than 0");
+        RuleFor(x => x.RuntimeMinutes)
+            .GreaterThan(0).WithMessage("Runtime must be greater than 0 minutes")
+            .LessThanOrEqualTo(1000).WithMessage("Runtime must be less than 1000 minutes")
+            .When(x => x.RuntimeMinutes.HasValue);
     }
 }

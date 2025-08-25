@@ -1,0 +1,1 @@
+ALTER TABLE movies ADD COLUMN runtime_minutes INTEGER NULL;

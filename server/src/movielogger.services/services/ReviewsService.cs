@@ -28,132 +28,162 @@ public class ReviewsService : IReviewsService
         }
 
         var reviews = await _db.Reviews
-            .Include(r => r.Viewing)
-            .ThenInclude(v => v.UserMovie)
-            .ThenInclude(x => x.Movie)
-            .Where(r => r.Viewing.UserMovie.UserId == userId)
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.Movie)
+            .ThenInclude(m => m.Genre)
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.User)
+            .Where(r => r.UserMovieViewing.UserId == userId)
+            .OrderByDescending(r => r.UserMovieViewing.DateViewed)
             .ToListAsync();
 
         return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
     }
 
-    public async Task<ReviewDto> CreateReviewAsync(int viewingId, ReviewDto dto)
+    public async Task<ReviewDto> CreateReviewAsync(int userMovieViewingId, ReviewDto dto)
     {
-        // Check if viewing exists
-        var viewing = await _db.Viewings.FirstOrDefaultAsync(v => v.Id == viewingId);
+        // Check if user movie viewing exists
+        var viewing = await _db.UserMovieViewings
+            .Include(v => v.Movie)
+            .Include(v => v.User)
+            .FirstOrDefaultAsync(v => v.Id == userMovieViewingId);
+
         if (viewing == null)
         {
-            throw new KeyNotFoundException($"Viewing with ID {viewingId} not found.");
+            throw new KeyNotFoundException($"User movie viewing with ID {userMovieViewingId} not found.");
+        }
+
+        // Check if review already exists for this viewing
+        var existingReview = await _db.Reviews.FirstOrDefaultAsync(r => r.UserMovieViewingId == userMovieViewingId);
+        if (existingReview != null)
+        {
+            throw new InvalidOperationException($"A review already exists for viewing with ID {userMovieViewingId}.");
         }
 
         var review = _mapper.Map<Review>(dto);
-        review.ViewingId = viewingId;
+        review.UserMovieViewingId = userMovieViewingId;
 
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        return _mapper.Map<ReviewDto>(review);
+        // Reload with includes for the response
+        var createdReview = await _db.Reviews
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.Movie)
+            .ThenInclude(m => m.Genre)
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.User)
+            .FirstOrDefaultAsync(r => r.Id == review.Id);
+
+        return _mapper.Map<ReviewDto>(createdReview!);
     }
 
-    public async Task<ReviewDto> UpdateReviewAsync(int reviewId, ReviewDto dto)
+    public async Task<ReviewDto> CreateMovieReviewAsync(int movieId, int userId, ReviewDto reviewDto)
     {
-        var review = await _db.Reviews.FindAsync(reviewId);
-        if (review == null)
+        // Check if user exists
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
         {
-            throw new KeyNotFoundException($"Review with ID {reviewId} not found.");
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
         }
 
-        _mapper.Map(dto, review);
-        await _db.SaveChangesAsync();
-
-        var savedReview = await _db.Reviews
-            .Include(r => r.Viewing)
-            .ThenInclude(v => v.UserMovie)
-            .ThenInclude(x => x.Movie)
-            .FirstOrDefaultAsync(v => v.Id == reviewId);
-
-        return _mapper.Map<ReviewDto>(savedReview);
-    }
-
-    public async Task<ReviewDto> CreateMovieReviewAsync(int movieId, int userId, ReviewDto review)
-    {
         // Check if movie exists
-        var movie = await _db.Movies.FirstOrDefaultAsync(m => m.Id == movieId);
-        if (movie == null)
+        var movieExists = await _db.Movies.AnyAsync(m => m.Id == movieId && !m.IsDeleted);
+        if (!movieExists)
         {
             throw new KeyNotFoundException($"Movie with ID {movieId} not found.");
         }
 
-        // Get or create UserMovie
-        var userMovie = await _db.UserMovies
-            .FirstOrDefaultAsync(um => um.MovieId == movieId && um.UserId == userId);
-
-        if (userMovie == null)
+        // Create new viewing record with current date
+        var viewing = new UserMovieViewing
         {
-            userMovie = new UserMovie
-            {
-                UserId = userId,
-                MovieId = movieId,
-                Favourite = false,
-                OwnsMovie = false,
-                UpcomingViewDate = null
-            };
-            _db.UserMovies.Add(userMovie);
-            await _db.SaveChangesAsync();
-        }
-
-        // Create a viewing
-        var viewing = new Viewing
-        {
-            UserMovieId = userMovie.Id,
-            DateViewed = review.DateViewed ?? DateTime.UtcNow
+            UserId = userId,
+            MovieId = movieId,
+            DateViewed = DateTime.UtcNow
         };
-        _db.Viewings.Add(viewing);
+
+        _db.UserMovieViewings.Add(viewing);
         await _db.SaveChangesAsync();
 
         // Create the review
-        var reviewEntity = _mapper.Map<Review>(review);
-        reviewEntity.ViewingId = viewing.Id;
+        var review = _mapper.Map<Review>(reviewDto);
+        review.UserMovieViewingId = viewing.Id;
 
-        _db.Reviews.Add(reviewEntity);
+        _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        // Load the complete review with all relationships
-        var savedReview = await _db.Reviews
-            .Include(r => r.Viewing)
-                .ThenInclude(v => v.UserMovie)
-                    .ThenInclude(um => um.Movie)
-            .FirstAsync(r => r.Id == reviewEntity.Id);
+        // Return the created review with full data
+        var createdReview = await _db.Reviews
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.Movie)
+            .ThenInclude(m => m.Genre)
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.User)
+            .FirstOrDefaultAsync(r => r.Id == review.Id);
 
-        return _mapper.Map<ReviewDto>(savedReview);
+        return _mapper.Map<ReviewDto>(createdReview!);
     }
 
     public async Task<List<ReviewDto>> GetMovieReviewsByUserIdAsync(int movieId, int userId)
     {
-        // First check if movie exists
-        var movie = await _db.Movies.FirstOrDefaultAsync(m => m.Id == movieId);
-        if (movie == null)
+        // Check if user exists
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        // Check if movie exists
+        var movieExists = await _db.Movies.AnyAsync(m => m.Id == movieId && !m.IsDeleted);
+        if (!movieExists)
         {
             throw new KeyNotFoundException($"Movie with ID {movieId} not found.");
         }
 
         var reviews = await _db.Reviews
-            .Include(r => r.Viewing)
-                .ThenInclude(v => v.UserMovie)
-                    .ThenInclude(um => um.Movie)
-            .Where(r => r.Viewing.UserMovie.MovieId == movieId && r.Viewing.UserMovie.UserId == userId)
-            .OrderByDescending(r => r.Viewing.DateViewed)
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.Movie)
+            .ThenInclude(m => m.Genre)
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.User)
+            .Where(r => r.UserMovieViewing.MovieId == movieId && r.UserMovieViewing.UserId == userId)
+            .OrderByDescending(r => r.UserMovieViewing.DateViewed)
             .ToListAsync();
 
         return _mapper.Map<List<ReviewDto>>(reviews);
     }
 
+    public async Task<ReviewDto> UpdateReviewAsync(int reviewId, ReviewDto dto)
+    {
+        var review = await _db.Reviews
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.Movie)
+            .ThenInclude(m => m.Genre)
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.User)
+            .FirstOrDefaultAsync(r => r.Id == reviewId);
+
+        if (review == null)
+        {
+            throw new KeyNotFoundException($"Review with ID {reviewId} not found.");
+        }
+
+        review.ReviewText = dto.ReviewText;
+        review.Score = dto.Score;
+
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<ReviewDto>(review);
+    }
+
     public async Task<ReviewDto> GetReviewByIdAsync(int reviewId)
     {
         var review = await _db.Reviews
-            .Include(r => r.Viewing)
-                .ThenInclude(v => v.UserMovie)
-                    .ThenInclude(um => um.Movie)
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.Movie)
+            .ThenInclude(m => m.Genre)
+            .Include(r => r.UserMovieViewing)
+            .ThenInclude(v => v.User)
             .FirstOrDefaultAsync(r => r.Id == reviewId);
 
         if (review == null)
@@ -166,8 +196,7 @@ public class ReviewsService : IReviewsService
 
     public async Task DeleteReviewAsync(int reviewId)
     {
-        var review = await _db.Reviews.FirstOrDefaultAsync(r => r.Id == reviewId);
-
+        var review = await _db.Reviews.FindAsync(reviewId);
         if (review == null)
         {
             throw new KeyNotFoundException($"Review with ID {reviewId} not found.");

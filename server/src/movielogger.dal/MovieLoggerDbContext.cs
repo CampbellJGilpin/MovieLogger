@@ -12,7 +12,7 @@ public class MovieLoggerDbContext : DbContext, IAssessmentDbContext
     public virtual DbSet<Movie> Movies => Set<Movie>();
     public virtual DbSet<Genre> Genres => Set<Genre>();
     public virtual DbSet<UserMovie> UserMovies => Set<UserMovie>();
-    public virtual DbSet<Viewing> Viewings => Set<Viewing>();
+    public virtual DbSet<UserMovieViewing> UserMovieViewings => Set<UserMovieViewing>();
     public virtual DbSet<Review> Reviews => Set<Review>();
     public virtual DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public virtual DbSet<EventTypeReference> EventTypeReferences => Set<EventTypeReference>();
@@ -73,15 +73,19 @@ public class MovieLoggerDbContext : DbContext, IAssessmentDbContext
                   .HasForeignKey(um => um.MovieId);
         });
 
-        // Viewing
-        modelBuilder.Entity<Viewing>(entity =>
+        // UserMovieViewing
+        modelBuilder.Entity<UserMovieViewing>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.DateViewed).IsRequired();
 
-            entity.HasOne(v => v.UserMovie)
-                  .WithMany(um => um.Viewings)
-                  .HasForeignKey(v => v.UserMovieId);
+            entity.HasOne(v => v.User)
+                  .WithMany(u => u.UserMovieViewings)
+                  .HasForeignKey(v => v.UserId);
+
+            entity.HasOne(v => v.Movie)
+                  .WithMany(m => m.UserMovieViewings)
+                  .HasForeignKey(v => v.MovieId);
         });
 
         // Review
@@ -89,9 +93,9 @@ public class MovieLoggerDbContext : DbContext, IAssessmentDbContext
         {
             entity.HasKey(e => e.Id);
 
-            entity.HasOne(r => r.Viewing)
+            entity.HasOne(r => r.UserMovieViewing)
                   .WithOne(v => v.Review)
-                  .HasForeignKey<Review>(r => r.ViewingId);
+                  .HasForeignKey<Review>(r => r.UserMovieViewingId);
         });
 
         // EventTypeReference

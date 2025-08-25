@@ -99,7 +99,13 @@ public class MoviesControllerTests : BaseTestController
         };
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/movies", request);
+        var formData = new MultipartFormDataContent();
+        formData.Add(new StringContent(request.Title), "Title");
+        formData.Add(new StringContent(request.Description), "Description");
+        formData.Add(new StringContent(request.GenreId.ToString()), "GenreId");
+        formData.Add(new StringContent(request.ReleaseDate.ToString("O")), "ReleaseDate");
+
+        var response = await client.PostAsync("/api/movies", formData);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -126,7 +132,13 @@ public class MoviesControllerTests : BaseTestController
         };
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/movies", request);
+        var formData = new MultipartFormDataContent();
+        formData.Add(new StringContent(request.Title), "Title");
+        formData.Add(new StringContent(request.Description), "Description");
+        formData.Add(new StringContent(request.GenreId.ToString()), "GenreId");
+        formData.Add(new StringContent(request.ReleaseDate.ToString("O")), "ReleaseDate");
+
+        var response = await client.PostAsync("/api/movies", formData);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -150,10 +162,16 @@ public class MoviesControllerTests : BaseTestController
         };
 
         // Act
-        var response = await client.PutAsJsonAsync("/api/movies/1", request);
+        var formData = new MultipartFormDataContent();
+        formData.Add(new StringContent(request.Title), "Title");
+        formData.Add(new StringContent(request.Description), "Description");
+        formData.Add(new StringContent(request.GenreId.ToString()), "GenreId");
+        formData.Add(new StringContent(request.ReleaseDate?.ToString("O") ?? string.Empty), "ReleaseDate");
+
+        var response = await client.PutAsync("/api/movies/1", formData);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.EnsureSuccessStatusCode();
         var movie = await response.Content.ReadFromJsonAsync<MovieResponse>();
         movie.Should().NotBeNull();
         movie!.Title.Should().Be("Updated Movie");

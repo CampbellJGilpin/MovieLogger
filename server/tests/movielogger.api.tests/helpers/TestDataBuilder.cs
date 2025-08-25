@@ -52,22 +52,23 @@ public static class TestDataBuilder
         };
     }
 
-    public static Viewing CreateTestViewing(int id = 1, int userMovieId = 1)
+    public static UserMovieViewing CreateTestViewing(int id = 1, int userId = 1, int movieId = 1)
     {
-        return new Viewing
+        return new UserMovieViewing
         {
             Id = id,
-            UserMovieId = userMovieId,
+            UserId = userId,
+            MovieId = movieId,
             DateViewed = DateTime.Now.AddDays(-id)
         };
     }
 
-    public static Review CreateTestReview(int id = 1, int viewingId = 1)
+    public static Review CreateTestReview(int id = 1, int userMovieViewingId = 1)
     {
         return new Review
         {
             Id = id,
-            ViewingId = viewingId,
+            UserMovieViewingId = userMovieViewingId,
             ReviewText = $"Test review {id}",
             Score = 4
         };

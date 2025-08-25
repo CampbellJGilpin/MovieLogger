@@ -37,9 +37,12 @@ public class LibraryServiceTests : BaseServiceTest
             .Create();
 
         var userMovies = new List<UserMovie> { userMovie }.AsQueryable();
+        var users = new List<User> { new User { Id = UserId, IsDeleted = false } }.AsQueryable();
 
-        var mockSet = userMovies.BuildMockDbSet();
-        _dbContext.UserMovies.Returns(mockSet);
+        var mockUserMoviesSet = userMovies.BuildMockDbSet();
+        var mockUsersSet = users.BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockUserMoviesSet);
+        _dbContext.Users.Returns(mockUsersSet);
 
         // Act
         var result = await _service.GetLibraryByUserIdAsync(UserId);
@@ -62,9 +65,12 @@ public class LibraryServiceTests : BaseServiceTest
             .Create();
 
         var userMovies = new List<UserMovie> { userMovie }.AsQueryable();
+        var users = new List<User> { new User { Id = UserId, IsDeleted = false } }.AsQueryable();
 
-        var mockSet = userMovies.BuildMockDbSet();
-        _dbContext.UserMovies.Returns(mockSet);
+        var mockUserMoviesSet = userMovies.BuildMockDbSet();
+        var mockUsersSet = users.BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockUserMoviesSet);
+        _dbContext.Users.Returns(mockUsersSet);
 
         // Act
         var result = await _service.GetLibraryFavouritesByUserIdAsync(UserId);
@@ -96,8 +102,12 @@ public class LibraryServiceTests : BaseServiceTest
             .Create();
 
         var userMovies = new List<UserMovie> { favUserMovie, nonFavUserMovie }.AsQueryable();
-        var mockSet = userMovies.BuildMockDbSet();
-        _dbContext.UserMovies.Returns(mockSet);
+        var users = new List<User> { new User { Id = UserId, IsDeleted = false } }.AsQueryable();
+
+        var mockUserMoviesSet = userMovies.BuildMockDbSet();
+        var mockUsersSet = users.BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockUserMoviesSet);
+        _dbContext.Users.Returns(mockUsersSet);
 
         // Act
         var result = await _service.GetLibraryFavouritesByUserIdAsync(UserId);
@@ -123,9 +133,12 @@ public class LibraryServiceTests : BaseServiceTest
             .Create();
 
         var userMovies = new List<UserMovie> { userMovie }.AsQueryable();
+        var users = new List<User> { new User { Id = UserId, IsDeleted = false } }.AsQueryable();
 
-        var mockSet = userMovies.BuildMockDbSet();
-        _dbContext.UserMovies.Returns(mockSet);
+        var mockUserMoviesSet = userMovies.BuildMockDbSet();
+        var mockUsersSet = users.BuildMockDbSet();
+        _dbContext.UserMovies.Returns(mockUserMoviesSet);
+        _dbContext.Users.Returns(mockUsersSet);
 
         // Act
         var result = await _service.GetLibraryWatchlistByUserIdAsync(UserId);

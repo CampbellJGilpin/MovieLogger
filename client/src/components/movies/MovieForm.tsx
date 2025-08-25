@@ -21,6 +21,7 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
   const [description, setDescription] = useState('');
   const [releaseDate, setReleaseDate] = useState(new Date().toISOString().split('T')[0]);
   const [genreId, setGenreId] = useState(1);
+  const [runtimeMinutes, setRuntimeMinutes] = useState<number | ''>('');
   const [genres, setGenres] = useState<Genre[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -55,6 +56,7 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
       setDescription(movie.description);
       setReleaseDate(new Date(movie.releaseDate).toISOString().split('T')[0]);
       setGenreId(movie.genre.id);
+      setRuntimeMinutes(movie.runtimeMinutes || '');
       
       // Set current poster URL if exists
       if (movie.posterPath) {
@@ -167,6 +169,9 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
     formData.append('description', description.trim());
     formData.append('releaseDate', new Date(releaseDate).toISOString());
     formData.append('genreId', genreId.toString());
+    if (runtimeMinutes !== '') {
+      formData.append('runtimeMinutes', runtimeMinutes.toString());
+    }
     formData.append('isDeleted', 'false');
     if (poster) {
       formData.append('poster', poster);
@@ -254,6 +259,25 @@ export default function MovieForm({ movie, onSubmit, onCancel }: MovieFormProps)
           onChange={(e) => setReleaseDate(e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
         />
+      </div>
+
+      <div>
+        <label htmlFor="runtime" className="block text-sm font-medium text-gray-700">
+          Runtime (minutes)
+        </label>
+        <input
+          type="number"
+          id="runtime"
+          value={runtimeMinutes}
+          onChange={(e) => setRuntimeMinutes(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+          placeholder="e.g. 135 for 2h 15m"
+          min="1"
+          max="1000"
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+        />
+        <p className="mt-1 text-xs text-gray-500">
+          Optional. Enter runtime in minutes (e.g., 135 for 2h 15m)
+        </p>
       </div>
 
       <div>

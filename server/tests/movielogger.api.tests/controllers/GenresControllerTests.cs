@@ -61,7 +61,7 @@ public class GenresControllerTests : BaseTestController
         // Arrange
         var request = new CreateGenreRequest
         {
-            Title = "Comedy"
+            Title = $"TestGenre_{Guid.NewGuid().ToString()[..8]}"
         };
 
         // Act
@@ -167,14 +167,23 @@ public class GenresControllerTests : BaseTestController
     [Fact]
     public async Task DeleteGenre_WhenGenreExists_ReturnsSuccess()
     {
+        // Arrange - Create a genre first so we can delete it
+        var createRequest = new CreateGenreRequest
+        {
+            Title = $"ToDelete_{Guid.NewGuid().ToString()[..8]}"
+        };
+        var createResponse = await _client.PostAsJsonAsync("/api/genres", createRequest);
+        createResponse.EnsureSuccessStatusCode();
+        var createdGenre = await createResponse.Content.ReadFromJsonAsync<GenreResponse>();
+
         // Act
-        var response = await _client.DeleteAsync("/api/genres/3"); // Assuming genre 3 exists
+        var response = await _client.DeleteAsync($"/api/genres/{createdGenre!.Id}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         // Verify genre is deleted
-        var getResponse = await _client.GetAsync("/api/genres/3");
+        var getResponse = await _client.GetAsync($"/api/genres/{createdGenre.Id}");
         getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 

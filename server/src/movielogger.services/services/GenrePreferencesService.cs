@@ -24,12 +24,11 @@ public class GenrePreferencesService : IGenrePreferencesService
         }
 
         // Get all viewings for the user with movie and genre data
-        var viewings = await _db.Viewings
-            .Include(v => v.UserMovie)
-            .ThenInclude(um => um.Movie)
+        var viewings = await _db.UserMovieViewings
+            .Include(v => v.Movie)
             .ThenInclude(m => m.Genre)
             .Include(v => v.Review)
-            .Where(v => v.UserMovie.UserId == userId)
+            .Where(v => v.UserId == userId)
             .ToListAsync();
 
         if (!viewings.Any())
@@ -45,7 +44,7 @@ public class GenrePreferencesService : IGenrePreferencesService
 
         // Group by genre and calculate statistics
         var genreStats = viewings
-            .GroupBy(v => v.UserMovie.Movie.Genre)
+            .GroupBy(v => v.Movie.Genre)
             .Select(g => new GenrePreferenceDto
             {
                 GenreId = g.Key.Id,
@@ -116,12 +115,11 @@ public class GenrePreferencesService : IGenrePreferencesService
     {
         var cutoffDate = DateTime.UtcNow.AddMonths(-months);
 
-        var monthlyTrends = await _db.Viewings
-            .Include(v => v.UserMovie)
-            .ThenInclude(um => um.Movie)
+        var monthlyTrends = await _db.UserMovieViewings
+            .Include(v => v.Movie)
             .ThenInclude(m => m.Genre)
-            .Where(v => v.UserMovie.UserId == userId && v.DateViewed >= cutoffDate)
-            .GroupBy(v => new { Month = v.DateViewed.Month, Year = v.DateViewed.Year, Genre = v.UserMovie.Movie.Genre.Title })
+            .Where(v => v.UserId == userId && v.DateViewed >= cutoffDate)
+            .GroupBy(v => new { Month = v.DateViewed.Month, Year = v.DateViewed.Year, Genre = v.Movie.Genre.Title })
             .Select(g => new
             {
                 MonthYear = $"{g.Key.Year}-{g.Key.Month:D2}",

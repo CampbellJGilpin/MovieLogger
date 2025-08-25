@@ -11,6 +11,7 @@ public class UpdateMovieRequest : IValidatable<UpdateMovieRequest>
     public string Description { get; set; } = string.Empty;
     public DateTime? ReleaseDate { get; set; }
     public int? GenreId { get; set; }
+    public int? RuntimeMinutes { get; set; }
     public IFormFile? Poster { get; set; }
 
     public IValidator<UpdateMovieRequest> GetValidator()

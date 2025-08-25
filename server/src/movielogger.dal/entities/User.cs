@@ -32,4 +32,5 @@ public class User
 
     public ICollection<UserMovie> Library { get; set; } = new List<UserMovie>();
     public ICollection<List> Lists { get; set; } = new List<List>();
+    public ICollection<UserMovieViewing> UserMovieViewings { get; set; } = new List<UserMovieViewing>();
 }

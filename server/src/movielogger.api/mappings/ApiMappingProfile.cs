@@ -29,8 +29,10 @@ public class ApiMappingProfile : Profile
             .ForMember(dest => dest.Favourite, opt => opt.MapFrom(src => src.IsFavorite));
         CreateMap<UpdateLibraryItemRequest, LibraryItemDto>()
             .ForMember(dest => dest.Favourite, opt => opt.MapFrom(src => src.IsFavorite));
-        CreateMap<CreateMovieRequest, MovieDto>();
-        CreateMap<UpdateMovieRequest, MovieDto>();
+        CreateMap<CreateMovieRequest, MovieDto>()
+            .ForMember(dest => dest.Genre, opt => opt.MapFrom(src => new GenreDto { Id = src.GenreId }));
+        CreateMap<UpdateMovieRequest, MovieDto>()
+            .ForMember(dest => dest.Genre, opt => opt.Ignore());
         CreateMap<CreateReviewRequest, ReviewDto>();
         CreateMap<UpdateReviewRequest, ReviewDto>();
         CreateMap<CreateUserRequest, UserDto>();

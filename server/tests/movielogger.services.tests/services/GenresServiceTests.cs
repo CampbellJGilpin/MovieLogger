@@ -107,7 +107,11 @@ public class GenresServiceTests : BaseServiceTest
         var genreDto = Fixture.Create<GenreDto>();
         var existingGenre = Fixture.Build<Genre>().With(g => g.Id, genreDto.Id).Create();
 
+        // Mock Genres DbSet with the existing genre
+        var genres = new List<Genre> { existingGenre }.AsQueryable().BuildMockDbSet();
+        _dbContext.Genres.Returns(genres);
         _dbContext.Genres.FindAsync(existingGenre.Id)!.Returns(new ValueTask<Genre>(existingGenre));
+
         _dbContext.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act 
@@ -140,6 +144,10 @@ public class GenresServiceTests : BaseServiceTest
         // Arrange
         var genre = Fixture.Create<Genre>();
         _dbContext.Genres.FindAsync(genre.Id)!.Returns(new ValueTask<Genre>(genre));
+
+        // Mock Movies DbSet to return empty (no associated movies)
+        var emptyMovies = new List<Movie>().AsQueryable().BuildMockDbSet();
+        _dbContext.Movies.Returns(emptyMovies);
 
         // Act 
         await _service.DeleteGenreAsync(genre.Id);

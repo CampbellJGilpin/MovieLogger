@@ -33,6 +33,10 @@ public class Movie
     [Column("poster_path")]
     public string? PosterPath { get; set; }
 
+    [Column("runtime_minutes")]
+    public int? RuntimeMinutes { get; set; }
+
     public ICollection<UserMovie> UserMovies { get; set; } = new List<UserMovie>();
     public ICollection<ListMovie> ListMovies { get; set; } = new List<ListMovie>();
+    public ICollection<UserMovieViewing> UserMovieViewings { get; set; } = new List<UserMovieViewing>();
 }

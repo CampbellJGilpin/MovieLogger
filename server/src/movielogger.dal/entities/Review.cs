@@ -10,8 +10,8 @@ public class Review
     [Column("id")]
     public int Id { get; set; }
 
-    [Column("viewing_id")]
-    public int ViewingId { get; set; }
+    [Column("user_movie_viewing_id")]
+    public int UserMovieViewingId { get; set; }
 
     [Column("review_text", TypeName = "text")]
     public string? ReviewText { get; set; }
@@ -19,6 +19,6 @@ public class Review
     [Column("score")]
     public int? Score { get; set; }
 
-    [ForeignKey(nameof(ViewingId))]
-    public Viewing Viewing { get; set; } = default!;
+    [ForeignKey(nameof(UserMovieViewingId))]
+    public UserMovieViewing UserMovieViewing { get; set; } = default!;
 }

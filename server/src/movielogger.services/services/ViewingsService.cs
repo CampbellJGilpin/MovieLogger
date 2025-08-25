@@ -20,9 +20,10 @@ public class ViewingsService : IViewingsService
 
     public async Task<ViewingDto> GetViewingByIdAsync(int viewingId)
     {
-        var viewing = await _db.Viewings
-            .Include(v => v.UserMovie)
-            .ThenInclude(um => um.Movie)
+        var viewing = await _db.UserMovieViewings
+            .Include(v => v.User)
+            .Include(v => v.Movie)
+            .ThenInclude(m => m.Genre)
             .Include(v => v.Review)
             .FirstOrDefaultAsync(v => v.Id == viewingId);
 
@@ -43,44 +44,108 @@ public class ViewingsService : IViewingsService
             throw new KeyNotFoundException($"User with ID {userId} not found.");
         }
 
-        // Check if UserMovie exists
-        var userMovie = await _db.UserMovies
-            .FirstOrDefaultAsync(um => um.MovieId == viewingDto.MovieId && um.UserId == userId);
-
-        if (userMovie == null)
+        // Check if movie exists
+        var movieExists = await _db.Movies.AnyAsync(m => m.Id == viewingDto.MovieId && !m.IsDeleted);
+        if (!movieExists)
         {
-            userMovie = new UserMovie
-            {
-                UserId = userId,
-                MovieId = viewingDto.MovieId,
-                Favourite = false,
-                OwnsMovie = false,
-                UpcomingViewDate = null
-            };
-
-            _db.UserMovies.Add(userMovie);
-            await _db.SaveChangesAsync();
+            throw new KeyNotFoundException($"Movie with ID {viewingDto.MovieId} not found.");
         }
 
-        var viewing = new Viewing { UserMovieId = userMovie.Id, DateViewed = viewingDto.DateViewed };
+        // Create new viewing - no longer requires library membership
+        var viewing = new UserMovieViewing
+        {
+            UserId = userId,
+            MovieId = viewingDto.MovieId,
+            DateViewed = viewingDto.DateViewed
+        };
 
-        _db.Viewings.Add(viewing);
+        _db.UserMovieViewings.Add(viewing);
         await _db.SaveChangesAsync();
 
-        // Reload viewing with eager includes
-        var savedViewing = await _db.Viewings
-            .Include(v => v.UserMovie)
-            .ThenInclude(um => um.Movie)
+        // Return the created viewing with related data
+        var createdViewing = await _db.UserMovieViewings
+            .Include(v => v.User)
+            .Include(v => v.Movie)
+            .ThenInclude(m => m.Genre)
             .FirstOrDefaultAsync(v => v.Id == viewing.Id);
 
-        return _mapper.Map<ViewingDto>(savedViewing);
+        return _mapper.Map<ViewingDto>(createdViewing!);
+    }
+
+    public async Task<IEnumerable<ViewingDto>> GetViewingsByUserIdAsync(int userId)
+    {
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        var viewings = await _db.UserMovieViewings
+            .Include(v => v.Movie)
+            .ThenInclude(m => m.Genre)
+            .Include(v => v.Review)
+            .Where(v => v.UserId == userId)
+            .OrderByDescending(v => v.DateViewed)
+            .ToListAsync();
+
+        return _mapper.Map<IEnumerable<ViewingDto>>(viewings);
+    }
+
+    public async Task<(IEnumerable<ViewingDto> Items, int TotalCount, int TotalPages)> GetViewingsByUserIdPaginatedAsync(int userId, int page = 1, int pageSize = 10)
+    {
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        var totalCount = await _db.UserMovieViewings
+            .Where(v => v.UserId == userId)
+            .CountAsync();
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var viewings = await _db.UserMovieViewings
+            .Include(v => v.Movie)
+            .ThenInclude(m => m.Genre)
+            .Include(v => v.Review)
+            .Where(v => v.UserId == userId)
+            .OrderByDescending(v => v.DateViewed)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (_mapper.Map<IEnumerable<ViewingDto>>(viewings), totalCount, totalPages);
+    }
+
+    public async Task<IEnumerable<ViewingDto>> GetViewingsForMovieByUserIdAsync(int userId, int movieId)
+    {
+        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        var movieExists = await _db.Movies.AnyAsync(m => m.Id == movieId && !m.IsDeleted);
+        if (!movieExists)
+        {
+            throw new KeyNotFoundException($"Movie with ID {movieId} not found.");
+        }
+
+        var viewings = await _db.UserMovieViewings
+            .Include(v => v.Movie)
+            .ThenInclude(m => m.Genre)
+            .Include(v => v.Review)
+            .Where(v => v.UserId == userId && v.MovieId == movieId)
+            .OrderByDescending(v => v.DateViewed)
+            .ToListAsync();
+
+        return _mapper.Map<IEnumerable<ViewingDto>>(viewings);
     }
 
     public async Task<ViewingDto> UpdateViewingAsync(int viewingId, ViewingDto viewingDto)
     {
-        var viewing = await _db.Viewings
-            .Include(v => v.UserMovie)
-            .ThenInclude(um => um.Movie)
+        var viewing = await _db.UserMovieViewings
             .FirstOrDefaultAsync(v => v.Id == viewingId);
 
         if (viewing == null)
@@ -89,63 +154,41 @@ public class ViewingsService : IViewingsService
         }
 
         viewing.DateViewed = viewingDto.DateViewed;
+
         await _db.SaveChangesAsync();
 
-        return _mapper.Map<ViewingDto>(viewing);
-    }
-
-    public async Task<List<ViewingDto>> GetViewingsByUserIdAsync(int userId)
-    {
-        // First check if user exists
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null)
-        {
-            throw new KeyNotFoundException($"User with ID {userId} not found.");
-        }
-
-        var viewings = await _db.Viewings
-            .Include(v => v.UserMovie)
-                .ThenInclude(um => um.Movie)
-                    .ThenInclude(m => m.Genre)
+        // Return updated viewing with related data
+        var updatedViewing = await _db.UserMovieViewings
+            .Include(v => v.User)
+            .Include(v => v.Movie)
+            .ThenInclude(m => m.Genre)
             .Include(v => v.Review)
-            .Where(v => v.UserMovie.UserId == userId)
-            .ToListAsync();
+            .FirstOrDefaultAsync(v => v.Id == viewingId);
 
-        return viewings.Select(v => _mapper.Map<ViewingDto>(v)).ToList();
+        return _mapper.Map<ViewingDto>(updatedViewing!);
     }
 
-    public async Task<List<ViewingDto>> GetRecentlyWatchedMoviesAsync(int userId, int count = 5)
+    public async Task<bool> DeleteViewingAsync(int viewingId)
     {
-        // Check if user exists
-        var userExists = await _db.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted);
-        if (!userExists)
-        {
-            throw new KeyNotFoundException($"User with ID {userId} not found.");
-        }
-
-        var recentViewings = await _db.Viewings
-            .Include(v => v.UserMovie)
-                .ThenInclude(um => um.Movie)
-                    .ThenInclude(m => m.Genre)
+        var viewing = await _db.UserMovieViewings
             .Include(v => v.Review)
-            .Where(v => v.UserMovie.UserId == userId)
-            .OrderByDescending(v => v.DateViewed)
-            .Take(count)
-            .ToListAsync();
-
-        return recentViewings.Select(v => _mapper.Map<ViewingDto>(v)).ToList();
-    }
-
-    public async Task DeleteViewingAsync(int viewingId)
-    {
-        var viewing = await _db.Viewings.FirstOrDefaultAsync(v => v.Id == viewingId);
+            .FirstOrDefaultAsync(v => v.Id == viewingId);
 
         if (viewing == null)
         {
-            throw new KeyNotFoundException($"Viewing with ID {viewingId} not found.");
+            return false;
         }
 
-        _db.Viewings.Remove(viewing);
+        // Delete associated review if it exists
+        if (viewing.Review != null)
+        {
+            _db.Reviews.Remove(viewing.Review);
+        }
+
+        // Delete the viewing
+        _db.UserMovieViewings.Remove(viewing);
         await _db.SaveChangesAsync();
+
+        return true;
     }
 }

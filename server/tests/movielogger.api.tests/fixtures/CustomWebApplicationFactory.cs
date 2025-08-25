@@ -111,7 +111,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         var db = scope.ServiceProvider.GetRequiredService<MovieLoggerDbContext>();
 
         db.Reviews.RemoveRange(db.Reviews);
-        db.Viewings.RemoveRange(db.Viewings);
+        db.UserMovieViewings.RemoveRange(db.UserMovieViewings);
         db.UserMovies.RemoveRange(db.UserMovies);
         db.Movies.RemoveRange(db.Movies);
         db.Users.RemoveRange(db.Users);
@@ -156,11 +156,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             db.SaveChanges();
 
             // Add viewings
-            var viewing1 = TestDataBuilder.CreateTestViewing(1, userMovie1.Id);
-            var viewing2 = TestDataBuilder.CreateTestViewing(2, userMovie2.Id);
-            var viewing3 = TestDataBuilder.CreateTestViewing(3, userMovie3.Id);
-            var viewing4 = TestDataBuilder.CreateTestViewing(4, userMovie4.Id);
-            db.Viewings.AddRange(viewing1, viewing2, viewing3, viewing4);
+            var viewing1 = TestDataBuilder.CreateTestViewing(1, user1.Id, movie1.Id);
+            var viewing2 = TestDataBuilder.CreateTestViewing(2, user1.Id, movie2.Id);
+            var viewing3 = TestDataBuilder.CreateTestViewing(3, user2.Id, movie3.Id);
+            var viewing4 = TestDataBuilder.CreateTestViewing(4, user2.Id, movie4.Id);
+            db.UserMovieViewings.AddRange(viewing1, viewing2, viewing3, viewing4);
             db.SaveChanges();
 
             // Add reviews

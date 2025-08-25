@@ -178,8 +178,6 @@ public class LibraryService : ILibraryService
             _logger.LogInformation("Removing movie {MovieId} from library for user {UserId}", movieId, userId);
 
             var entry = await _db.UserMovies
-                .Include(um => um.Viewings)
-                .ThenInclude(v => v.Review)
                 .FirstOrDefaultAsync(um => um.MovieId == movieId && um.UserId == userId);
 
             if (entry == null)
@@ -188,23 +186,9 @@ public class LibraryService : ILibraryService
                 return false;
             }
 
-            // Delete related data in correct order to handle foreign key constraints
-            // 1. First delete reviews
-            var reviews = entry.Viewings.Where(v => v.Review != null).Select(v => v.Review!).ToList();
-            if (reviews.Any())
-            {
-                _logger.LogInformation("Removing {ReviewCount} reviews for movie {MovieId}", reviews.Count, movieId);
-                _db.Reviews.RemoveRange(reviews);
-            }
-
-            // 2. Then delete viewings
-            if (entry.Viewings.Any())
-            {
-                _logger.LogInformation("Removing {ViewingCount} viewings for movie {MovieId}", entry.Viewings.Count, movieId);
-                _db.Viewings.RemoveRange(entry.Viewings);
-            }
-
-            // 3. Finally delete the UserMovie entry
+            // With the new architecture, reviews and viewings are independent of library membership
+            // We only need to delete the UserMovie entry - reviews and viewings remain intact
+            _logger.LogInformation("Removing library entry for movie {MovieId} from user {UserId}. Reviews and viewing history will be preserved.", movieId, userId);
             _db.UserMovies.Remove(entry);
             await _db.SaveChangesAsync();
 

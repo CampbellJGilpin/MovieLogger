@@ -16,6 +16,7 @@ export interface MovieCreateRequest {
   description: string;
   releaseDate: string;
   genreId: number;
+  runtimeMinutes?: number;
   isDeleted?: boolean;
   poster?: File;
 }
@@ -28,6 +29,7 @@ export interface Movie {
   genre: Genre;
   isDeleted: boolean;
   posterPath?: string;
+  runtimeMinutes?: number;
 }
 
 export interface MovieInLibrary extends Movie {

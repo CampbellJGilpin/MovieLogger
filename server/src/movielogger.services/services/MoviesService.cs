@@ -67,7 +67,9 @@ public class MoviesService : IMoviesService
 
     public async Task<MovieDto> UpdateMovieAsync(int movieId, MovieDto dto)
     {
-        var movie = await _db.Movies.FirstOrDefaultAsync(m => m.Id == movieId && !m.IsDeleted);
+        var movie = await _db.Movies
+            .Include(m => m.Genre)
+            .FirstOrDefaultAsync(m => m.Id == movieId && !m.IsDeleted);
         if (movie == null)
         {
             throw new KeyNotFoundException($"Movie with ID {movieId} not found.");

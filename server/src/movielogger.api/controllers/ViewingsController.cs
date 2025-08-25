@@ -126,7 +126,9 @@ namespace movielogger.api.controllers
         {
             try
             {
-                await _viewingsService.DeleteViewingAsync(viewingId);
+                var deleted = await _viewingsService.DeleteViewingAsync(viewingId);
+                if (!deleted)
+                    return NotFound($"Viewing with ID {viewingId} not found.");
                 return NoContent();
             }
             catch (KeyNotFoundException)
@@ -136,13 +138,54 @@ namespace movielogger.api.controllers
         }
 
         [HttpGet]
+        [Route("~/api/users/{userId}/viewings/paginated")]
+        public async Task<IActionResult> GetUserViewingsPaginated(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var serviceResponse = await _viewingsService.GetViewingsByUserIdPaginatedAsync(userId, page, pageSize);
+                var mappedResponse = _mapper.Map<List<ViewingResponse>>(serviceResponse.Items);
+
+                return Ok(new
+                {
+                    Items = mappedResponse,
+                    TotalCount = serviceResponse.TotalCount,
+                    TotalPages = serviceResponse.TotalPages,
+                    CurrentPage = page,
+                    PageSize = pageSize
+                });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"User with ID {userId} not found.");
+            }
+        }
+
+        [HttpGet]
+        [Route("~/api/users/{userId}/movies/{movieId}/viewings")]
+        public async Task<IActionResult> GetViewingsForMovie(int userId, int movieId)
+        {
+            try
+            {
+                var serviceResponse = await _viewingsService.GetViewingsForMovieByUserIdAsync(userId, movieId);
+                var mappedResponse = _mapper.Map<List<ViewingResponse>>(serviceResponse);
+                return Ok(mappedResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet]
         [Route("~/api/users/{userId}/recently-watched")]
         public async Task<IActionResult> GetRecentlyWatchedMovies(int userId, [FromQuery] int count = 5)
         {
             try
             {
-                var serviceResponse = await _viewingsService.GetRecentlyWatchedMoviesAsync(userId, count);
-                var mappedResponse = _mapper.Map<List<ViewingResponse>>(serviceResponse);
+                var serviceResponse = await _viewingsService.GetViewingsByUserIdAsync(userId);
+                var recentViewings = serviceResponse.OrderByDescending(v => v.DateViewed).Take(count);
+                var mappedResponse = _mapper.Map<List<ViewingResponse>>(recentViewings);
                 return Ok(mappedResponse);
             }
             catch (KeyNotFoundException)

@@ -9,7 +9,7 @@ public interface IAssessmentDbContext
     DbSet<Genre> Genres { get; }
     DbSet<User> Users { get; }
     DbSet<UserMovie> UserMovies { get; }
-    DbSet<Viewing> Viewings { get; }
+    DbSet<UserMovieViewing> UserMovieViewings { get; }
     DbSet<Review> Reviews { get; }
     DbSet<AuditLog> AuditLogs { get; }
     DbSet<EventTypeReference> EventTypeReferences { get; }
